@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
@@ -260,7 +260,6 @@
       skippedItems.clear();
       updateUI();
       
-      // Pronuncia prima "Avvio Checklist Avviamento" e poi il primo elemento
       speak(`Avvio ${checklistName}`, () => {
         speakCurrent();
       });
@@ -412,7 +411,9 @@
       document.getElementById('startBtn').style.display = 'inline-block';
       
       updateUI();
-      speak(`${checklistName} completata`);
+      
+      // Conferma esplicita di completamento pulito senza pendenze
+      speak(`${checklistName} completata, tutte le voci verificate`);
     }
 
     function speakCurrent() {
