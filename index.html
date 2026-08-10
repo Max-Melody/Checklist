@@ -10,62 +10,63 @@
       margin: 15px;
       padding: 0;
       background-color: #f4f4f9;
-    }
-    h1 {
       text-align: center;
-      color: #333;
     }
-    .controls {
-      text-align: center;
-      margin-bottom: 15px;
+    h1 { color: #333; margin-bottom: 5px; }
+    
+    .card {
+      background: white;
+      border: 2px solid #007bff;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 15px auto;
+      max-width: 400px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
-    button {
-      padding: 10px 18px;
-      font-size: 16px;
-      background-color: #007bff;
+    .item-title { font-size: 20px; font-weight: bold; color: #333; }
+    .item-status { font-size: 24px; font-weight: bold; color: #d9534f; margin-top: 10px; }
+    
+    .btn {
+      padding: 15px 25px;
+      font-size: 18px;
+      font-weight: bold;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
+      margin: 5px;
     }
-    button:hover {
-      background-color: #0056b3;
-    }
+    .btn-next { background-color: #28a745; width: 80%; margin-top: 15px; }
+    .btn-repeat { background-color: #ffc107; color: #333; }
+    .btn-reset { background-color: #6c757d; }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      background-color: #fff;
+      margin-top: 20px;
+      background: white;
     }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 12px 8px;
-      text-align: left;
-      font-size: 16px;
-    }
-    th {
-      background-color: #e9ecef;
-      text-align: center;
-    }
-    tr {
-      cursor: pointer;
-    }
-    tr:hover {
-      background-color: #f1f1f1;
-    }
-    .status {
-      font-weight: bold;
-      text-align: right;
-    }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    .active-row { background-color: #d4edda; font-weight: bold; }
   </style>
 </head>
 <body>
 
   <h1>AVVIAMENTO</h1>
 
-  <div class="controls">
-    <button onclick="readAll()">▶ Leggi Tutta la Checklist</button>
+  <!-- Scheda dell'elemento corrente -->
+  <div class="card">
+    <div id="itemText" class="item-title">Premi AVVIA per iniziare</div>
+    <div id="statusText" class="item-status">---</div>
+    <button class="btn btn-next" onclick="nextItem()">▶ OK / AVANTI</button>
   </div>
 
+  <div>
+    <button class="btn btn-repeat" onclick="speakCurrent()">🔊 Ripeti</button>
+    <button class="btn btn-reset" onclick="resetChecklist()">🔄 Ricomincia</button>
+  </div>
+
+  <!-- Tabella riepilogativa -->
   <table id="checklistTable">
     <thead>
       <tr>
@@ -73,108 +74,96 @@
         <th>Stato</th>
       </tr>
     </thead>
-    <tbody>
-      <tr onclick="speak('Telefoni e dispositivi elettronici: OFF o Modalità Volo')">
-        <td>Telefoni / disp elettronici</td>
-        <td class="status">OFF / MOD VOLO</td>
-      </tr>
-      <tr onclick="speak('Briefing passeggeri: Come richiesto')">
-        <td>Briefing passeggeri</td>
-        <td class="status">COME RICHIESTO</td>
-      </tr>
-      <tr onclick="speak('Porta: Chiusa non bloccata')">
-        <td>Porta</td>
-        <td class="status">CHIUSA NO BLOCCATA</td>
-      </tr>
-      <tr onclick="speak('Freno parcheggio: Inserito')">
-        <td>Freno parcheggio</td>
-        <td class="status">INSERITO</td>
-      </tr>
-      <tr onclick="speak('Sedile: Regolato e bloccato')">
-        <td>Sedile</td>
-        <td class="status">REGOLATO E BLOCCATO</td>
-      </tr>
-      <tr onclick="speak('Interruttori elettrici: OFF')">
-        <td>Interruttori elettrici</td>
-        <td class="status">OFF</td>
-      </tr>
-      <tr onclick="speak('Ventilazione cabina: OFF')">
-        <td>Ventilazione cabina</td>
-        <td class="status">OFF</td>
-      </tr>
-      <tr onclick="speak('Circuit breakers: Inseriti')">
-        <td>Circuit breakers</td>
-        <td class="status">INSERITI</td>
-      </tr>
-      <tr onclick="speak('Master batteria e alternatore: ON')">
-        <td>Master batteria / alternatore</td>
-        <td class="status">ON</td>
-      </tr>
-      <tr onclick="speak('Rotating beacon: ON')">
-        <td>Rotating beacon</td>
-        <td class="status">ON</td>
-      </tr>
-      <tr onclick="speak('Aria carburatore: OFF')">
-        <td>Aria carburatore</td>
-        <td class="status">OFF</td>
-      </tr>
-      <tr onclick="speak('Miscela: Ricca')">
-        <td>Miscela</td>
-        <td class="status">RICCA</td>
-      </tr>
-      <tr onclick="speak('Serbatoio: Meno pieno')">
-        <td>Serbatoio</td>
-        <td class="status">MENO PIENO</td>
-      </tr>
-      <tr onclick="speak('Trim elettrico: OFF')">
-        <td>Trim elettrico</td>
-        <td class="status">OFF</td>
-      </tr>
-      <tr onclick="speak('Autopilot: OFF')">
-        <td>Autopilot</td>
-        <td class="status">OFF</td>
-      </tr>
-      <tr onclick="speak('Pompa elettrica carburante: ON')">
-        <td>Pompa elettrica carburante</td>
-        <td class="status">ON</td>
-      </tr>
-    </tbody>
+    <tbody id="tableBody"></tbody>
   </table>
 
   <script>
-    const items = [
-      "Telefoni e dispositivi elettronici: OFF o Modalità Volo",
-      "Briefing passeggeri: Come richiesto",
-      "Porta: Chiusa non bloccata",
-      "Freno parcheggio: Inserito",
-      "Sedile: Regolato e bloccato",
-      "Interruttori elettrici: OFF",
-      "Ventilazione cabina: OFF",
-      "Circuit breakers: Inseriti",
-      "Master batteria e alternatore: ON",
-      "Rotating beacon: ON",
-      "Aria carburatore: OFF",
-      "Miscela: Ricca",
-      "Serbatoio: Meno pieno",
-      "Trim elettrico: OFF",
-      "Autopilot: OFF",
-      "Pompa elettrica carburante: ON"
+    const checklist = [
+      { item: "Telefoni / disp elettronici", status: "OFF / MOD VOLO", speak: "Telefoni e dispositivi elettronici: OFF o Modalità Volo" },
+      { item: "Briefing passeggeri", status: "COME RICHIESTO", speak: "Briefing passeggeri: Come richiesto" },
+      { item: "Porta", status: "CHIUSA NO BLOCCATA", speak: "Porta: Chiusa non bloccata" },
+      { item: "Freno parcheggio", status: "INSERITO", speak: "Freno parcheggio: Inserito" },
+      { item: "Sedile", status: "REGOLATO E BLOCCATO", speak: "Sedile: Regolato e bloccato" },
+      { item: "Interruttori elettrici", status: "OFF", speak: "Interruttori elettrici: OFF" },
+      { item: "Ventilazione cabina", status: "OFF", speak: "Ventilazione cabina: OFF" },
+      { item: "Circuit breakers", status: "INSERITI", speak: "Circuit breakers: Inseriti" },
+      { item: "Master batteria / alternatore", status: "ON", speak: "Master batteria e alternatore: ON" },
+      { item: "Rotating beacon", status: "ON", speak: "Rotating beacon: ON" },
+      { item: "Aria carburatore", status: "OFF", speak: "Aria carburatore: OFF" },
+      { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" },
+      { item: "Serbatoio", status: "MENO PIENO", speak: "Serbatoio: Meno pieno" },
+      { item: "Trim elettrico", status: "OFF", speak: "Trim elettrico: OFF" },
+      { item: "Autopilot", status: "OFF", speak: "Autopilot: OFF" },
+      { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: ON" }
     ];
 
+    let currentIndex = -1;
+
+    // Popola la tabella iniziale
+    const tbody = document.getElementById('tableBody');
+    checklist.forEach((entry, idx) => {
+      let row = tbody.insertRow();
+      row.id = "row-" + idx;
+      row.insertCell(0).innerText = entry.item;
+      row.insertCell(1).innerText = entry.status;
+      row.onclick = () => selectItem(idx);
+    });
+
     function speak(text) {
-      window.speechSynthesis.cancel(); // Ferma la lettura precedente se attiva
+      window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'it-IT';
       window.speechSynthesis.speak(utterance);
     }
 
-    function readAll() {
-      window.speechSynthesis.cancel();
-      items.forEach(item => {
-        const utterance = new SpeechSynthesisUtterance(item);
-        utterance.lang = 'it-IT';
-        window.speechSynthesis.speak(utterance);
+    function selectItem(index) {
+      currentIndex = index;
+      updateUI();
+      speakCurrent();
+    }
+
+    function nextItem() {
+      if (currentIndex < checklist.length - 1) {
+        currentIndex++;
+        updateUI();
+        speakCurrent();
+      } else if (currentIndex === checklist.length - 1) {
+        document.getElementById('itemText').innerText = "Checklist Completata!";
+        document.getElementById('statusText').innerText = "OK";
+        speak("Checklist avviamento completata");
+      }
+    }
+
+    function speakCurrent() {
+      if (currentIndex >= 0 && currentIndex < checklist.length) {
+        speak(checklist[currentIndex].speak);
+      }
+    }
+
+    function updateUI() {
+      // Aggiorna scheda
+      document.getElementById('itemText').innerText = checklist[currentIndex].item;
+      document.getElementById('statusText').innerText = checklist[currentIndex].status;
+
+      // Evidenzia riga in tabella
+      checklist.forEach((_, idx) => {
+        const row = document.getElementById("row-" + idx);
+        if (idx === currentIndex) {
+          row.classList.add("active-row");
+        } else {
+          row.classList.remove("active-row");
+        }
       });
+    }
+
+    function resetChecklist() {
+      currentIndex = -1;
+      document.getElementById('itemText').innerText = "Premi AVVIA per iniziare";
+      document.getElementById('statusText').innerText = "---";
+      checklist.forEach((_, idx) => {
+        document.getElementById("row-" + idx).classList.remove("active-row");
+      });
+      window.speechSynthesis.cancel();
     }
   </script>
 
