@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
@@ -259,7 +259,12 @@
       reviewIndex = -1;
       skippedItems.clear();
       updateUI();
-      speakCurrent();
+      
+      // Pronuncia prima "Avvio Checklist Avviamento" e poi il primo elemento
+      speak(`Avvio ${checklistName}`, () => {
+        speakCurrent();
+      });
+
       document.getElementById('startBtn').style.display = 'none';
     }
 
@@ -396,7 +401,7 @@
       isAskingReview = false;
       reviewQueue = [];
       reviewIndex = -1;
-      currentIndex = -1; // Reset dell'indice attivo per togliere l'evidenziazione
+      currentIndex = -1;
       
       if (recognition) try { recognition.stop(); } catch(e) {}
 
