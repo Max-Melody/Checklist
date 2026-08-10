@@ -125,7 +125,12 @@
     let isListening = false;
     let isSpeaking = false;
     let lastActionTime = 0;
-    let skippedItems = new Set(); // Registra gli elementi saltati
+    let skippedItems = new Set();
+    
+    // Variabili gestione recupero elementi saltati
+    let isAskingReview = false;
+    let reviewQueue = [];
+    let reviewIndex = -1;
 
     // Popola la tabella
     const tbody = document.getElementById('tableBody');
@@ -150,6 +155,33 @@
 
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           const spokenText = event.results[i][0].transcript.trim().toLowerCase();
+
+          // SE SIAMO NELLA DOMANDA DI VERIFICA (POSITIVO / NEGATIVO)
+          if (isAskingReview) {
+            if (
+              spokenText.includes("positivo") || 
+              spokenText.includes("si") || 
+              spokenText.includes("sì") || 
+              spokenText.includes("confermo") || 
+              spokenText.includes("ok")
+            ) {
+              lastActionTime = Date.now();
+              isAskingReview = false;
+              startReviewMode();
+              break;
+            } else if (
+              spokenText.includes("negativo") || 
+              spokenText.includes("no") || 
+              spokenText.includes("annulla") || 
+              spokenText.includes("fine")
+            ) {
+              lastActionTime = Date.now();
+              isAskingReview = false;
+              finishChecklistCompletely();
+              break;
+            }
+            continue;
+          }
 
           // COMANDO: SALTA
           if (
@@ -224,6 +256,9 @@
     function startChecklist() {
       currentIndex = 0;
       isListening = true;
+      isAskingReview = false;
+      reviewQueue = [];
+      reviewIndex = -1;
       skippedItems.clear();
       updateUI();
       speakCurrent();
@@ -234,7 +269,11 @@
       if (recognition && isListening && !isSpeaking) {
         try {
           recognition.start();
-          document.getElementById('micStatus').innerText = "🎙️ In ascolto ('CHECK', 'SALTA', 'RIPETI')";
+          if (isAskingReview) {
+            document.getElementById('micStatus').innerText = "🎙️ Rispondi 'POSITIVO' o 'NEGATIVO'";
+          } else {
+            document.getElementById('micStatus').innerText = "🎙️ In ascolto ('CHECK', 'SALTA', 'RIPETI')";
+          }
           document.getElementById('micStatus').className = "mic-status mic-active";
         } catch(e) {}
       }
@@ -253,10 +292,8 @@
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'it-IT';
-      
-      // IMPOSTAZIONE VELOCITÀ E TONO
-      utterance.rate = 1.2; // Aumentata la velocità (1.0 è il valore base lento, 1.2 è fluido e naturale)
-      utterance.pitch = 1.0; // Tonalità normale
+      utterance.rate = 1.2;
+      utterance.pitch = 1.0;
 
       utterance.onend = () => {
         isSpeaking = false;
@@ -272,22 +309,38 @@
 
     function selectItem(index) {
       currentIndex = index;
+      reviewQueue = [];
+      reviewIndex = -1;
+      isAskingReview = false;
       updateUI();
       speakCurrent();
     }
 
     function nextItem() {
-      if (currentIndex >= 0) {
-        skippedItems.delete(currentIndex);
+      if (reviewQueue.length > 0) {
+        // Siamo in modalità recupero saltati
+        const actualIdx = reviewQueue[reviewIndex];
+        skippedItems.delete(actualIdx);
+        advanceReviewQueue();
+      } else {
+        // Modalità normale
+        if (currentIndex >= 0) {
+          skippedItems.delete(currentIndex);
+        }
+        advanceChecklist();
       }
-      advanceChecklist();
     }
 
     function skipItem() {
-      if (currentIndex >= 0) {
-        skippedItems.add(currentIndex);
+      if (reviewQueue.length > 0) {
+        // Rimane saltato
+        advanceReviewQueue();
+      } else {
+        if (currentIndex >= 0) {
+          skippedItems.add(currentIndex);
+        }
+        advanceChecklist();
       }
-      advanceChecklist();
     }
 
     function advanceChecklist() {
@@ -296,28 +349,70 @@
         updateUI();
         speakCurrent();
       } else if (currentIndex === checklist.length - 1) {
-        isListening = false;
-        if (recognition) try { recognition.stop(); } catch(e) {}
-        
-        const countSkipped = skippedItems.size;
-        let finalMsg = "Checklist avviamento completata";
-        
-        if (countSkipped > 0) {
-          const parolaIstruzione = countSkipped === 1 ? "istruzione saltata" : "istruzioni saltate";
-          finalMsg += `. Attenzione: ${countSkipped} ${parolaIstruzione}!`;
-          document.getElementById('itemText').innerText = "Checklist Completata";
-          document.getElementById('statusText').innerText = `⚠️ ${countSkipped} SALTATE`;
-        } else {
-          document.getElementById('itemText').innerText = "Checklist Completata!";
-          document.getElementById('statusText').innerText = "OK";
-        }
-
-        document.getElementById('micStatus').innerText = "Microfono spento";
-        document.getElementById('micStatus').className = "mic-status";
-        document.getElementById('startBtn').style.display = 'inline-block';
-        updateUI();
-        speak(finalMsg);
+        handleChecklistEnd();
       }
+    }
+
+    function handleChecklistEnd() {
+      const countSkipped = skippedItems.size;
+      
+      if (countSkipped > 0) {
+        isAskingReview = true;
+        const parolaIstruzione = countSkipped === 1 ? "istruzione saltata" : "istruzioni saltate";
+        const promptText = `Checklist completata. Attenzione: ${countSkipped} ${parolaIstruzione}. Vuoi verificarle?`;
+        
+        document.getElementById('itemText').innerText = "Verifica istruzioni saltate?";
+        document.getElementById('statusText').innerText = `⚠️ ${countSkipped} SALTATE`;
+        
+        updateUI();
+        speak(promptText);
+      } else {
+        finishChecklistCompletely();
+      }
+    }
+
+    function startReviewMode() {
+      reviewQueue = Array.from(skippedItems).sort((a, b) => a - b);
+      reviewIndex = 0;
+      currentIndex = reviewQueue[0];
+      updateUI();
+      speakCurrent();
+    }
+
+    function advanceReviewQueue() {
+      reviewIndex++;
+      if (reviewIndex < reviewQueue.length) {
+        currentIndex = reviewQueue[reviewIndex];
+        updateUI();
+        speakCurrent();
+      } else {
+        // Fine della coda di revisione
+        reviewQueue = [];
+        reviewIndex = -1;
+        if (skippedItems.size > 0) {
+          handleChecklistEnd(); // Se ne rimangono ancora, richiede
+        } else {
+          finishChecklistCompletely();
+        }
+      }
+    }
+
+    function finishChecklistCompletely() {
+      isListening = false;
+      isAskingReview = false;
+      reviewQueue = [];
+      reviewIndex = -1;
+      
+      if (recognition) try { recognition.stop(); } catch(e) {}
+
+      document.getElementById('itemText').innerText = "Checklist Completata!";
+      document.getElementById('statusText').innerText = "OK";
+      document.getElementById('micStatus').innerText = "Microfono spento";
+      document.getElementById('micStatus').className = "mic-status";
+      document.getElementById('startBtn').style.display = 'inline-block';
+      
+      updateUI();
+      speak("Checklist avviamento completata");
     }
 
     function speakCurrent() {
@@ -327,7 +422,7 @@
     }
 
     function updateUI() {
-      if (currentIndex >= 0 && currentIndex < checklist.length) {
+      if (currentIndex >= 0 && currentIndex < checklist.length && !isAskingReview) {
         document.getElementById('itemText').innerText = checklist[currentIndex].item;
         document.getElementById('statusText').innerText = checklist[currentIndex].status;
       }
@@ -351,18 +446,25 @@
     function resetChecklist() {
       isListening = false;
       isSpeaking = false;
+      isAskingReview = false;
+      reviewQueue = [];
+      reviewIndex = -1;
       skippedItems.clear();
+      
       if (recognition) try { recognition.stop(); } catch(e) {}
+      
       currentIndex = -1;
       document.getElementById('itemText').innerText = "Premi AVVIA per iniziare";
       document.getElementById('statusText').innerText = "---";
       document.getElementById('micStatus').innerText = "Microfono spento";
       document.getElementById('micStatus').className = "mic-status";
       document.getElementById('startBtn').style.display = 'inline-block';
+      
       checklist.forEach((_, idx) => {
         const row = document.getElementById("row-" + idx);
         row.classList.remove("active-row", "skipped-row");
       });
+      
       window.speechSynthesis.cancel();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
