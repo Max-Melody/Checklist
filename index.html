@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
@@ -253,6 +253,10 @@
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'it-IT';
+      
+      // IMPOSTAZIONE VELOCITÀ E TONO
+      utterance.rate = 1.2; // Aumentata la velocità (1.0 è il valore base lento, 1.2 è fluido e naturale)
+      utterance.pitch = 1.0; // Tonalità normale
 
       utterance.onend = () => {
         isSpeaking = false;
