@@ -194,31 +194,30 @@
             skipItem();
             break;
           }
-          // COMANDO: CHECK / AVANTI
-          else if (
-            spokenText.includes("check") || 
-            spokenText.includes("ceck") || 
-            spokenText.includes("cec") || 
-            spokenText.includes("ciec") || 
-            spokenText.includes("cek") || 
-            spokenText.includes("gec") || 
-            spokenText.includes("geck") || 
-            spokenText.includes("c'è") || 
-            spokenText.includes("c'e") || 
-            spokenText.includes("ce") || 
-            spokenText.includes("che") || 
-            spokenText.includes("cioè") || 
-            spokenText.includes("cioc") || 
-            spokenText.includes("ciao") || 
-            spokenText.includes("set") || 
-            spokenText.includes("sic") || 
-            spokenText.includes("shake") || 
-            spokenText.includes("jack") || 
-            spokenText.includes("seck") || 
-            spokenText.includes("ok") || 
-            spokenText.includes("avanti") ||
-            spokenText.includes("passa")
-          ) {
+
+          // COMANDO: CHECK / AVANTI (Insieme ultra-ampliato di varianti e suoni assimilabili)
+          const isCheck = 
+            // Varianti esplicite e trascrizioni errate di "check"
+            spokenText.includes("check") || spokenText.includes("ceck") || spokenText.includes("cec") ||
+            spokenText.includes("ciec") || spokenText.includes("cek") || spokenText.includes("gec") ||
+            spokenText.includes("geck") || spokenText.includes("c'è") || spokenText.includes("c'e") ||
+            spokenText.includes("ce") || spokenText.includes("che") || spokenText.includes("cioè") ||
+            spokenText.includes("cioc") || spokenText.includes("ciao") || spokenText.includes("set") ||
+            spokenText.includes("sic") || spokenText.includes("shake") || spokenText.includes("jack") ||
+            spokenText.includes("seck") || spokenText.includes("c'era") || spokenText.includes("c'erano") ||
+            spokenText.includes("cieco") || spokenText.includes("ceco") || spokenText.includes("c'es") ||
+            spokenText.includes("ci e") || spokenText.includes("c e") || spokenText.includes("c'è k") ||
+            spokenText.includes("c'è c") || spokenText.includes("c'è che") || spokenText.includes("c'è il") ||
+            spokenText.includes("chek") || spokenText.includes("chec") || spokenText.includes("tech") ||
+            spokenText.includes("teck") || spokenText.includes("chack") || spokenText.includes("chaz") ||
+            // Parole alternative di conferma
+            spokenText.includes("ok") || spokenText.includes("avanti") || spokenText.includes("passa") ||
+            spokenText.includes("fatto") || spokenText.includes("eseguito") || spokenText.includes("va bene") ||
+            // Controllo per inizio parola o monosillabi brevi (quando rileva solo l'inizio di "check")
+            spokenText.startsWith("ce") || spokenText.startsWith("ci") || spokenText.startsWith("ge") ||
+            spokenText.startsWith("ja") || spokenText === "c" || spokenText === "k";
+
+          if (isCheck) {
             lastActionTime = Date.now();
             nextItem();
             break;
@@ -318,12 +317,10 @@
 
     function nextItem() {
       if (reviewQueue.length > 0) {
-        // Siamo in modalità recupero saltati
         const actualIdx = reviewQueue[reviewIndex];
         skippedItems.delete(actualIdx);
         advanceReviewQueue();
       } else {
-        // Modalità normale
         if (currentIndex >= 0) {
           skippedItems.delete(currentIndex);
         }
@@ -333,7 +330,6 @@
 
     function skipItem() {
       if (reviewQueue.length > 0) {
-        // Rimane saltato
         advanceReviewQueue();
       } else {
         if (currentIndex >= 0) {
@@ -386,11 +382,10 @@
         updateUI();
         speakCurrent();
       } else {
-        // Fine della coda di revisione
         reviewQueue = [];
         reviewIndex = -1;
         if (skippedItems.size > 0) {
-          handleChecklistEnd(); // Se ne rimangono ancora, richiede
+          handleChecklistEnd();
         } else {
           finishChecklistCompletely();
         }
