@@ -108,7 +108,7 @@
     let recognition;
     let isListening = false;
 
-    // Inizializza tabella
+    // Popola la tabella
     const tbody = document.getElementById('tableBody');
     checklist.forEach((entry, idx) => {
       let row = tbody.insertRow();
@@ -118,7 +118,7 @@
       row.onclick = () => selectItem(idx);
     });
 
-    // Inizializza riconoscimento vocale
+    // Configurazione Riconoscimento Vocale
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
@@ -129,20 +129,45 @@
       recognition.onresult = (event) => {
         const lastResultIndex = event.results.length - 1;
         const spokenText = event.results[lastResultIndex][0].transcript.trim().toLowerCase();
-        console.log("Riconosciuto:", spokenText);
+        console.log("Comando vocale ricevuto:", spokenText);
 
-        if (spokenText.includes("check") || spokenText.includes("ok") || spokenText.includes("avanti") || spokenText.includes("ceck")) {
+        // COMANDO: AVANTI / CHECK
+        if (
+          spokenText.includes("check") || 
+          spokenText.includes("ceck") || 
+          spokenText.includes("cec") || 
+          spokenText.includes("ciec") || 
+          spokenText.includes("c'è") || 
+          spokenText.includes("c'e") || 
+          spokenText.includes("ok") || 
+          spokenText.includes("avanti") ||
+          spokenText.includes("passa")
+        ) {
           nextItem();
+        } 
+        // COMANDO: RIPETI
+        else if (
+          spokenText.includes("ripeti") || 
+          spokenText.includes("ancora") || 
+          spokenText.includes("come")
+        ) {
+          speakCurrent();
+        } 
+        // COMANDO: RICOMINCIA
+        else if (
+          spokenText.includes("ricomincia") || 
+          spokenText.includes("da capo") || 
+          spokenText.includes("reset")
+        ) {
+          resetChecklist();
         }
       };
 
       recognition.onend = () => {
         if (isListening) {
-          recognition.start(); // Riavvia l'ascolto se la checklist è attiva
+          try { recognition.start(); } catch(e) {}
         }
       };
-    } else {
-      alert("Il riconoscimento vocale non è supportato da questo browser.");
     }
 
     function startChecklist() {
@@ -158,7 +183,7 @@
       if (recognition && isListening) {
         try {
           recognition.start();
-          document.getElementById('micStatus').innerText = "🎙️ In ascolto... (Pronuncia 'CHECK')";
+          document.getElementById('micStatus').innerText = "🎙️ In ascolto ('CHECK', 'RIPETI', 'RICOMINCIA')";
           document.getElementById('micStatus').className = "mic-status mic-active";
         } catch(e) {}
       }
@@ -169,9 +194,9 @@
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'it-IT';
       
-      // Mette in pausa il microfono mentre il telefono parla per evitare che la voce del telefono attivi il comando
+      // Sospende l'ascolto mentre lo smartphone parla
       if (recognition && isListening) {
-        recognition.stop();
+        try { recognition.stop(); } catch(e) {}
       }
 
       utterance.onend = () => {
@@ -197,7 +222,7 @@
         speakCurrent();
       } else if (currentIndex === checklist.length - 1) {
         isListening = false;
-        if (recognition) recognition.stop();
+        if (recognition) try { recognition.stop(); } catch(e) {}
         document.getElementById('itemText').innerText = "Checklist Completata!";
         document.getElementById('statusText').innerText = "OK";
         document.getElementById('micStatus').innerText = "Microfono spento";
@@ -229,7 +254,7 @@
 
     function resetChecklist() {
       isListening = false;
-      if (recognition) recognition.stop();
+      if (recognition) try { recognition.stop(); } catch(e) {}
       currentIndex = -1;
       document.getElementById('itemText').innerText = "Premi AVVIA per iniziare";
       document.getElementById('statusText').innerText = "---";
