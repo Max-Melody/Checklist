@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checklist Avviamento</title>
+  <title>Checklist Avviamento Vocale</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -26,6 +26,14 @@
     .item-title { font-size: 20px; font-weight: bold; color: #333; }
     .item-status { font-size: 24px; font-weight: bold; color: #d9534f; margin-top: 10px; }
     
+    .mic-status {
+      font-size: 14px;
+      font-weight: bold;
+      margin-top: 10px;
+      color: #666;
+    }
+    .mic-active { color: #28a745; }
+
     .btn {
       padding: 15px 25px;
       font-size: 18px;
@@ -36,7 +44,7 @@
       cursor: pointer;
       margin: 5px;
     }
-    .btn-next { background-color: #28a745; width: 80%; margin-top: 15px; }
+    .btn-start { background-color: #28a745; width: 80%; margin-top: 10px; }
     .btn-repeat { background-color: #ffc107; color: #333; }
     .btn-reset { background-color: #6c757d; }
 
@@ -54,11 +62,11 @@
 
   <h1>AVVIAMENTO</h1>
 
-  <!-- Scheda dell'elemento corrente -->
   <div class="card">
     <div id="itemText" class="item-title">Premi AVVIA per iniziare</div>
     <div id="statusText" class="item-status">---</div>
-    <button class="btn btn-next" onclick="nextItem()">▶ OK / AVANTI</button>
+    <div id="micStatus" class="mic-status">Microfono spento</div>
+    <button id="startBtn" class="btn btn-start" onclick="startChecklist()">🎙️ AVVIA CHECKLIST</button>
   </div>
 
   <div>
@@ -66,7 +74,6 @@
     <button class="btn btn-reset" onclick="resetChecklist()">🔄 Ricomincia</button>
   </div>
 
-  <!-- Tabella riepilogativa -->
   <table id="checklistTable">
     <thead>
       <tr>
@@ -98,8 +105,10 @@
     ];
 
     let currentIndex = -1;
+    let recognition;
+    let isListening = false;
 
-    // Popola la tabella iniziale
+    // Inizializza tabella
     const tbody = document.getElementById('tableBody');
     checklist.forEach((entry, idx) => {
       let row = tbody.insertRow();
@@ -109,10 +118,69 @@
       row.onclick = () => selectItem(idx);
     });
 
-    function speak(text) {
+    // Inizializza riconoscimento vocale
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = 'it-IT';
+      recognition.continuous = true;
+      recognition.interimResults = false;
+
+      recognition.onresult = (event) => {
+        const lastResultIndex = event.results.length - 1;
+        const spokenText = event.results[lastResultIndex][0].transcript.trim().toLowerCase();
+        console.log("Riconosciuto:", spokenText);
+
+        if (spokenText.includes("check") || spokenText.includes("ok") || spokenText.includes("avanti") || spokenText.includes("ceck")) {
+          nextItem();
+        }
+      };
+
+      recognition.onend = () => {
+        if (isListening) {
+          recognition.start(); // Riavvia l'ascolto se la checklist è attiva
+        }
+      };
+    } else {
+      alert("Il riconoscimento vocale non è supportato da questo browser.");
+    }
+
+    function startChecklist() {
+      currentIndex = 0;
+      isListening = true;
+      updateUI();
+      speakCurrent();
+      startListening();
+      document.getElementById('startBtn').style.display = 'none';
+    }
+
+    function startListening() {
+      if (recognition && isListening) {
+        try {
+          recognition.start();
+          document.getElementById('micStatus').innerText = "🎙️ In ascolto... (Pronuncia 'CHECK')";
+          document.getElementById('micStatus').className = "mic-status mic-active";
+        } catch(e) {}
+      }
+    }
+
+    function speak(text, callback) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'it-IT';
+      
+      // Mette in pausa il microfono mentre il telefono parla per evitare che la voce del telefono attivi il comando
+      if (recognition && isListening) {
+        recognition.stop();
+      }
+
+      utterance.onend = () => {
+        if (isListening) {
+          setTimeout(startListening, 300);
+        }
+        if (callback) callback();
+      };
+
       window.speechSynthesis.speak(utterance);
     }
 
@@ -128,8 +196,13 @@
         updateUI();
         speakCurrent();
       } else if (currentIndex === checklist.length - 1) {
+        isListening = false;
+        if (recognition) recognition.stop();
         document.getElementById('itemText').innerText = "Checklist Completata!";
         document.getElementById('statusText').innerText = "OK";
+        document.getElementById('micStatus').innerText = "Microfono spento";
+        document.getElementById('micStatus').className = "mic-status";
+        document.getElementById('startBtn').style.display = 'inline-block';
         speak("Checklist avviamento completata");
       }
     }
@@ -141,11 +214,9 @@
     }
 
     function updateUI() {
-      // Aggiorna scheda
       document.getElementById('itemText').innerText = checklist[currentIndex].item;
       document.getElementById('statusText').innerText = checklist[currentIndex].status;
 
-      // Evidenzia riga in tabella
       checklist.forEach((_, idx) => {
         const row = document.getElementById("row-" + idx);
         if (idx === currentIndex) {
@@ -157,9 +228,14 @@
     }
 
     function resetChecklist() {
+      isListening = false;
+      if (recognition) recognition.stop();
       currentIndex = -1;
       document.getElementById('itemText').innerText = "Premi AVVIA per iniziare";
       document.getElementById('statusText').innerText = "---";
+      document.getElementById('micStatus').innerText = "Microfono spento";
+      document.getElementById('micStatus').className = "mic-status";
+      document.getElementById('startBtn').style.display = 'inline-block';
       checklist.forEach((_, idx) => {
         document.getElementById("row-" + idx).classList.remove("active-row");
       });
