@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist Vocale</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: white; text-align: center; padding: 20px; }
+        .card { background: #1e1e1e; border-radius: 12px; padding: 25px; margin: 20px auto; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .step-text { font-size: 28px; font-weight: bold; margin: 30px 0; color: #4caf50; min-height: 80px; }
+        .btn-start { background: #2196f3; color: white; font-size: 22px; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; width: 100%; margin-bottom: 15px; }
+        .mic-status { font-size: 16px; color: #888; margin-top: 15px; }
+        .mic-active { color: #ff9800; font-weight: bold; }
+        .heard-box { font-size: 14px; color: #aaa; background: #2a2a2a; padding: 8px; border-radius: 6px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Checklist Vocale</h2>
+        <div id="progress" style="color:#aaa;">Passo 0 di 3</div>
+        
+        <div id="stepText" class="step-text">Premi 'AVVIA' per iniziare</div>
+        
+        <button id="startBtn" class="btn-start" onclick="avviaChecklist()">🎤 AVVIA CHECKLIST</button>
+        
+        <div id="micStatus" class="mic-status">Microfono: Inattivo</div>
+        <div class="heard-box">Ha sentito: <span id="heardText" style="color:#fff;">-</span></div>
+    </div>
+
+    <script>
+        const passi = [
+            "Apri lo sportello",
+            "Gira la leva rossa a destra",
+            "Premi il pulsante blu"
+        ];
+        let indiceCorrente = 0;
+        let riconoscimento;
+        let attivo = false;
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (SpeechRecognition) {
+            riconoscimento = new SpeechRecognition();
+            riconoscimento.lang = 'it-IT';
+            riconoscimento.continuous = true;
+            riconoscimento.interimResults = false;
+
+            riconoscimento.onresult = function(event) {
+                const testo = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+                document.getElementById('heardText').innerText = testo;
+
+                // Elenco parole accettate per andare avanti (include tutte le varianti di suono di "Check" in italiano)
+                const comandiAvanti = ['check', 'ceck', "c'è", 'ce', 'ciè', 'cec', 'shake', 'fatto', 'avanti', 'ok', 'va bene', 'prossimo'];
+
+                const haDettoAvanti = comandiAvanti.some(parola => testo.includes(parola));
+
+                if (haDettoAvanti) {
+                    prossimoPasso();
+                } else if (testo.includes('ripeti')) {
+                    leggiEAscolta();
+                } else if (testo.includes('indietro')) {
+                    passoPrecedente();
+                }
+            };
+
+            riconoscimento.onend = function() {
+                if (attivo) {
+                    try { riconoscimento.start(); } catch(e){}
+                }
+            };
+        }
+
+        function avviaChecklist() {
+            attivo = true;
+            document.getElementById('startBtn').style.display = 'none';
+            indiceCorrente = 0;
+            aggiornaEParla();
+        }
+
+        function aggiornaEParla() {
+            document.getElementById('progress').innerText = `Passo ${indiceCorrente + 1} di ${passi.length}`;
+            document.getElementById('stepText').innerText = passi[indiceCorrente];
+            leggiEAscolta();
+        }
+
+        function leggiEAscolta() {
+            if (riconoscimento) {
+                try { riconoscimento.stop(); } catch(e){}
+            }
+            document.getElementById('micStatus').innerText = "L'app sta parlando...";
+            document.getElementById('micStatus').className = "mic-status";
+
+            const messaggio = new SpeechSynthesisUtterance(passi[indiceCorrente]);
+            messaggio.lang = 'it-IT';
+            
+            messaggio.onend = function() {
+                document.getElementById('micStatus').innerText = "🎤 In ascolto (Dici 'Check')...";
+                document.getElementById('micStatus').className = "mic-status mic-active";
+                if (attivo && riconoscimento) {
+                    try { riconoscimento.start(); } catch(e){}
+                }
+            };
+
+            window.speechSynthesis.speak(messaggio);
+        }
+
+        function prossimoPasso() {
+            if (indiceCorrente < passi.length - 1) {
+                indiceCorrente++;
+                aggiornaEParla();
+            } else {
+                attivo = false;
+                document.getElementById('stepText').innerText = "🎉 Procedura Completata!";
+                document.getElementById('micStatus').innerText = "Completato";
+                const fine = new SpeechSynthesisUtterance("Procedura completata!");
+                fine.lang = 'it-IT';
+                window.speechSynthesis.speak(fine);
+            }
+        }
+
+        function passoPrecedente() {
+            if (indiceCorrente > 0) {
+                indiceCorrente--;
+                aggiornaEParla();
+            }
+        }
+    </script>
+</body>
+</html>
