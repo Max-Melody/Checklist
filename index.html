@@ -58,10 +58,19 @@
       background: white;
     }
     th, td { border: 1px solid #ccc; padding: 12px 8px; text-align: left; }
+    
+    /* Stili evidenziazione */
     .active-row { 
-      background-color: #d4edda; 
+      background-color: #d4edda !important; 
       font-weight: bold; 
       border-left: 5px solid #28a745;
+      color: #000 !important;
+    }
+    .skipped-row { 
+      background-color: #dc3545 !important; 
+      color: white !important; 
+      font-weight: bold; 
+      border-left: 5px solid #a71d2a;
     }
   </style>
 </head>
@@ -116,6 +125,7 @@
     let isListening = false;
     let isSpeaking = false;
     let lastActionTime = 0;
+    let skippedItems = new Set(); // Registra gli elementi saltati
 
     // Popola la tabella
     const tbody = document.getElementById('tableBody');
@@ -141,7 +151,19 @@
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           const spokenText = event.results[i][0].transcript.trim().toLowerCase();
 
+          // COMANDO: SALTA
           if (
+            spokenText.includes("salta") || 
+            spokenText.includes("salta questa") || 
+            spokenText.includes("passa oltre") || 
+            spokenText.includes("salto")
+          ) {
+            lastActionTime = Date.now();
+            skipItem();
+            break;
+          }
+          // COMANDO: CHECK / AVANTI
+          else if (
             spokenText.includes("check") || 
             spokenText.includes("ceck") || 
             spokenText.includes("cec") || 
@@ -169,6 +191,7 @@
             nextItem();
             break;
           } 
+          // COMANDO: RIPETI
           else if (
             spokenText.includes("ripeti") || 
             spokenText.includes("ancora") || 
@@ -178,6 +201,7 @@
             speakCurrent();
             break;
           } 
+          // COMANDO: RICOMINCIA
           else if (
             spokenText.includes("ricomincia") || 
             spokenText.includes("da capo") || 
@@ -200,6 +224,7 @@
     function startChecklist() {
       currentIndex = 0;
       isListening = true;
+      skippedItems.clear();
       updateUI();
       speakCurrent();
       document.getElementById('startBtn').style.display = 'none';
@@ -209,7 +234,7 @@
       if (recognition && isListening && !isSpeaking) {
         try {
           recognition.start();
-          document.getElementById('micStatus').innerText = "🎙️ In ascolto ('CHECK', 'RIPETI', 'RICOMINCIA')";
+          document.getElementById('micStatus').innerText = "🎙️ In ascolto ('CHECK', 'SALTA', 'RIPETI')";
           document.getElementById('micStatus').className = "mic-status mic-active";
         } catch(e) {}
       }
@@ -248,6 +273,22 @@
     }
 
     function nextItem() {
+      // Se viene confermato con check, rimuove dall'elenco di quelli saltati (se c'era)
+      if (currentIndex >= 0) {
+        skippedItems.delete(currentIndex);
+      }
+      advanceChecklist();
+    }
+
+    function skipItem() {
+      // Segna l'elemento corrente come saltato (rosso)
+      if (currentIndex >= 0) {
+        skippedItems.add(currentIndex);
+      }
+      advanceChecklist();
+    }
+
+    function advanceChecklist() {
       if (currentIndex < checklist.length - 1) {
         currentIndex++;
         updateUI();
@@ -260,6 +301,7 @@
         document.getElementById('micStatus').innerText = "Microfono spento";
         document.getElementById('micStatus').className = "mic-status";
         document.getElementById('startBtn').style.display = 'inline-block';
+        updateUI();
         speak("Checklist avviamento completata");
       }
     }
@@ -271,17 +313,24 @@
     }
 
     function updateUI() {
-      document.getElementById('itemText').innerText = checklist[currentIndex].item;
-      document.getElementById('statusText').innerText = checklist[currentIndex].status;
+      if (currentIndex >= 0 && currentIndex < checklist.length) {
+        document.getElementById('itemText').innerText = checklist[currentIndex].item;
+        document.getElementById('statusText').innerText = checklist[currentIndex].status;
+      }
 
       checklist.forEach((_, idx) => {
         const row = document.getElementById("row-" + idx);
+        
+        // Rimuove le classi
+        row.classList.remove("active-row");
+
         if (idx === currentIndex) {
           row.classList.add("active-row");
-          // Mantiene la riga attiva ben visibile al centro della schermata
           row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (skippedItems.has(idx)) {
+          row.classList.add("skipped-row");
         } else {
-          row.classList.remove("active-row");
+          row.classList.remove("skipped-row");
         }
       });
     }
@@ -289,6 +338,7 @@
     function resetChecklist() {
       isListening = false;
       isSpeaking = false;
+      skippedItems.clear();
       if (recognition) try { recognition.stop(); } catch(e) {}
       currentIndex = -1;
       document.getElementById('itemText').innerText = "Premi AVVIA per iniziare";
@@ -297,7 +347,8 @@
       document.getElementById('micStatus').className = "mic-status";
       document.getElementById('startBtn').style.display = 'inline-block';
       checklist.forEach((_, idx) => {
-        document.getElementById("row-" + idx).classList.remove("active-row");
+        const row = document.getElementById("row-" + idx);
+        row.classList.remove("active-row", "skipped-row");
       });
       window.speechSynthesis.cancel();
       window.scrollTo({ top: 0, behavior: 'smooth' });
