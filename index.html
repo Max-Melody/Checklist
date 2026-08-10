@@ -273,7 +273,6 @@
     }
 
     function nextItem() {
-      // Se viene confermato con check, rimuove dall'elenco di quelli saltati (se c'era)
       if (currentIndex >= 0) {
         skippedItems.delete(currentIndex);
       }
@@ -281,7 +280,6 @@
     }
 
     function skipItem() {
-      // Segna l'elemento corrente come saltato (rosso)
       if (currentIndex >= 0) {
         skippedItems.add(currentIndex);
       }
@@ -296,13 +294,25 @@
       } else if (currentIndex === checklist.length - 1) {
         isListening = false;
         if (recognition) try { recognition.stop(); } catch(e) {}
-        document.getElementById('itemText').innerText = "Checklist Completata!";
-        document.getElementById('statusText').innerText = "OK";
+        
+        const countSkipped = skippedItems.size;
+        let finalMsg = "Checklist avviamento completata";
+        
+        if (countSkipped > 0) {
+          const parolaIstruzione = countSkipped === 1 ? "istruzione saltata" : "istruzioni saltate";
+          finalMsg += `. Attenzione: ${countSkipped} ${parolaIstruzione}!`;
+          document.getElementById('itemText').innerText = "Checklist Completata";
+          document.getElementById('statusText').innerText = `⚠️ ${countSkipped} SALTATE`;
+        } else {
+          document.getElementById('itemText').innerText = "Checklist Completata!";
+          document.getElementById('statusText').innerText = "OK";
+        }
+
         document.getElementById('micStatus').innerText = "Microfono spento";
         document.getElementById('micStatus').className = "mic-status";
         document.getElementById('startBtn').style.display = 'inline-block';
         updateUI();
-        speak("Checklist avviamento completata");
+        speak(finalMsg);
       }
     }
 
@@ -321,7 +331,6 @@
       checklist.forEach((_, idx) => {
         const row = document.getElementById("row-" + idx);
         
-        // Rimuove le classi
         row.classList.remove("active-row");
 
         if (idx === currentIndex) {
