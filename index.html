@@ -131,21 +131,27 @@
         const spokenText = event.results[lastResultIndex][0].transcript.trim().toLowerCase();
         console.log("Comando vocale ricevuto:", spokenText);
 
-        // COMANDO: AVANTI / CHECK
+        // VARIANTI AMPIE PER "CHECK" / "AVANTI"
         if (
           spokenText.includes("check") || 
           spokenText.includes("ceck") || 
           spokenText.includes("cec") || 
           spokenText.includes("ciec") || 
+          spokenText.includes("cek") || 
           spokenText.includes("c'è") || 
           spokenText.includes("c'e") || 
+          spokenText.includes("ce") || 
+          spokenText.includes("che") || 
+          spokenText.includes("cioè") || 
+          spokenText.includes("shake") || 
+          spokenText.includes("jack") || 
+          spokenText.includes("seck") || 
           spokenText.includes("ok") || 
           spokenText.includes("avanti") ||
           spokenText.includes("passa")
         ) {
           nextItem();
         } 
-        // COMANDO: RIPETI
         else if (
           spokenText.includes("ripeti") || 
           spokenText.includes("ancora") || 
@@ -153,7 +159,6 @@
         ) {
           speakCurrent();
         } 
-        // COMANDO: RICOMINCIA
         else if (
           spokenText.includes("ricomincia") || 
           spokenText.includes("da capo") || 
@@ -175,7 +180,6 @@
       isListening = true;
       updateUI();
       speakCurrent();
-      startListening();
       document.getElementById('startBtn').style.display = 'none';
     }
 
@@ -194,14 +198,15 @@
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'it-IT';
       
-      // Sospende l'ascolto mentre lo smartphone parla
+      // Mette in pausa il microfono mentre il telefono legge per non auto-rilevarsi
       if (recognition && isListening) {
         try { recognition.stop(); } catch(e) {}
       }
 
       utterance.onend = () => {
         if (isListening) {
-          setTimeout(startListening, 300);
+          // Riapre il microfono IMMEDIATAMENTE
+          startListening();
         }
         if (callback) callback();
       };
