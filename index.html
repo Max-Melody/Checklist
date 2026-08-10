@@ -107,6 +107,8 @@
     let currentIndex = -1;
     let recognition;
     let isListening = false;
+    let isSpeaking = false;
+    let lastActionTime = 0;
 
     // Popola la tabella
     const tbody = document.getElementById('tableBody');
@@ -124,52 +126,68 @@
       recognition = new SpeechRecognition();
       recognition.lang = 'it-IT';
       recognition.continuous = true;
-      recognition.interimResults = false;
+      recognition.interimResults = true; // Risultati immediati senza attese
 
       recognition.onresult = (event) => {
-        const lastResultIndex = event.results.length - 1;
-        const spokenText = event.results[lastResultIndex][0].transcript.trim().toLowerCase();
-        console.log("Comando vocale ricevuto:", spokenText);
+        // Ignora i comandi se il telefono sta parlando o se sono trascorsi meno di 800ms
+        if (isSpeaking || (Date.now() - lastActionTime < 800)) return;
 
-        // VARIANTI AMPIE PER "CHECK" / "AVANTI"
-        if (
-          spokenText.includes("check") || 
-          spokenText.includes("ceck") || 
-          spokenText.includes("cec") || 
-          spokenText.includes("ciec") || 
-          spokenText.includes("cek") || 
-          spokenText.includes("c'è") || 
-          spokenText.includes("c'e") || 
-          spokenText.includes("ce") || 
-          spokenText.includes("che") || 
-          spokenText.includes("cioè") || 
-          spokenText.includes("shake") || 
-          spokenText.includes("jack") || 
-          spokenText.includes("seck") || 
-          spokenText.includes("ok") || 
-          spokenText.includes("avanti") ||
-          spokenText.includes("passa")
-        ) {
-          nextItem();
-        } 
-        else if (
-          spokenText.includes("ripeti") || 
-          spokenText.includes("ancora") || 
-          spokenText.includes("come")
-        ) {
-          speakCurrent();
-        } 
-        else if (
-          spokenText.includes("ricomincia") || 
-          spokenText.includes("da capo") || 
-          spokenText.includes("reset")
-        ) {
-          resetChecklist();
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const spokenText = event.results[i][0].transcript.trim().toLowerCase();
+          console.log("Ascoltato:", spokenText);
+
+          // VOCABOLARIO ESTESO PER "CHECK" / "AVANTI"
+          if (
+            spokenText.includes("check") || 
+            spokenText.includes("ceck") || 
+            spokenText.includes("cec") || 
+            spokenText.includes("ciec") || 
+            spokenText.includes("cek") || 
+            spokenText.includes("gec") || 
+            spokenText.includes("geck") || 
+            spokenText.includes("c'è") || 
+            spokenText.includes("c'e") || 
+            spokenText.includes("ce") || 
+            spokenText.includes("che") || 
+            spokenText.includes("cioè") || 
+            spokenText.includes("cioc") || 
+            spokenText.includes("ciao") || 
+            spokenText.includes("set") || 
+            spokenText.includes("sic") || 
+            spokenText.includes("shake") || 
+            spokenText.includes("jack") || 
+            spokenText.includes("seck") || 
+            spokenText.includes("ok") || 
+            spokenText.includes("avanti") ||
+            spokenText.includes("passa")
+          ) {
+            lastActionTime = Date.now();
+            nextItem();
+            break;
+          } 
+          else if (
+            spokenText.includes("ripeti") || 
+            spokenText.includes("ancora") || 
+            spokenText.includes("come")
+          ) {
+            lastActionTime = Date.now();
+            speakCurrent();
+            break;
+          } 
+          else if (
+            spokenText.includes("ricomincia") || 
+            spokenText.includes("da capo") || 
+            spokenText.includes("reset")
+          ) {
+            lastActionTime = Date.now();
+            resetChecklist();
+            break;
+          }
         }
       };
 
       recognition.onend = () => {
-        if (isListening) {
+        if (isListening && !isSpeaking) {
           try { recognition.start(); } catch(e) {}
         }
       };
@@ -184,7 +202,7 @@
     }
 
     function startListening() {
-      if (recognition && isListening) {
+      if (recognition && isListening && !isSpeaking) {
         try {
           recognition.start();
           document.getElementById('micStatus').innerText = "🎙️ In ascolto ('CHECK', 'RIPETI', 'RICOMINCIA')";
@@ -195,18 +213,23 @@
 
     function speak(text, callback) {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'it-IT';
+      isSpeaking = true;
       
-      // Mette in pausa il microfono mentre il telefono legge per non auto-rilevarsi
-      if (recognition && isListening) {
+      if (recognition) {
         try { recognition.stop(); } catch(e) {}
       }
 
+      document.getElementById('micStatus').innerText = "🔊 Lettura in corso...";
+      document.getElementById('micStatus').className = "mic-status";
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'it-IT';
+
       utterance.onend = () => {
+        isSpeaking = false;
+        lastActionTime = Date.now();
         if (isListening) {
-          // Riapre il microfono IMMEDIATAMENTE
-          startListening();
+          startListening(); // Attiva il bip e il microfono immediatamente alla fine della frase
         }
         if (callback) callback();
       };
@@ -259,6 +282,7 @@
 
     function resetChecklist() {
       isListening = false;
+      isSpeaking = false;
       if (recognition) try { recognition.stop(); } catch(e) {}
       currentIndex = -1;
       document.getElementById('itemText').innerText = "Premi AVVIA per iniziare";
