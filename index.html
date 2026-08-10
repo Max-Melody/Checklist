@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
@@ -82,7 +82,7 @@
     <div id="itemText" class="item-title">Premi AVVIA per iniziare</div>
     <div id="statusText" class="item-status">---</div>
     <div id="micStatus" class="mic-status">Microfono spento</div>
-    <button id="startBtn" class="btn btn-start" onclick="startChecklist()">🎙️ AVVIA CHECKLIST</button>
+    <button id="startBtn" class="btn btn-start" onclick="startChecklist()">🎙️ AVVIA CHECKLIST AVVIAMENTO</button>
   </div>
 
   <div>
@@ -101,6 +101,8 @@
   </table>
 
   <script>
+    const checklistName = "Checklist Avviamento";
+
     const checklist = [
       { item: "Telefoni / disp elettronici", status: "OFF / MOD VOLO", speak: "Telefoni e dispositivi elettronici: OFF o Modalità Volo" },
       { item: "Briefing passeggeri", status: "COME RICHIESTO", speak: "Briefing passeggeri: Come richiesto" },
@@ -195,9 +197,8 @@
             break;
           }
 
-          // COMANDO: CHECK / AVANTI (Insieme ultra-ampliato di varianti e suoni assimilabili)
+          // COMANDO: CHECK / AVANTI
           const isCheck = 
-            // Varianti esplicite e trascrizioni errate di "check"
             spokenText.includes("check") || spokenText.includes("ceck") || spokenText.includes("cec") ||
             spokenText.includes("ciec") || spokenText.includes("cek") || spokenText.includes("gec") ||
             spokenText.includes("geck") || spokenText.includes("c'è") || spokenText.includes("c'e") ||
@@ -210,10 +211,8 @@
             spokenText.includes("c'è c") || spokenText.includes("c'è che") || spokenText.includes("c'è il") ||
             spokenText.includes("chek") || spokenText.includes("chec") || spokenText.includes("tech") ||
             spokenText.includes("teck") || spokenText.includes("chack") || spokenText.includes("chaz") ||
-            // Parole alternative di conferma
             spokenText.includes("ok") || spokenText.includes("avanti") || spokenText.includes("passa") ||
             spokenText.includes("fatto") || spokenText.includes("eseguito") || spokenText.includes("va bene") ||
-            // Controllo per inizio parola o monosillabi brevi (quando rileva solo l'inizio di "check")
             spokenText.startsWith("ce") || spokenText.startsWith("ci") || spokenText.startsWith("ge") ||
             spokenText.startsWith("ja") || spokenText === "c" || spokenText === "k";
 
@@ -355,7 +354,7 @@
       if (countSkipped > 0) {
         isAskingReview = true;
         const parolaIstruzione = countSkipped === 1 ? "istruzione saltata" : "istruzioni saltate";
-        const promptText = `Checklist completata. Attenzione: ${countSkipped} ${parolaIstruzione}. Vuoi verificarle?`;
+        const promptText = `${checklistName} completata. Attenzione: ${countSkipped} ${parolaIstruzione}. Vuoi verificarle?`;
         
         document.getElementById('itemText').innerText = "Verifica istruzioni saltate?";
         document.getElementById('statusText').innerText = `⚠️ ${countSkipped} SALTATE`;
@@ -397,17 +396,18 @@
       isAskingReview = false;
       reviewQueue = [];
       reviewIndex = -1;
+      currentIndex = -1; // Reset dell'indice attivo per togliere l'evidenziazione
       
       if (recognition) try { recognition.stop(); } catch(e) {}
 
-      document.getElementById('itemText').innerText = "Checklist Completata!";
+      document.getElementById('itemText').innerText = `${checklistName} Completata!`;
       document.getElementById('statusText').innerText = "OK";
       document.getElementById('micStatus').innerText = "Microfono spento";
       document.getElementById('micStatus').className = "mic-status";
       document.getElementById('startBtn').style.display = 'inline-block';
       
       updateUI();
-      speak("Checklist avviamento completata");
+      speak(`${checklistName} completata`);
     }
 
     function speakCurrent() {
