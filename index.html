@@ -144,30 +144,6 @@
       row.onclick = () => selectItem(idx);
     });
 
-    // Tre bip puliti e rapidi ad alto volume per comando non riconosciuto
-    function playErrorSound() {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
-        [0, 0.1, 0.2].forEach((delay) => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(880, audioCtx.currentTime + delay);
-
-          gain.gain.setValueAtTime(0.5, audioCtx.currentTime + delay);
-          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + 0.06);
-
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-
-          osc.start(audioCtx.currentTime + delay);
-          osc.stop(audioCtx.currentTime + delay + 0.06);
-        });
-      } catch(e) {}
-    }
-
     // Configurazione Riconoscimento Vocale
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -205,10 +181,8 @@
               isAskingReview = false;
               finishChecklistCompletely();
               break;
-            } else {
-              playErrorSound();
-              break;
             }
+            continue;
           }
 
           // COMANDO: SALTA
@@ -265,11 +239,6 @@
           ) {
             lastActionTime = Date.now();
             resetChecklist();
-            break;
-          }
-          // NESSUN COMANDO RICONOSCIUTO
-          else {
-            playErrorSound();
             break;
           }
         }
@@ -442,6 +411,8 @@
       document.getElementById('startBtn').style.display = 'inline-block';
       
       updateUI();
+      
+      // Conferma esplicita di completamento pulito senza pendenze
       speak(`${checklistName} completata, tutte le voci verificate`);
     }
 
@@ -459,6 +430,7 @@
 
       checklist.forEach((_, idx) => {
         const row = document.getElementById("row-" + idx);
+        
         row.classList.remove("active-row");
 
         if (idx === currentIndex) {
