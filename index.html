@@ -14,7 +14,6 @@
     }
     h1 { color: #333; margin-bottom: 10px; font-size: 22px; }
     
-    /* MENU PRINCIPALE GRID */
     .menu-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -40,7 +39,6 @@
     .btn-menu:active { background-color: #0056b3; }
     .badge-status { font-size: 14px; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 5px; }
 
-    /* CARD E CONTROLLI CHECKLIST */
     .card {
       position: sticky;
       top: 10px;
@@ -159,7 +157,6 @@
   </div>
 
   <script>
-    // DEFINIZIONE STRUTTURA COMPLETA DELLE 10 CHECKLIST
     const checklistsData = [
       { 
         id: 0, 
@@ -447,22 +444,6 @@
       }
     }
 
-    document.addEventListener('visibilitychange', async () => {
-      if (document.visibilityState === 'visible' && isListening) {
-        await requestWakeLock();
-      }
-    });
-
-    function handleRowTap(index) {
-      const currentTime = new Date().getTime();
-      const tapLength = currentTime - lastTapTime;
-      if (tapLength < 500 && tapLength > 0 && lastTapIndex === index) {
-        selectItem(index);
-      }
-      lastTapTime = currentTime;
-      lastTapIndex = index;
-    }
-
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
@@ -477,7 +458,7 @@
           const spokenText = event.results[i][0].transcript.trim().toLowerCase();
 
           if (isAskingReview) {
-            if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("verifica") || spokenText.includes("verifichiamo") || spokenText.includes("ok")) {
+            if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("verifica") || spokenText.includes("ok")) {
               lastActionTime = Date.now();
               isAskingReview = false;
               startReviewMode();
@@ -490,7 +471,7 @@
             }
           }
 
-          if (spokenText.includes("salta") || spokenText.includes("salta questa") || spokenText.includes("passa oltre")) {
+          if (spokenText.includes("salta") || spokenText.includes("passa oltre")) {
             lastActionTime = Date.now();
             skipItem();
             break;
@@ -528,6 +509,7 @@
       };
     }
 
+    // MOTORE SINTESI VOCALE SBLOCCATO E CORRETTO
     function speak(text, callback) {
       if (!('speechSynthesis' in window)) {
         if (callback) callback();
@@ -540,47 +522,59 @@
       document.getElementById('micStatus').innerText = "🔊 Lettura in corso...";
       document.getElementById('micStatus').className = "mic-status";
 
+      // Reset completo del motore audio del browser
       window.speechSynthesis.cancel();
-      if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+      window.speechSynthesis.resume();
 
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'it-IT';
+      utterance.rate = 1.1;
+      utterance.pitch = 1.0;
+
+      const voices = window.speechSynthesis.getVoices();
+      const itVoice = voices.find(v => v.lang && (v.lang.includes('it') || v.lang.includes('IT')));
+      if (itVoice) utterance.voice = itVoice;
+
+      let hasFinished = false;
+      const finishSpeech = () => {
+        if (hasFinished) return;
+        hasFinished = true;
+        isSpeaking = false;
+        lastActionTime = Date.now();
+        if (callback) {
+          callback();
+        } else if (isListening) {
+          startListening();
+        }
+      };
+
+      utterance.onend = finishSpeech;
+      utterance.onerror = finishSpeech;
+
+      // Un breve ritardo previene l'interruzione su Chrome mobile
       setTimeout(() => {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'it-IT';
-        utterance.rate = 1.2;
-        utterance.pitch = 1.0;
-
-        const voices = window.speechSynthesis.getVoices();
-        const itVoice = voices.find(v => v.lang && (v.lang.includes('it') || v.lang.includes('IT')));
-        if (itVoice) utterance.voice = itVoice;
-
-        let hasFinished = false;
-        const finishSpeech = () => {
-          if (hasFinished) return;
-          hasFinished = true;
-          isSpeaking = false;
-          lastActionTime = Date.now();
-          if (callback) callback();
-          else if (isListening) startListening();
-        };
-
-        utterance.onend = finishSpeech;
-        utterance.onerror = finishSpeech;
-
         window.speechSynthesis.speak(utterance);
-
-        const estimatedTime = (text.length * 70) + 800;
-        setTimeout(() => {
-          if (isSpeaking && !hasFinished) finishSpeech();
-        }, estimatedTime);
-
       }, 50);
+
+      // Timeout di sicurezza nel caso in cui l'evento onend del browser si blocchi
+      const estimatedTime = (text.length * 90) + 1000;
+      setTimeout(() => {
+        if (isSpeaking && !hasFinished) {
+          finishSpeech();
+        }
+      }, estimatedTime);
     }
 
     function startChecklist() {
       if (currentChecklist.length === 0) return;
       
       requestWakeLock();
-      if ('speechSynthesis' in window) window.speechSynthesis.resume();
+      
+      // Sblocco Audio Safari/Chrome
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.resume();
+      }
 
       currentIndex = 0;
       isListening = true;
@@ -603,10 +597,20 @@
         requestWakeLock();
         try {
           recognition.start();
-          document.getElementById('micStatus').innerText = isAskingReview ? "🎙️ In ascolto ('VERIFICA', 'SÌ', 'NO')" : "🎙️ In ascolto ('CHECK', 'SALTA', 'RIPETI')";
+          document.getElementById('micStatus').innerText = isAskingReview ? "🎙️ In ascolto ('SÌ', 'NO')" : "🎙️ In ascolto ('CHECK', 'SALTA')";
           document.getElementById('micStatus').className = "mic-status mic-active";
         } catch(e) {}
       }
+    }
+
+    function handleRowTap(index) {
+      const currentTime = new Date().getTime();
+      const tapLength = currentTime - lastTapTime;
+      if (tapLength < 500 && tapLength > 0 && lastTapIndex === index) {
+        selectItem(index);
+      }
+      lastTapTime = currentTime;
+      lastTapIndex = index;
     }
 
     function selectItem(index) {
@@ -767,7 +771,6 @@
       });
     }
 
-    // Inizializzazione applicazione
     renderMenu();
   </script>
 </body>
