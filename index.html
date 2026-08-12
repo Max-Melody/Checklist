@@ -723,6 +723,29 @@
       }
     }
 
+    function resetChecklist() {
+      isListening = false;
+      isSpeaking = false;
+      isAskingReview = false;
+      currentIndex = -1;
+      reviewQueue = [];
+      reviewIndex = -1;
+      skippedItems.clear();
+
+      releaseWakeLock();
+      if (recognition) try { recognition.stop(); } catch(e) {}
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+      document.getElementById('itemText').innerText = "Premi AVVIA per iniziare";
+      document.getElementById('statusText').innerText = "---";
+      document.getElementById('micStatus').innerText = "Microfono spento";
+      document.getElementById('micStatus').className = "mic-status";
+      document.getElementById('startBtn').style.display = 'inline-block';
+      document.getElementById('endControls').style.display = 'none';
+
+      updateUI();
+    }
+
     function updateUI() {
       if (currentIndex >= 0 && currentIndex < currentChecklist.length && !isAskingReview) {
         document.getElementById('itemText').innerText = currentChecklist[currentIndex].item;
@@ -731,50 +754,21 @@
 
       currentChecklist.forEach((_, idx) => {
         const row = document.getElementById("row-" + idx);
-        if (!row) return;
-        row.classList.remove("active-row");
+        if (row) {
+          row.classList.remove('active-row', 'skipped-row');
 
-        if (idx === currentIndex) {
-          row.classList.add("active-row");
-          row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else if (skippedItems.has(idx)) {
-          row.classList.add("skipped-row");
-        } else {
-          row.classList.remove("skipped-row");
+          if (idx === currentIndex) {
+            row.classList.add('active-row');
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } else if (skippedItems.has(idx)) {
+            row.classList.add('skipped-row');
+          }
         }
       });
     }
 
-    function resetChecklist() {
-      isListening = false;
-      isSpeaking = false;
-      isAskingReview = false;
-      reviewQueue = [];
-      reviewIndex = -1;
-      skippedItems.clear();
-      
-      releaseWakeLock();
-      if (recognition) try { recognition.stop(); } catch(e) {}
-      
-      currentIndex = -1;
-      document.getElementById('itemText').innerText = "Premi AVVIA per iniziare";
-      document.getElementById('statusText').innerText = "---";
-      document.getElementById('micStatus').innerText = "Microfono spento";
-      document.getElementById('micStatus').className = "mic-status";
-      document.getElementById('startBtn').style.display = 'inline-block';
-      document.getElementById('endControls').style.display = 'none';
-      
-      currentChecklist.forEach((_, idx) => {
-        const row = document.getElementById("row-" + idx);
-        if (row) row.classList.remove("active-row", "skipped-row");
-      });
-      
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
+    // Inizializzazione applicazione
     renderMenu();
   </script>
-
 </body>
 </html>
