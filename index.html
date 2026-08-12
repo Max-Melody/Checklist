@@ -302,9 +302,12 @@
       });
     }
 
+    // Gestione WakeLock migliorata
     async function requestWakeLock() {
       try {
-        if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
+        if ('wakeLock' in navigator && wakeLock === null) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
       } catch (err) {}
     }
 
@@ -315,7 +318,7 @@
     }
 
     document.addEventListener('visibilitychange', async () => {
-      if (wakeLock !== null && document.visibilityState === 'visible' && isListening) {
+      if (document.visibilityState === 'visible' && isListening) {
         await requestWakeLock();
       }
     });
@@ -344,7 +347,7 @@
           const spokenText = event.results[i][0].transcript.trim().toLowerCase();
 
           if (isAskingReview) {
-            if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("verifica") || spokenText.includes("ok")) {
+            if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("verifica") || spokenText.includes("verifichiamo") || spokenText.includes("ok")) {
               lastActionTime = Date.now();
               isAskingReview = false;
               startReviewMode();
@@ -460,16 +463,18 @@
       document.getElementById('startBtn').style.display = 'none';
       document.getElementById('endControls').style.display = 'none';
 
-      speak(`Avvio ${checklistsData[currentChecklistIndex].title}`, () => {
-        speakCurrent();
-      });
+      // Modificato: Pronuncia l'intestazione e direttamente la prima voce di seguito
+      const headerText = `Avvio ${checklistsData[currentChecklistIndex].title}`;
+      const firstItemText = currentChecklist[0].speak;
+      speak(`${headerText}. ${firstItemText}`);
     }
 
     function startListening() {
       if (recognition && isListening && !isSpeaking) {
+        requestWakeLock(); // Rinforzato qui per garantire lo schermo acceso
         try {
           recognition.start();
-          document.getElementById('micStatus').innerText = isAskingReview ? "🎙️ In ascolto ('SÌ', 'NO')" : "🎙️ In ascolto ('CHECK', 'SALTA', 'RIPETI')";
+          document.getElementById('micStatus').innerText = isAskingReview ? "🎙️ In ascolto ('VERIFICA', 'SÌ', 'NO')" : "🎙️ In ascolto ('CHECK', 'SALTA', 'RIPETI')";
           document.getElementById('micStatus').className = "mic-status mic-active";
         } catch(e) {}
       }
@@ -567,7 +572,7 @@
       
       document.getElementById('endControls').style.display = 'block';
       if (currentChecklistIndex < checklistsData.length - 1) {
-        document.getElementById('nextChecklistBtn').innerText = `➡️ PASSAPORTA A: ${checklistsData[currentChecklistIndex + 1].title}`;
+        document.getElementById('nextChecklistBtn').innerText = `➡️ PASSA A: ${checklistsData[currentChecklistIndex + 1].title}`;
         document.getElementById('nextChecklistBtn').style.display = 'inline-block';
       } else {
         document.getElementById('nextChecklistBtn').style.display = 'none';
