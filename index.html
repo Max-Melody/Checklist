@@ -142,8 +142,8 @@
       row.onclick = () => selectItem(idx);
     });
 
-    // Bip unico da usarsi solo all'avvio
-    function playStartBeep() {
+    // Bip da riprodurre SOLO a fine istruzione vocale
+    function playEndInstructionBeep() {
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
@@ -180,16 +180,17 @@
 
           if (isAskingReview) {
             if (
-              spokenText.includes("positivo") || spokenText.includes("si") || 
-              spokenText.includes("sì") || spokenText.includes("confermo") || spokenText.includes("ok")
+              spokenText.includes("si") || spokenText.includes("sì") || 
+              spokenText.includes("verifica") || spokenText.includes("verifichiamo") || 
+              spokenText.includes("confermo") || spokenText.includes("ok")
             ) {
               lastActionTime = Date.now();
               isAskingReview = false;
               startReviewMode();
               break;
             } else if (
-              spokenText.includes("negativo") || spokenText.includes("no") || 
-              spokenText.includes("annulla") || spokenText.includes("fine")
+              spokenText.includes("no") || spokenText.includes("annulla") || 
+              spokenText.includes("fine") || spokenText.includes("salta")
             ) {
               lastActionTime = Date.now();
               isAskingReview = false;
@@ -319,9 +320,6 @@
         window.speechSynthesis.resume();
       }
 
-      // Suona il bip solo quando premi AVVIA
-      playStartBeep();
-
       currentIndex = 0;
       isListening = true;
       isAskingReview = false;
@@ -340,10 +338,12 @@
     function startListening() {
       if (recognition && isListening && !isSpeaking) {
         try {
+          // Bip prima di aprire il microfono (A FINE ISTRUZIONE)
+          playEndInstructionBeep();
+
           recognition.start();
-          // Nessun bip durante l'ascolto continuo
           if (isAskingReview) {
-            document.getElementById('micStatus').innerText = "🎙️ In ascolto ('POSITIVO' / 'NEGATIVO')";
+            document.getElementById('micStatus').innerText = "🎙️ In ascolto ('SÌ', 'VERIFICA', 'NO')";
           } else {
             document.getElementById('micStatus').innerText = "🎙️ In ascolto ('CHECK', 'SALTA', 'RIPETI')";
           }
