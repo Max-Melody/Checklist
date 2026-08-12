@@ -144,25 +144,27 @@
       row.onclick = () => selectItem(idx);
     });
 
-    // Suono di errore stile quiz ("buzzer" basso e discendente)
+    // Tre bip puliti e rapidi ad alto volume per comando non riconosciuto
     function playErrorSound() {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
+        
+        [0, 0.1, 0.2].forEach((delay) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
 
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.3);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, audioCtx.currentTime + delay);
 
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.5, audioCtx.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + 0.06);
 
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
 
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.3);
+          osc.start(audioCtx.currentTime + delay);
+          osc.stop(audioCtx.currentTime + delay + 0.06);
+        });
       } catch(e) {}
     }
 
