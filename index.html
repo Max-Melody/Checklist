@@ -142,6 +142,7 @@
       row.onclick = () => selectItem(idx);
     });
 
+    // Bip unico da usarsi solo all'avvio
     function playStartBeep() {
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -274,7 +275,6 @@
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'it-IT';
         
-        // Impostiamo la velocità rapida (1.2 per lettura fluida da cabina)
         utterance.rate = 1.2;
         utterance.pitch = 1.0;
 
@@ -319,6 +319,9 @@
         window.speechSynthesis.resume();
       }
 
+      // Suona il bip solo quando premi AVVIA
+      playStartBeep();
+
       currentIndex = 0;
       isListening = true;
       isAskingReview = false;
@@ -338,7 +341,7 @@
       if (recognition && isListening && !isSpeaking) {
         try {
           recognition.start();
-          playStartBeep();
+          // Nessun bip durante l'ascolto continuo
           if (isAskingReview) {
             document.getElementById('micStatus').innerText = "🎙️ In ascolto ('POSITIVO' / 'NEGATIVO')";
           } else {
