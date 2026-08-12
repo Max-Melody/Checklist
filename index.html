@@ -129,7 +129,6 @@
     let lastActionTime = 0;
     let skippedItems = new Set();
     
-    // Variabili gestione recupero elementi saltati
     let isAskingReview = false;
     let reviewQueue = [];
     let reviewIndex = -1;
@@ -144,35 +143,24 @@
       row.onclick = () => selectItem(idx);
     });
 
-    // Funzione per il doppio bip raddoppiato (coppia acuto/grave x2)
-    function playDoubleBeep() {
+    // Un singolo Bip pulito di "pronto risposta" (opzionale se voluto)
+    function playStartBeep() {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
-        // Sequenza dei 4 toni: [frequenza Hz, momento di inizio sec, durata sec]
-        const tones = [
-          { freq: 880, start: 0.00, duration: 0.08 }, // Bip piccolo (acuto)
-          { freq: 440, start: 0.10, duration: 0.12 }, // Bip grosso (grave)
-          { freq: 880, start: 0.28, duration: 0.08 }, // Ripetizione: Bip piccolo
-          { freq: 440, start: 0.38, duration: 0.12 }  // Ripetizione: Bip grosso
-        ];
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
 
-        tones.forEach(t => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
 
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(t.freq, audioCtx.currentTime + t.start);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
 
-          gain.gain.setValueAtTime(0.3, audioCtx.currentTime + t.start);
-          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + t.start + t.duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
 
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-
-          osc.start(audioCtx.currentTime + t.start);
-          osc.stop(audioCtx.currentTime + t.start + t.duration);
-        });
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.08);
       } catch(e) {}
     }
 
@@ -190,24 +178,19 @@
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           const spokenText = event.results[i][0].transcript.trim().toLowerCase();
 
-          // SE SIAMO NELLA DOMANDA DI VERIFICA (POSITIVO / NEGATIVO)
+          // VERIFICA REVISIONE
           if (isAskingReview) {
             if (
-              spokenText.includes("positivo") || 
-              spokenText.includes("si") || 
-              spokenText.includes("sì") || 
-              spokenText.includes("confermo") || 
-              spokenText.includes("ok")
+              spokenText.includes("positivo") || spokenText.includes("si") || 
+              spokenText.includes("sì") || spokenText.includes("confermo") || spokenText.includes("ok")
             ) {
               lastActionTime = Date.now();
               isAskingReview = false;
               startReviewMode();
               break;
             } else if (
-              spokenText.includes("negativo") || 
-              spokenText.includes("no") || 
-              spokenText.includes("annulla") || 
-              spokenText.includes("fine")
+              spokenText.includes("negativo") || spokenText.includes("no") || 
+              spokenText.includes("annulla") || spokenText.includes("fine")
             ) {
               lastActionTime = Date.now();
               isAskingReview = false;
@@ -218,10 +201,8 @@
 
           // COMANDO: SALTA
           if (
-            spokenText.includes("salta") || 
-            spokenText.includes("salta questa") || 
-            spokenText.includes("passa oltre") || 
-            spokenText.includes("salto")
+            spokenText.includes("salta") || spokenText.includes("salta questa") || 
+            spokenText.includes("passa oltre") || spokenText.includes("salto")
           ) {
             lastActionTime = Date.now();
             skipItem();
@@ -254,9 +235,7 @@
           } 
           // COMANDO: RIPETI
           else if (
-            spokenText.includes("ripeti") || 
-            spokenText.includes("ancora") || 
-            spokenText.includes("come")
+            spokenText.includes("ripeti") || spokenText.includes("ancora") || spokenText.includes("come")
           ) {
             lastActionTime = Date.now();
             speakCurrent();
@@ -264,9 +243,7 @@
           } 
           // COMANDO: RICOMINCIA
           else if (
-            spokenText.includes("ricomincia") || 
-            spokenText.includes("da capo") || 
-            spokenText.includes("reset")
+            spokenText.includes("ricomincia") || spokenText.includes("da capo") || spokenText.includes("reset")
           ) {
             lastActionTime = Date.now();
             resetChecklist();
@@ -275,9 +252,12 @@
         }
       };
 
+      // Riavvia in modo silenzioso SOLO se l'ascolto si interrompe accidentalmente
       recognition.onend = () => {
         if (isListening && !isSpeaking) {
-          try { recognition.start(); } catch(e) {}
+          try { 
+            recognition.start(); 
+          } catch(e) {}
         }
       };
     }
@@ -302,8 +282,9 @@
       if (recognition && isListening && !isSpeaking) {
         try {
           recognition.start();
+          playStartBeep(); // Un solo bip discreto per dare il "via" alla risposta
           if (isAskingReview) {
-            document.getElementById('micStatus').innerText = "🎙️ Rispondi 'POSITIVO' o 'NEGATIVO'";
+            document.getElementById('micStatus').innerText = "🎙️ In ascolto ('POSITIVO' / 'NEGATIVO')";
           } else {
             document.getElementById('micStatus').innerText = "🎙️ In ascolto ('CHECK', 'SALTA', 'RIPETI')";
           }
