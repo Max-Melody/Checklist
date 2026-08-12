@@ -127,7 +127,7 @@
       { item: "Autopilot", status: "OFF", speak: "Autopilot: OFF" },
       { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: ON" },
       
-      // Nuova sezione: AVVIAMENTO A FREDDO
+      // AVVIAMENTO A FREDDO
       { item: "Manetta", status: "1 cm", speak: "Manetta: Un centimetro" },
       { item: "Primer", status: "3 / 4 volte poi BLOCCARE", speak: "Primer: Tre o quattro volte, poi bloccare" },
       { item: "Via dall'elica", status: "ANNUNCIARE", speak: "Via dall'elica: Annunciare" },
@@ -148,10 +148,38 @@
     let reviewQueue = [];
     let reviewIndex = -1;
 
+    let wakeLock = null;
+
+    // Variabili per la gestione del Doppio Tap
+    let lastTapTime = 0;
+    let lastTapIndex = -1;
+
+    // Gestione Schermo Sempre Acceso
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {}
+    }
+
+    function releaseWakeLock() {
+      if (wakeLock !== null) {
+        wakeLock.release().then(() => {
+          wakeLock = null;
+        });
+      }
+    }
+
+    document.addEventListener('visibilitychange', async () => {
+      if (wakeLock !== null && document.visibilityState === 'visible' && isListening) {
+        await requestWakeLock();
+      }
+    });
+
     // Popola la tabella
     const tbody = document.getElementById('tableBody');
     checklist.forEach((entry, idx) => {
-      // Inserisce l'intestazione grafica prima della manetta
       if (idx === 16) {
         let headerRow = tbody.insertRow();
         headerRow.className = "section-header-row";
@@ -164,8 +192,23 @@
       row.id = "row-" + idx;
       row.insertCell(0).innerText = entry.item;
       row.insertCell(1).innerText = entry.status;
-      row.onclick = () => selectItem(idx);
+      
+      // Controllo doppio tap di sicurezza
+      row.onclick = () => handleRowTap(idx);
     });
+
+    function handleRowTap(index) {
+      const currentTime = new Date().getTime();
+      const tapLength = currentTime - lastTapTime;
+
+      // Se il secondo tocco avviene entro 500ms sulla stessa riga
+      if (tapLength < 500 && tapLength > 0 && lastTapIndex === index) {
+        selectItem(index);
+      }
+      
+      lastTapTime = currentTime;
+      lastTapIndex = index;
+    }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -318,6 +361,8 @@
     }
 
     function startChecklist() {
+      requestWakeLock();
+
       if ('speechSynthesis' in window) {
         window.speechSynthesis.resume();
       }
@@ -444,6 +489,8 @@
       reviewIndex = -1;
       currentIndex = -1;
       
+      releaseWakeLock();
+
       if (recognition) try { recognition.stop(); } catch(e) {}
 
       document.getElementById('itemText').innerText = `${checklistName} Completata!`;
@@ -491,6 +538,8 @@
       reviewIndex = -1;
       skippedItems.clear();
       
+      releaseWakeLock();
+
       if (recognition) try { recognition.stop(); } catch(e) {}
       
       currentIndex = -1;
