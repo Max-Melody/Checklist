@@ -161,7 +161,30 @@
   <script>
     // DEFINIZIONE STRUTTURA 10 CHECKLIST
     const checklistsData = [
-      { id: 0, title: "1. CONTROLLI CABINA", data: [] },
+      { 
+        id: 0, 
+        title: "1. CONTROLLI CABINA", 
+        data: [
+          { item: "Documenti pilota", status: "A BORDO", speak: "Documenti pilota: A bordo" },
+          { item: "Documenti aeromobile", status: "A BORDO", speak: "Documenti aeromobile: A bordo" },
+          { item: "Estintore / cassetta pronto soccorso", status: "A BORDO", speak: "Estintore e cassetta pronto soccorso: A bordo" },
+          { item: "ELT", status: "Verificare OFF", speak: "ELT: Verificare OFF" },
+          { item: "Giubbotti salvagente / Canotto / raft", status: "COME RICHIESTO", speak: "Giubbotti salvagente e canotto: Come richiesto" },
+          { item: "Equipagg. per sosta Tacchi Olio", status: "COME RICHIESTO", speak: "Equipaggiamento per sosta, tacchi e olio: Come richiesto" },
+          { item: "Comandi volo", status: "LIBERI E CORRETTI", speak: "Comandi di volo: Liberi e corretti" },
+          { item: "Miscela", status: "CHIUSA", speak: "Miscela: Chiusa" },
+          { item: "Magneti", status: "OFF", speak: "Magneti: OFF" },
+          { item: "Interruttori elettrici", status: "OFF", speak: "Interruttori elettrici: OFF" },
+          { item: "Radio e avionica", status: "OFF", speak: "Radio e avionica: OFF" },
+          { item: "Circuit breakers", status: "INSERITI", speak: "Circuit breakers: Inseriti" },
+          { item: "Batteria", status: "ON", speak: "Batteria: ON" },
+          { item: "Carburante televel", status: "VERIFICARE", speak: "Carburante televel: Verificare" },
+          { item: "Pannello annunciatore", status: "Spie ON", speak: "Pannello annunciatore: Spie ON" },
+          { item: "Batteria", status: "OFF", speak: "Batteria: OFF" },
+          { item: "Trim", status: "Zero", speak: "Trim: Zero" },
+          { item: "Parabrezza e finestrini", status: "PULITI", speak: "Parabrezza e finestrini: Puliti" }
+        ]
+      },
       { 
         id: 1, 
         title: "2. AVVIAMENTO", 
@@ -201,7 +224,7 @@
       { id: 9, title: "10. SOTTOVENTO E FINALE", data: [] }
     ];
 
-    let currentChecklistIndex = 1; // Default su Avviamento
+    let currentChecklistIndex = 0;
     let currentChecklist = [];
     let currentIndex = -1;
     let recognition;
@@ -218,7 +241,6 @@
     let lastTapTime = 0;
     let lastTapIndex = -1;
 
-    // Generazione Menu
     function renderMenu() {
       const menuContainer = document.getElementById('menuButtons');
       menuContainer.innerHTML = '';
@@ -235,6 +257,7 @@
       resetChecklist();
       document.getElementById('checklistView').style.display = 'none';
       document.getElementById('menuView').style.display = 'block';
+      renderMenu();
     }
 
     function openChecklist(index) {
@@ -279,7 +302,6 @@
       });
     }
 
-    // Gestione WakeLock
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
@@ -543,7 +565,6 @@
       document.getElementById('micStatus').className = "mic-status";
       document.getElementById('startBtn').style.display = 'none';
       
-      // Mostra pulsanti di avanzamento al termine
       document.getElementById('endControls').style.display = 'block';
       if (currentChecklistIndex < checklistsData.length - 1) {
         document.getElementById('nextChecklistBtn').innerText = `➡️ PASSAPORTA A: ${checklistsData[currentChecklistIndex + 1].title}`;
@@ -618,7 +639,6 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Inizializzazione
     renderMenu();
   </script>
 
