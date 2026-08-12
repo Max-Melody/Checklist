@@ -251,6 +251,7 @@
       };
     }
 
+    // NUOVA FUNZIONE DI LETTURA CON FORZATURA E SBLOCCO ENGINE
     function speak(text, callback) {
       if (!('speechSynthesis' in window)) {
         if (callback) callback();
@@ -258,7 +259,6 @@
       }
 
       isSpeaking = true;
-      
       if (recognition) {
         try { recognition.stop(); } catch(e) {}
       }
@@ -266,38 +266,61 @@
       document.getElementById('micStatus').innerText = "🔊 Lettura in corso...";
       document.getElementById('micStatus').className = "mic-status";
 
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'it-IT';
-      utterance.rate = 1.0;
+      // Sblocca e forza il ripristino del sintetizzatore audio del browser
+      window.speechSynthesis.cancel();
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
 
-      let hasFinished = false;
-      const onSpeechEnd = () => {
-        if (hasFinished) return;
-        hasFinished = true;
-        isSpeaking = false;
-        lastActionTime = Date.now();
-        if (callback) {
-          callback();
-        } else if (isListening) {
-          startListening();
+      setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'it-IT';
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+
+        // Se disponibile, cerca una voce italiana esplicita
+        const voices = window.speechSynthesis.getVoices();
+        const itVoice = voices.find(v => v.lang && (v.lang.includes('it') || v.lang.includes('IT')));
+        if (itVoice) {
+          utterance.voice = itVoice;
         }
-      };
 
-      utterance.onend = onSpeechEnd;
-      utterance.onerror = (e) => {
-        onSpeechEnd();
-      };
+        let hasFinished = false;
+        const finishSpeech = () => {
+          if (hasFinished) return;
+          hasFinished = true;
+          isSpeaking = false;
+          lastActionTime = Date.now();
+          if (callback) {
+            callback();
+          } else if (isListening) {
+            startListening();
+          }
+        };
 
-      // Avvio immediato della sintesi
-      window.speechSynthesis.speak(utterance);
+        utterance.onend = finishSpeech;
+        utterance.onerror = (e) => {
+          console.log("Errore sintesi:", e);
+          finishSpeech();
+        };
+
+        window.speechSynthesis.speak(utterance);
+
+        // Backup di sicurezza se 'onend' non scatta per bug del dispositivo
+        const estimatedTime = (text.length * 90) + 1000;
+        setTimeout(() => {
+          if (isSpeaking && !hasFinished) {
+            finishSpeech();
+          }
+        }, estimatedTime);
+
+      }, 50);
     }
 
     function startChecklist() {
-      // Sblocca la sintesi vocale istantaneamente al click dell'utente
+      // Sblocco audio al click iniziale
       if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        let unlockUtterance = new SpeechSynthesisUtterance("");
-        window.speechSynthesis.speak(unlockUtterance);
+        window.speechSynthesis.resume();
       }
 
       currentIndex = 0;
