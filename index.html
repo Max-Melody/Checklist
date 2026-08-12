@@ -59,7 +59,6 @@
     }
     th, td { border: 1px solid #ccc; padding: 12px 8px; text-align: left; }
     
-    /* Stili evidenziazione */
     .active-row { 
       background-color: #d4edda !important; 
       font-weight: bold; 
@@ -132,6 +131,7 @@
     let isAskingReview = false;
     let reviewQueue = [];
     let reviewIndex = -1;
+    let audioCtx = null;
 
     // Popola la tabella
     const tbody = document.getElementById('tableBody');
@@ -143,17 +143,21 @@
       row.onclick = () => selectItem(idx);
     });
 
-    // Un singolo Bip pulito di "pronto risposta" (opzionale se voluto)
     function playStartBeep() {
       try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
 
         osc.type = 'sine';
         osc.frequency.setValueAtTime(800, audioCtx.currentTime);
 
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
 
         osc.connect(gain);
@@ -164,7 +168,6 @@
       } catch(e) {}
     }
 
-    // Configurazione Riconoscimento Vocale
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
@@ -173,12 +176,11 @@
       recognition.interimResults = true;
 
       recognition.onresult = (event) => {
-        if (isSpeaking || (Date.now() - lastActionTime < 800)) return;
+        if (isSpeaking || (Date.now() - lastActionTime < 600)) return;
 
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           const spokenText = event.results[i][0].transcript.trim().toLowerCase();
 
-          // VERIFICA REVISIONE
           if (isAskingReview) {
             if (
               spokenText.includes("positivo") || spokenText.includes("si") || 
@@ -199,7 +201,6 @@
             }
           }
 
-          // COMANDO: SALTA
           if (
             spokenText.includes("salta") || spokenText.includes("salta questa") || 
             spokenText.includes("passa oltre") || spokenText.includes("salto")
@@ -209,7 +210,6 @@
             break;
           }
 
-          // COMANDO: CHECK / AVANTI
           const isCheck = 
             spokenText.includes("check") || spokenText.includes("ceck") || spokenText.includes("cec") ||
             spokenText.includes("ciec") || spokenText.includes("cek") || spokenText.includes("gec") ||
@@ -232,17 +232,13 @@
             lastActionTime = Date.now();
             nextItem();
             break;
-          } 
-          // COMANDO: RIPETI
-          else if (
+          } else if (
             spokenText.includes("ripeti") || spokenText.includes("ancora") || spokenText.includes("come")
           ) {
             lastActionTime = Date.now();
             speakCurrent();
             break;
-          } 
-          // COMANDO: RICOMINCIA
-          else if (
+          } else if (
             spokenText.includes("ricomincia") || spokenText.includes("da capo") || spokenText.includes("reset")
           ) {
             lastActionTime = Date.now();
@@ -252,12 +248,9 @@
         }
       };
 
-      // Riavvia in modo silenzioso SOLO se l'ascolto si interrompe accidentalmente
       recognition.onend = () => {
         if (isListening && !isSpeaking) {
-          try { 
-            recognition.start(); 
-          } catch(e) {}
+          try { recognition.start(); } catch(e) {}
         }
       };
     }
@@ -271,18 +264,18 @@
       skippedItems.clear();
       updateUI();
       
+      document.getElementById('startBtn').style.display = 'none';
+
       speak(`Avvio ${checklistName}`, () => {
         speakCurrent();
       });
-
-      document.getElementById('startBtn').style.display = 'none';
     }
 
     function startListening() {
       if (recognition && isListening && !isSpeaking) {
         try {
           recognition.start();
-          playStartBeep(); // Un solo bip discreto per dare il "via" alla risposta
+          playStartBeep();
           if (isAskingReview) {
             document.getElementById('micStatus').innerText = "🎙️ In ascolto ('POSITIVO' / 'NEGATIVO')";
           } else {
@@ -306,16 +299,21 @@
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'it-IT';
-      utterance.rate = 1.2;
-      utterance.pitch = 1.0;
+      utterance.rate = 1.1;
 
       utterance.onend = () => {
         isSpeaking = false;
         lastActionTime = Date.now();
-        if (isListening) {
+        if (callback) {
+          callback();
+        } else if (isListening) {
           startListening();
         }
-        if (callback) callback();
+      };
+
+      utterance.onerror = () => {
+        isSpeaking = false;
+        if (isListening) startListening();
       };
 
       window.speechSynthesis.speak(utterance);
