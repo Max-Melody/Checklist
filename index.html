@@ -3,973 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Piper P28 Digital Checklist</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Piper PA-28 Digital Checklist</title>
     <style>
         :root {
-            --bg-primary: #121820;
-            --bg-secondary: #1a2332;
-            --bg-card: #222d3f;
-            --accent-blue: #0088ff;
-            --accent-green: #00e676;
-            --accent-amber: #ffab00;
-            --accent-red: #ff3d00;
-            --text-main: #f0f4f8;
-            --text-sub: #94a3b8;
-            --border-color: #2e3d52;
-            --item-hover: #2a384c;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --accent-color: #00e676;
+            --warning-color: #ff9800;
+            --danger-color: #f44336;
+            --button-bg: #2c2c2c;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background-color: var(--bg-primary);
-            color: var(--text-main);
-            min-height: 100vh;
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
         }
 
         header {
-            background-color: var(--bg-secondary);
-            border-bottom: 2px solid var(--border-color);
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
         }
 
-        .header-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            color: var(--accent-color);
         }
 
-        .header-title i {
-            font-size: 24px;
-            color: var(--accent-blue);
-        }
-
-        .header-title h1 {
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .header-title span {
-            font-size: 13px;
-            color: var(--text-sub);
-            display: block;
-        }
-
-        .timer-widget {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.25);
-            padding: 6px 14px;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-        }
-
-        .timer-widget.active {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 10px rgba(0, 136, 255, 0.3);
-        }
-
-        .timer-widget.warning {
-            border-color: var(--accent-amber);
-            animation: pulse-amber 1.5s infinite;
-        }
-
-        .timer-widget.alarm {
-            border-color: var(--accent-red);
-            background: rgba(255, 61, 0, 0.2);
-            animation: pulse-red 0.8s infinite;
-        }
-
-        @keyframes pulse-amber {
-            0% { box-shadow: 0 0 0 0 rgba(255, 171, 0, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 171, 0, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 171, 0, 0); }
-        }
-
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(255, 61, 0, 0.6); }
-            70% { box-shadow: 0 0 0 12px rgba(255, 61, 0, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 61, 0, 0); }
-        }
-
-        .timer-display {
-            font-family: "Courier New", Courier, monospace;
-            font-size: 18px;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .timer-controls {
-            display: flex;
-            gap: 6px;
-        }
-
-        .btn-icon {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s;
-        }
-
-        .btn-icon:hover {
-            background: var(--accent-blue);
-            color: #fff;
-        }
-
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .sidebar {
-            width: 320px;
-            background-color: var(--bg-secondary);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        .nav-item {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: background 0.2s;
-        }
-
-        .nav-item:hover {
-            background-color: var(--item-hover);
-        }
-
-        .nav-item.active {
-            background-color: rgba(0, 136, 255, 0.15);
-            border-left: 4px solid var(--accent-blue);
-        }
-
-        .nav-item.completed {
-            border-left: 4px solid var(--accent-green);
-        }
-
-        .nav-item-title {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .nav-item-status {
-            font-size: 12px;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .content {
-            flex: 1;
-            padding: 24px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+        .phase-title {
+            font-size: 1.2rem;
+            color: #888;
+            margin-top: 5px;
         }
 
         .checklist-card {
-            background-color: var(--bg-card);
+            background-color: var(--card-bg);
             border-radius: 12px;
-            border: 1px solid var(--border-color);
-            padding: 24px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .card-header h2 {
-            font-size: 22px;
-            color: var(--text-main);
-        }
-
-        .progress-bar-bg {
-            width: 100%;
-            height: 8px;
-            background-color: var(--bg-primary);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .checklist-items {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
         }
 
         .item-row {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            background-color: var(--bg-secondary);
-            padding: 14px 18px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .item-row:hover {
-            border-color: var(--accent-blue);
-        }
-
-        .item-row.current {
-            border-color: var(--accent-blue);
-            background-color: rgba(0, 136, 255, 0.1);
-            box-shadow: 0 0 10px rgba(0, 136, 255, 0.2);
-        }
-
-        .item-row.checked {
-            background-color: rgba(0, 230, 118, 0.08);
-            border-color: rgba(0, 230, 118, 0.3);
-            opacity: 0.85;
-        }
-
-        .item-left {
-            display: flex;
             align-items: center;
-            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid #333;
         }
 
-        .item-checkbox {
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
-            border: 2px solid var(--text-sub);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .item-row.checked .item-checkbox {
-            background-color: var(--accent-green);
-            border-color: var(--accent-green);
-            color: #121820;
+        .item-row:last-child {
+            border-bottom: none;
         }
 
         .item-label {
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 1.1rem;
+            font-weight: 500;
         }
 
         .item-action {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--accent-blue);
-            background: rgba(0, 136, 255, 0.12);
-            padding: 6px 14px;
-            border-radius: 6px;
-            letter-spacing: 0.5px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--accent-color);
         }
 
-        .item-row.checked .item-action {
-            color: var(--accent-green);
-            background: rgba(0, 230, 118, 0.12);
-        }
-
-        .cruise-banner {
-            background: linear-gradient(135deg, rgba(0, 136, 255, 0.15), rgba(255, 171, 0, 0.15));
-            border: 1px solid var(--accent-amber);
-            border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .cruise-banner-info h3 {
-            font-size: 16px;
-            color: var(--accent-amber);
-            margin-bottom: 4px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .cruise-banner-info p {
-            font-size: 13px;
-            color: var(--text-sub);
-        }
-
-        .controls-footer {
-            background-color: var(--bg-secondary);
-            border-top: 1px solid var(--border-color);
-            padding: 16px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            bottom: 0;
-            z-index: 90;
-        }
-
-        .voice-status {
-            display: flex;
-            align-items: center;
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
-            font-size: 14px;
+            margin-top: 20px;
         }
 
-        .voice-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: var(--text-sub);
-        }
-
-        .voice-indicator.listening {
-            background-color: var(--accent-green);
-            box-shadow: 0 0 8px var(--accent-green);
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 12px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
+        button {
+            background-color: var(--button-bg);
+            color: var(--text-color);
             border: none;
-            font-weight: 700;
-            font-size: 14px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
+            transition: background-color 0.2s;
         }
 
-        .btn-primary {
-            background-color: var(--accent-blue);
-            color: #fff;
+        button:active {
+            background-color: #444;
         }
 
-        .btn-primary:hover {
-            background-color: #0077e6;
+        button.primary {
+            background-color: var(--accent-color);
+            color: #000;
+            grid-column: span 2;
         }
 
-        .btn-success {
-            background-color: var(--accent-green);
-            color: #121820;
+        .progress-bar {
+            width: 100%;
+            background-color: #333;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 20px;
         }
 
-        .btn-secondary {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--item-hover);
-        }
-
-        @media (max-width: 850px) {
-            .main-container {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                max-height: 160px;
-            }
-
-            header {
-                flex-direction: column;
-                gap: 10px;
-                align-items: flex-start;
-            }
-
-            .timer-widget {
-                width: 100%;
-                justify-content: space-between;
-            }
+        .progress-fill {
+            height: 100%;
+            background-color: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s ease;
         }
     </style>
 </head>
 <body>
 
+<div class="container">
     <header>
-        <div class="header-title">
-            <i class="fa-solid fa-plane-up"></i>
-            <div>
-                <h1>PIPER ARCHER / WARRIOR (P28)</h1>
-                <span>Digital Interactive Checklist System</span>
-            </div>
-        </div>
-
-        <div class="timer-widget" id="timerWidget">
-            <i class="fa-solid fa-stopwatch" style="color: var(--accent-amber);"></i>
-            <div style="display:flex; flex-direction:column;">
-                <span style="font-size:10px; color:var(--text-sub); text-transform:uppercase; letter-spacing:0.5px;">Memo Crociera (30 min)</span>
-                <span class="timer-display" id="timerDisplay">30:00</span>
-            </div>
-            <div class="timer-controls">
-                <button class="btn-icon" id="btnTimerStart" title="Avvia/Pausa Timer"><i class="fa-solid fa-play"></i></button>
-                <button class="btn-icon" id="btnTimerReset" title="Reset 30 min"><i class="fa-solid fa-rotate-right"></i></button>
-            </div>
-        </div>
+        <h1>PIPER PA-28 ARCHER/WARRIOR</h1>
+        <div class="phase-title" id="phaseDisplay">Ispezione Pre-Volo</div>
     </header>
 
-    <div class="main-container">
-        <div class="sidebar" id="sidebar"></div>
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressBar"></div>
+    </div>
 
-        <div class="content">
-            <div class="checklist-card">
-                <div class="card-header">
-                    <h2 id="checklistTitle">1. PRIMA DELL'AVVIAMENTO</h2>
-                    <span id="stepCounter" style="font-size: 14px; color: var(--text-sub); font-weight:600;">1 / 9</span>
-                </div>
+    <div class="checklist-card" id="checklistContainer">
+        <!-- I controlli della checklist vengono generati qui -->
+    </div>
 
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" id="progressBar"></div>
-                </div>
+    <div class="controls">
+        <button id="btnPrev" onclick="prevItem()">Indietro</button>
+        <button id="btnSkip" onclick="skipItem()">Salta</button>
+        <button class="primary" id="btnNext" onclick="nextItem()">CONFERMA / NEXT</button>
+    </div>
+</div>
 
-                <div class="cruise-banner" id="cruiseBanner" style="display: none;">
-                    <div class="cruise-banner-info">
-                        <h3><i class="fa-solid fa-clock-rotate-left"></i> Timer Crociera Automatico Attivo</h3>
-                        <p>Il memo dei 30 minuti per controllo parametri e cambio serbatoio è in esecuzione.</p>
-                    </div>
-                    <button class="btn btn-secondary" onclick="resetCruiseTimer()" style="padding:6px 12px; font-size:12px;">
-                        <i class="fa-solid fa-arrows-rotate"></i> Azzera 30 Min
-                    </button>
-                </div>
+<script>
+    const checklistData = [
+        {
+            phase: "Prima dell'Avviamento",
+            items: [
+                { item: "Controlli Pre-volo", action: "COMPLETATI" },
+                { item: "Cinture di Sicurezza", action: "ALLACCIATE" },
+                { item: "Freni di Stazionamento", action: "INSERITI" },
+                { item: "Selettore Carburante", action: "SERBATOIO PIÙ PIENO" },
+                { item: "Master Switch", action: "ON" }
+            ]
+        },
+        {
+            phase: "Avviamento Motore",
+            items: [
+                { item: "Miscela", action: "RICCA" },
+                { item: "Pompa Carburante", action: "ON" },
+                { item: "Manetta", action: "APERTURA 1/4" },
+                { item: "Area Elica", action: "LIBERA" },
+                { item: "Chiave Avviamento", action: "START" }
+            ]
+        }
+    ];
 
-                <div class="checklist-items" id="checklistItems"></div>
+    let currentPhaseIndex = 0;
+    let currentItemIndex = 0;
+
+    function updateUI() {
+        const currentPhase = checklistData[currentPhaseIndex];
+        const currentItem = currentPhase.items[currentItemIndex];
+
+        document.getElementById('phaseDisplay').innerText = currentPhase.phase;
+
+        const container = document.getElementById('checklistContainer');
+        container.innerHTML = `
+            <div class="item-row">
+                <span class="item-label">${currentItem.item}</span>
+                <span class="item-action">${currentItem.action}</span>
             </div>
-        </div>
-    </div>
+        `;
 
-    <div class="controls-footer">
-        <div class="voice-status">
-            <div class="voice-indicator" id="voiceIndicator"></div>
-            <span id="voiceStatusText">Controllo vocale attivo ("Avanti", "Fatto", "Indietro")</span>
-        </div>
+        // Aggiorna la barra di avanzamento
+        const totalItems = currentPhase.items.length;
+        const progress = ((currentItemIndex + 1) / totalItems) * 100;
+        document.getElementById('progressBar').style.width = `${progress}%`;
+    }
 
-        <div class="btn-group">
-            <button class="btn btn-secondary" id="btnPrev" onclick="prevItem()">
-                <i class="fa-solid fa-chevron-left"></i> Indietro
-            </button>
-            <button class="btn btn-primary" id="btnNext" onclick="nextItem()">
-                Conferma / Avanti <i class="fa-solid fa-chevron-right"></i>
-            </button>
-            <button class="btn btn-secondary" id="btnTTS" onclick="readCurrentItem()">
-                <i class="fa-solid fa-volume-high"></i> Rileggi
-            </button>
-        </div>
-    </div>
-
-    <script>
-        const checklists = [
-            {
-                id: 1,
-                title: "1. PRIMA DELL'AVVIAMENTO",
-                items: [
-                    { label: "Ispezione prevolo", action: "COMPLETATA" },
-                    { label: "Documenti di bordo", action: "A BORDO" },
-                    { label: "Controllo comandi", action: "LIBERI E CORRETTI" },
-                    { label: "Flap", action: "CONTROLLATI E RIENTRATI" },
-                    { label: "Freni", action: "CONTROLLATI E APPLICATI" },
-                    { label: "Selettore serbatoio", action: "SERBATOIO PIÙ PIENO" },
-                    { label: "Master Switch", action: "ON" },
-                    { label: "Quantità carburante", action: "VERIFICATA" },
-                    { label: "Luci di navigazione / Anti-collisione", action: "SECONDO NECESSITÀ" }
-                ]
-            },
-            {
-                id: 2,
-                title: "2. AVVIAMENTO MOTORE",
-                items: [
-                    { label: "Pompa elettrica carburante", action: "ON (PRESSIONE OK)" },
-                    { label: "Miscela", action: "RICCA" },
-                    { label: "Aria Calda / Carburatore", action: "OFF / FREDDA" },
-                    { label: "Manetta", action: "APERTA 1/4 POLLICE" },
-                    { label: "Area elica", action: "LIBERA (\"LIBERO!\")" },
-                    { label: "Chiave d'accensione", action: "START" },
-                    { label: "Pressione olio", action: "VERIFICARE ENTRO 30 SEC" },
-                    { label: "Pompa elettrica carburante", action: "OFF" }
-                ]
-            },
-            {
-                id: 3,
-                title: "3. DOPO L'AVVIAMENTO",
-                items: [
-                    { label: "Alternatore / Generatore", action: "ON / CARICA OK" },
-                    { label: "Radio e Avionica", action: "ON / IMPOSTATE" },
-                    { label: "Altimetro", action: "IMPOSTATO QNH / QFE" },
-                    { label: "Transponder", action: "STANDBY / ALT" },
-                    { label: "Girodirezionale", action: "ALLINEATO CON BUSSOLA" },
-                    { label: "Flap", action: "RIENTRATI" }
-                ]
-            },
-            {
-                id: 4,
-                title: "4. RULLAGGIO E PROVA MOTORE",
-                items: [
-                    { label: "Freni", action: "CONTROLLATI IN RULLAGGIO" },
-                    { label: "Strumenti di volo", action: "CONTROLLATI IN VIRATA" },
-                    { label: "Freni di parcheggio", action: "APPLICATI" },
-                    { label: "Temperature e Pressioni", action: "NEI LIMITI" },
-                    { label: "Miscela", action: "RICCA" },
-                    { label: "Manetta", action: "2000 RPM" },
-                    { label: "Magneti (L/R)", action: "VERIFICARE CALO (MAX 175)" },
-                    { label: "Aria Calda Carburatore", action: "PROVA HOT / COLD" },
-                    { label: "Vacuum", action: "4,9 - 5,1 IN.HG" },
-                    { label: "Alternatore", action: "VERIFICARE CARICO" },
-                    { label: "Minimo motore", action: "CONTROLLATO (600-700 RPM)" },
-                    { label: "Manetta", action: "1000 RPM" }
-                ]
-            },
-            {
-                id: 5,
-                title: "5. PRIMA DEL DECOLLO",
-                items: [
-                    { label: "Trim", action: "IMPOSTATO PER DECOLLO" },
-                    { label: "Flap", action: "SECONDO NECESSITÀ" },
-                    { label: "Miscela", action: "RICCA" },
-                    { label: "Pompa elettrica carburante", action: "ON" },
-                    { label: "Aria Calda Carburatore", action: "OFF / COLD" },
-                    { label: "Strumenti motore", action: "NEI LIMITI" },
-                    { label: "Cinture di sicurezza", action: "ALLACCIATE" },
-                    { label: "Porte e Finestrini", action: "CHIUSI E BLOCCATI" },
-                    { label: "Comandi di volo", action: "LIBERI E CORRETTI" },
-                    { label: "Briefing di decollo", action: "EFFETTUATO" },
-                    { label: "Pista e finale", action: "LIBERI" }
-                ]
-            },
-            {
-                id: 6,
-                title: "6. DOPO IL DECOLLO / SALITA",
-                items: [
-                    { label: "Flap", action: "RIENTRATI" },
-                    { label: "Pompa elettrica carburante", action: "OFF (PRESSIONE OK)" },
-                    { label: "Potenza di salita", action: "IMPOSTATA" },
-                    { label: "Strumenti motore", action: "NEGLI ARCHI VERDI" }
-                ]
-            },
-            {
-                id: 7,
-                title: "7. CROCIERA",
-                items: [
-                    { label: "Manetta", action: "COME RICHIESTO" },
-                    { label: "Miscela", action: "COME RICHIESTO" },
-                    { label: "Vacuum", action: "4,9 – 5,1" },
-                    { label: "Girodirezionale e bussola", action: "ALLINEARE" },
-                    { label: "Strumenti motore", action: "NEGLI ARCHI" },
-                    { label: "Cambio serbatoio - Pompa elettrica", action: "ON" },
-                    { label: "Cambio serbatoio - Selettore", action: "CAMBIARE" },
-                    { label: "Cambio serbatoio - Pressione", action: "VERIFICARE" },
-                    { label: "Cambio serbatoio - Pompa elettrica", action: "OFF" },
-                    { label: "Cambio serbatoio - Pressione", action: "VERIFICARE" }
-                ]
-            },
-            {
-                id: 8,
-                title: "8. DISCESA E AVVICINAMENTO",
-                items: [
-                    { label: "Briefing di approccio", action: "EFFETTUATO" },
-                    { label: "Altimetro", action: "IMPOSTATO QNH" },
-                    { label: "Cinture di sicurezza", action: "ALLACCIATE" },
-                    { label: "Selettore serbatoio", action: "SERBATOIO PIÙ PIENO" },
-                    { label: "Miscela", action: "RICCA / REGOLATA" },
-                    { label: "Aria Calda Carburatore", action: "SECONDO NECESSITÀ / ON" },
-                    { label: "Pompa elettrica carburante", action: "ON" }
-                ]
-            },
-            {
-                id: 9,
-                title: "9. DOPO L'ATTERRAGGIO E ARRESTO MOTORE",
-                items: [
-                    { label: "Flap", action: "RIENTRATI" },
-                    { label: "Pompa elettrica", action: "OFF" },
-                    { label: "Aria Calda Carburatore", action: "OFF" },
-                    { label: "Transponder", action: "STANDBY / 7000" },
-                    { label: "Radio e Avionica", action: "OFF" },
-                    { label: "Potenza", action: "1000 RPM" },
-                    { label: "Miscela", action: "SMAGRITA COMPLETAMENTE" },
-                    { label: "Chiave magneti", action: "OFF" },
-                    { label: "Master Switch", action: "OFF" }
-                ]
-            }
-        ];
-
-        let currentChecklistIndex = 0;
-        let currentItemIndex = 0;
-        let checkedStates = checklists.map(cl => new Array(cl.items.length).fill(false));
-
-        const THIRTY_MINUTES = 30 * 60;
-        let timerSecondsRemaining = THIRTY_MINUTES;
-        let timerInterval = null;
-        let isTimerRunning = false;
-
-        const sidebarEl = document.getElementById("sidebar");
-        const checklistTitleEl = document.getElementById("checklistTitle");
-        const stepCounterEl = document.getElementById("stepCounter");
-        const progressBarEl = document.getElementById("progressBar");
-        const checklistItemsEl = document.getElementById("checklistItems");
-        const cruiseBannerEl = document.getElementById("cruiseBanner");
-
-        const timerDisplayEl = document.getElementById("timerDisplay");
-        const timerWidgetEl = document.getElementById("timerWidget");
-        const btnTimerStartEl = document.getElementById("btnTimerStart");
-        const btnTimerResetEl = document.getElementById("btnTimerReset");
-
-        window.addEventListener("DOMContentLoaded", () => {
-            renderSidebar();
-            loadChecklist(0, 0);
-            initSpeechRecognition();
-            initTimerEvents();
-        });
-
-        function renderSidebar() {
-            sidebarEl.innerHTML = "";
-            checklists.forEach((cl, index) => {
-                const total = cl.items.length;
-                const completedCount = checkedStates[index].filter(Boolean).length;
-                const isCompleted = completedCount === total;
-                const isActive = index === currentChecklistIndex;
-
-                const navEl = document.createElement("div");
-                navEl.className = `nav-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`;
-                navEl.onclick = () => selectChecklist(index);
-
-                navEl.innerHTML = `
-                    <div class="nav-item-title">${cl.title}</div>
-                    <div class="nav-item-status">${completedCount}/${total}</div>
-                `;
-                sidebarEl.appendChild(navEl);
-            });
+    function nextItem() {
+        const currentPhase = checklistData[currentPhaseIndex];
+        if (currentItemIndex < currentPhase.items.length - 1) {
+            currentItemIndex++;
+        } else if (currentPhaseIndex < checklistData.length - 1) {
+            currentPhaseIndex++;
+            currentItemIndex = 0;
+        } else {
+            alert("Checklist Completata!");
+            return;
         }
+        updateUI();
+    }
 
-        function loadChecklist(clIndex, itemIndex = 0) {
-            currentChecklistIndex = clIndex;
-            currentItemIndex = itemIndex;
-
-            const activeCl = checklists[clIndex];
-            checklistTitleEl.innerText = activeCl.title;
-
-            if (activeCl.id === 7) {
-                cruiseBannerEl.style.display = "flex";
-                if (!isTimerRunning) {
-                    startCruiseTimer();
-                }
-            } else {
-                cruiseBannerEl.style.display = "none";
-                if (activeCl.id >= 8 && isTimerRunning) {
-                    stopCruiseTimer();
-                    speakTTS("Timer memo crociera disattivato per fase di discesa.");
-                }
-            }
-
-            renderSidebar();
-            renderItems();
-            updateProgress();
-            readCurrentItem();
+    function prevItem() {
+        if (currentItemIndex > 0) {
+            currentItemIndex--;
+        } else if (currentPhaseIndex > 0) {
+            currentPhaseIndex--;
+            currentItemIndex = checklistData[currentPhaseIndex].items.length - 1;
         }
+        updateUI();
+    }
 
-        function renderItems() {
-            checklistItemsEl.innerHTML = "";
-            const activeCl = checklists[currentChecklistIndex];
+    function skipItem() {
+        nextItem();
+    }
 
-            activeCl.items.forEach((item, idx) => {
-                const isChecked = checkedStates[currentChecklistIndex][idx];
-                const isCurrent = idx === currentItemIndex;
+    // Inizializza l'interfaccia al caricamento
+    updateUI();
+</script>
 
-                const rowEl = document.createElement("div");
-                rowEl.className = `item-row ${isChecked ? 'checked' : ''} ${isCurrent ? 'current' : ''}`;
-                rowEl.onclick = () => {
-                    currentItemIndex = idx;
-                    toggleCheck(currentChecklistIndex, idx);
-                };
-
-                rowEl.innerHTML = `
-                    <div class="item-left">
-                        <div class="item-checkbox">
-                            ${isChecked ? '<i class="fa-solid fa-check"></i>' : ''}
-                        </div>
-                        <span class="item-label">${item.label}</span>
-                    </div>
-                    <span class="item-action">${item.action}</span>
-                `;
-
-                checklistItemsEl.appendChild(rowEl);
-            });
-        }
-
-        function updateProgress() {
-            const activeCl = checklists[currentChecklistIndex];
-            const total = activeCl.items.length;
-            const completed = checkedStates[currentChecklistIndex].filter(Boolean).length;
-            const percentage = Math.round((completed / total) * 100);
-
-            stepCounterEl.innerText = `${currentItemIndex + 1} / ${total}`;
-            progressBarEl.style.width = `${percentage}%`;
-        }
-
-        function toggleCheck(clIdx, itemIdx) {
-            checkedStates[clIdx][itemIdx] = !checkedStates[clIdx][itemIdx];
-            renderSidebar();
-            renderItems();
-            updateProgress();
-        }
-
-        function nextItem() {
-            const activeCl = checklists[currentChecklistIndex];
-            checkedStates[currentChecklistIndex][currentItemIndex] = true;
-
-            if (currentItemIndex < activeCl.items.length - 1) {
-                currentItemIndex++;
-                renderItems();
-                updateProgress();
-                readCurrentItem();
-            } else {
-                speakTTS(`Checklist ${activeCl.title} completata.`);
-                if (currentChecklistIndex < checklists.length - 1) {
-                    setTimeout(() => {
-                        loadChecklist(currentChecklistIndex + 1, 0);
-                    }, 1200);
-                }
-            }
-            renderSidebar();
-        }
-
-        function prevItem() {
-            if (currentItemIndex > 0) {
-                currentItemIndex--;
-                renderItems();
-                updateProgress();
-                readCurrentItem();
-            } else if (currentChecklistIndex > 0) {
-                loadChecklist(currentChecklistIndex - 1, checklists[currentChecklistIndex - 1].items.length - 1);
-            }
-        }
-
-        function selectChecklist(index) {
-            loadChecklist(index, 0);
-        }
-
-        function initTimerEvents() {
-            btnTimerStartEl.onclick = () => {
-                if (isTimerRunning) {
-                    pauseCruiseTimer();
-                } else {
-                    startCruiseTimer();
-                }
-            };
-
-            btnTimerResetEl.onclick = () => {
-                resetCruiseTimer();
-            };
-        }
-
-        function startCruiseTimer() {
-            if (isTimerRunning) return;
-            isTimerRunning = true;
-            btnTimerStartEl.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            timerWidgetEl.classList.add("active");
-
-            timerInterval = setInterval(() => {
-                if (timerSecondsRemaining > 0) {
-                    timerSecondsRemaining--;
-                    updateTimerUI();
-
-                    if (timerSecondsRemaining === 120) {
-                        timerWidgetEl.classList.add("warning");
-                    }
-                } else {
-                    triggerCruiseTimerAlert();
-                }
-            }, 1000);
-        }
-
-        function pauseCruiseTimer() {
-            isTimerRunning = false;
-            clearInterval(timerInterval);
-            btnTimerStartEl.innerHTML = '<i class="fa-solid fa-play"></i>';
-            timerWidgetEl.classList.remove("active");
-        }
-
-        function stopCruiseTimer() {
-            pauseCruiseTimer();
-            timerSecondsRemaining = THIRTY_MINUTES;
-            timerWidgetEl.className = "timer-widget";
-            updateTimerUI();
-        }
-
-        function resetCruiseTimer() {
-            stopCruiseTimer();
-            startCruiseTimer();
-        }
-
-        function updateTimerUI() {
-            const mins = Math.floor(timerSecondsRemaining / 60);
-            const secs = timerSecondsRemaining % 60;
-            timerDisplayEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-
-        function triggerCruiseTimerAlert() {
-            pauseCruiseTimer();
-            timerWidgetEl.className = "timer-widget alarm";
-            playChimeSound();
-
-            speakTTS("Attenzione memo crociera: sono trascorsi 30 minuti. Effettuare controllo parametri e cambio serbatoio.", () => {
-                resetCruiseTimer();
-            });
-        }
-
-        function playChimeSound() {
-            try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (!AudioCtx) return;
-                const ctx = new AudioCtx();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(880, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.6);
-
-                gain.gain.setValueAtTime(0.3, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
-
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-
-                osc.start();
-                osc.stop(ctx.currentTime + 0.6);
-            } catch(e) {}
-        }
-
-        function readCurrentItem() {
-            const item = checklists[currentChecklistIndex].items[currentItemIndex];
-            if (!item) return;
-            const textToSpeak = `${item.label}, ${item.action}`;
-            speakTTS(textToSpeak);
-        }
-
-        function speakTTS(text, onEndCallback = null) {
-            if (!('speechSynthesis' in window)) return;
-
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = "it-IT";
-            utterance.rate = 1.2;
-
-            if (onEndCallback) {
-                utterance.onend = onEndCallback;
-            }
-
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function initSpeechRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const voiceIndicator = document.getElementById("voiceIndicator");
-            const voiceStatusText = document.getElementById("voiceStatusText");
-
-            if (!SpeechRecognition) {
-                voiceStatusText.innerText = "Riconoscimento vocale non supportato dal browser";
-                return;
-            }
-
-            const recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = false;
-            recognition.lang = "it-IT";
-
-            recognition.onstart = () => {
-                voiceIndicator.classList.add("listening");
-                voiceStatusText.innerText = "Ascolto vocale attivo (\"Avanti\", \"Fatto\", \"Indietro\", \"Crociera\")";
-            };
-
-            recognition.onerror = () => {
-                voiceIndicator.classList.remove("listening");
-            };
-
-            recognition.onend = () => {
-                try {
-                    recognition.start();
-                } catch(e) {}
-            };
-
-            recognition.onresult = (event) => {
-                const last = event.results.length - 1;
-                const command = event.results[last][0].transcript.trim().toLowerCase();
-
-                if (command.includes("avanti") || command.includes("fatto") || command.includes("ok") || command.includes("conferma")) {
-                    nextItem();
-                } else if (command.includes("indietro") || command.includes("precedente")) {
-                    prevItem();
-                } else if (command.includes("ripeti") || command.includes("rilegge") || command.includes("rileggi")) {
-                    readCurrentItem();
-                } else if (command.includes("crociera")) {
-                    selectChecklist(6);
-                } else if (command.includes("reset timer") || command.includes("azzera timer")) {
-                    resetCruiseTimer();
-                    speakTTS("Timer crociera azzerato.");
-                }
-            };
-
-            try {
-                recognition.start();
-            } catch(e) {}
-        }
-    </script>
 </body>
 </html>
