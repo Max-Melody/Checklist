@@ -131,18 +131,6 @@
     let isAskingReview = false;
     let reviewQueue = [];
     let reviewIndex = -1;
-    let availableVoices = [];
-
-    // Pre-carica le voci di sistema del browser
-    function loadVoices() {
-      if ('speechSynthesis' in window) {
-        availableVoices = window.speechSynthesis.getVoices();
-      }
-    }
-    loadVoices();
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = loadVoices;
-    }
 
     // Popola la tabella
     const tbody = document.getElementById('tableBody');
@@ -263,7 +251,55 @@
       };
     }
 
+    function speak(text, callback) {
+      if (!('speechSynthesis' in window)) {
+        if (callback) callback();
+        return;
+      }
+
+      isSpeaking = true;
+      
+      if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+      }
+
+      document.getElementById('micStatus').innerText = "🔊 Lettura in corso...";
+      document.getElementById('micStatus').className = "mic-status";
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'it-IT';
+      utterance.rate = 1.0;
+
+      let hasFinished = false;
+      const onSpeechEnd = () => {
+        if (hasFinished) return;
+        hasFinished = true;
+        isSpeaking = false;
+        lastActionTime = Date.now();
+        if (callback) {
+          callback();
+        } else if (isListening) {
+          startListening();
+        }
+      };
+
+      utterance.onend = onSpeechEnd;
+      utterance.onerror = (e) => {
+        onSpeechEnd();
+      };
+
+      // Avvio immediato della sintesi
+      window.speechSynthesis.speak(utterance);
+    }
+
     function startChecklist() {
+      // Sblocca la sintesi vocale istantaneamente al click dell'utente
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        let unlockUtterance = new SpeechSynthesisUtterance("");
+        window.speechSynthesis.speak(unlockUtterance);
+      }
+
       currentIndex = 0;
       isListening = true;
       isAskingReview = false;
@@ -292,57 +328,6 @@
           document.getElementById('micStatus').className = "mic-status mic-active";
         } catch(e) {}
       }
-    }
-
-    function speak(text, callback) {
-      if (!('speechSynthesis' in window)) {
-        if (callback) callback();
-        return;
-      }
-
-      window.speechSynthesis.cancel();
-      isSpeaking = true;
-      
-      if (recognition) {
-        try { recognition.stop(); } catch(e) {}
-      }
-
-      document.getElementById('micStatus').innerText = "🔊 Lettura in corso...";
-      document.getElementById('micStatus').className = "mic-status";
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'it-IT';
-      utterance.rate = 1.1;
-
-      // Assegna la voce italiana se presente tra quelle precaricate
-      if (availableVoices.length === 0) {
-        availableVoices = window.speechSynthesis.getVoices();
-      }
-      const itVoice = availableVoices.find(v => v.lang && v.lang.includes('it'));
-      if (itVoice) {
-        utterance.voice = itVoice;
-      }
-
-      let hasFinished = false;
-      const onSpeechEnd = () => {
-        if (hasFinished) return;
-        hasFinished = true;
-        isSpeaking = false;
-        lastActionTime = Date.now();
-        if (callback) {
-          callback();
-        } else if (isListening) {
-          startListening();
-        }
-      };
-
-      utterance.onend = onSpeechEnd;
-      utterance.onerror = (e) => {
-        // In caso di errore della sintesi vocale, sblocca comunque il flusso
-        onSpeechEnd();
-      };
-
-      window.speechSynthesis.speak(utterance);
     }
 
     function selectItem(index) {
