@@ -159,7 +159,7 @@
   </div>
 
   <script>
-    // DEFINIZIONE STRUTTURA COMPLETA DELLE 10 CHECKLIST
+    // DEFINIZIONE STRUTTURA DELLE 9 CHECKLIST ACCORPATE
     const checklistsData = [
       { 
         id: 0, 
@@ -282,19 +282,13 @@
       },
       { 
         id: 5, 
-        title: "6. ALLINEAMENTO", 
+        title: "6. ALLINEAMENTO, TAKEOFF E SALITA", 
         data: [
-          { item: "Manetta", status: "1.500 RPM", speak: "Manetta: 1500 RPM" },
+          { item: "Manetta", status: "1.500 RPM", speak: "Manetta: 1500 RPM", section: "ALLINEAMENTO" },
           { item: "Faro atterraggio", status: "ON", speak: "Faro atterraggio: ON" },
           { item: "Transponder", status: "ON / ALT", speak: "Transponder: ON o ALT" },
           { item: "Bussola / Gyro", status: "QFU", speak: "Bussola e Gyro: QFU" },
-          { item: "Full throttle RPM Min", status: "2.275 RPM", speak: "Full throttle RPM minimo: 2275 RPM" }
-        ]
-      },
-      { 
-        id: 6, 
-        title: "7. TAKE OFF E SALITA", 
-        data: [
+          { item: "Full throttle RPM Min", status: "2.275 RPM", speak: "Full throttle RPM minimo: 2275 RPM" },
           { item: "Full throttle", status: "Min 2275", speak: "Full throttle: Minimo 2275 RPM", section: "TAKE OFF" },
           { item: "Engine instrument", status: "All green", speak: "Strumenti motore: Tutti in verde" },
           { item: "Runway clean", status: "Clean", speak: "Pista libera: Confermata" },
@@ -310,8 +304,8 @@
         ]
       },
       { 
-        id: 7, 
-        title: "8. CROCIERA", 
+        id: 6, 
+        title: "7. CROCIERA", 
         data: [
           { item: "Manetta", status: "COME RICHIESTO", speak: "Manetta: Come richiesto" },
           { item: "Miscela", status: "COME RICHIESTO", speak: "Miscela: Come richiesto" },
@@ -326,8 +320,8 @@
         ]
       },
       { 
-        id: 8, 
-        title: "9. DISCESA E AVVICINAMENTO", 
+        id: 7, 
+        title: "8. DISCESA E AVVICINAMENTO", 
         data: [
           { item: "Cinture e spallacci", status: "ALLACCIATE", speak: "Cinture e spallacci: Allacciate" },
           { item: "Informazioni meteo", status: "RICEVUTE", speak: "Informazioni meteo: Ricevute" },
@@ -339,8 +333,8 @@
         ]
       },
       { 
-        id: 9, 
-        title: "10. SOTTOVENTO E FINALE", 
+        id: 8, 
+        title: "9. SOTTOVENTO E FINALE", 
         data: [
           { item: "Aria carburatore", status: "ON", speak: "Aria carburatore: ON" },
           { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" },
