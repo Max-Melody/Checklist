@@ -1,466 +1,780 @@
  <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Piper PA-28 Digital Checklist System</title>
-    <style>
-        :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --card-header: #252525;
-            --text-main: #ffffff;
-            --text-sub: #b0b0b0;
-            --accent-green: #00e676;
-            --accent-orange: #ff9800;
-            --accent-blue: #29b6f6;
-            --border-color: #333333;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checklist Piper PA-28</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 15px;
+      padding: 0;
+      background-color: #f4f4f9;
+      text-align: center;
+    }
+    h1 { color: #333; margin-bottom: 10px; font-size: 22px; }
+    
+    /* MENU PRINCIPALE GRID */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      max-width: 450px;
+      margin: 15px auto;
+    }
+    .btn-menu {
+      padding: 16px;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      background-color: #007bff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-menu:active { background-color: #0056b3; }
+    .badge-status { font-size: 14px; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 5px; }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-            -webkit-user-select: none;
-        }
+    /* CARD E CONTROLLI CHECKLIST */
+    .card {
+      position: sticky;
+      top: 10px;
+      z-index: 100;
+      background: white;
+      border: 2px solid #007bff;
+      border-radius: 10px;
+      padding: 15px;
+      margin: 10px auto;
+      max-width: 400px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    .item-title { font-size: 20px; font-weight: bold; color: #333; }
+    .item-status { font-size: 24px; font-weight: bold; color: #d9534f; margin-top: 8px; }
+    
+    .mic-status {
+      font-size: 14px;
+      font-weight: bold;
+      margin-top: 8px;
+      color: #666;
+    }
+    .mic-active { color: #28a745; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
+    .btn {
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: bold;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 4px;
+    }
+    .btn-start { background-color: #28a745; width: 85%; margin-top: 10px; }
+    .btn-repeat { background-color: #ffc107; color: #333; }
+    .btn-reset { background-color: #6c757d; }
+    .btn-home { background-color: #17a2b8; }
+    .btn-next { background-color: #28a745; font-size: 16px; padding: 14px 20px; margin-top: 10px; }
 
-        header {
-            background-color: var(--card-header);
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background: white;
+    }
+    th, td { border: 1px solid #ccc; padding: 12px 8px; text-align: left; }
+    
+    .section-header-row td {
+      background-color: #e9ecef;
+      font-weight: bold;
+      text-align: center;
+      color: #333;
+    }
 
-        .title-container h1 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--accent-green);
-        }
+    .active-row { 
+      background-color: #d4edda !important; 
+      font-weight: bold; 
+      border-left: 5px solid #28a745;
+      color: #000 !important;
+    }
+    .skipped-row { 
+      background-color: #dc3545 !important; 
+      color: white !important; 
+      font-weight: bold; 
+      border-left: 5px solid #a71d2a;
+    }
 
-        .phase-select {
-            background-color: var(--card-bg);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            outline: none;
-            max-width: 60%;
-        }
-
-        .progress-bar-container {
-            width: 100%;
-            background-color: #222;
-            height: 6px;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background-color: var(--accent-green);
-            width: 0%;
-            transition: width 0.2s ease;
-        }
-
-        main {
-            flex: 1;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            overflow-y: auto;
-        }
-
-        .display-card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            margin-bottom: 16px;
-        }
-
-        .item-info {
-            font-size: 0.85rem;
-            color: var(--text-sub);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-
-        .item-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 14px;
-            line-height: 1.3;
-        }
-
-        .item-target-action {
-            font-size: 1.7rem;
-            font-weight: 800;
-            color: var(--accent-green);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .skipped-tag {
-            display: inline-block;
-            background-color: var(--accent-orange);
-            color: #000;
-            font-size: 0.75rem;
-            font-weight: bold;
-            padding: 3px 8px;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-
-        .grid-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .btn-action {
-            background-color: var(--card-bg);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 16px;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.1s, transform 0.1s;
-        }
-
-        .btn-action:active {
-            transform: scale(0.98);
-        }
-
-        .btn-main-confirm {
-            grid-column: span 2;
-            background-color: var(--accent-green);
-            color: #000;
-            border: none;
-            font-size: 1.25rem;
-            padding: 20px;
-        }
-
-        .btn-skip-item {
-            background-color: #2a2010;
-            color: var(--accent-orange);
-            border-color: #4a3010;
-        }
-
-        .btn-voice-toggle {
-            background-color: #102030;
-            color: var(--accent-blue);
-            border-color: #103050;
-        }
-
-        footer {
-            padding: 10px 16px;
-            background-color: var(--card-header);
-            border-top: 1px solid var(--border-color);
-            font-size: 0.85rem;
-            color: var(--text-sub);
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-    </style>
+    .end-controls {
+      display: none;
+      margin-top: 15px;
+      padding: 10px;
+      background: #e9ecef;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <div class="title-container">
-            <h1>PIPER PA-28</h1>
-        </div>
-        <select id="phaseDropdown" class="phase-select" onchange="selectPhase(this.value)">
-            <!-- Le 9 fasi inserite da JavaScript -->
-        </select>
-    </header>
+  <!-- VISTA 1: MENU PRINCIPALE -->
+  <div id="menuView">
+    <h1>PIPER PA-28 CHECKLIST</h1>
+    <div class="menu-grid" id="menuButtons"></div>
+  </div>
 
-    <div class="progress-bar-container">
-        <div id="phaseProgress" class="progress-bar-fill"></div>
+  <!-- VISTA 2: ESECUZIONE CHECKLIST -->
+  <div id="checklistView" style="display: none;">
+    <h1 id="checklistTitle">CHECKLIST</h1>
+
+    <div class="card">
+      <div id="itemText" class="item-title">Premi AVVIA per iniziare</div>
+      <div id="statusText" class="item-status">---</div>
+      <div id="micStatus" class="mic-status">Microfono spento</div>
+      <button id="startBtn" class="btn btn-start" onclick="startChecklist()">🎙️ AVVIA CHECKLIST</button>
+      
+      <div id="endControls" class="end-controls">
+        <button id="nextChecklistBtn" class="btn btn-next" onclick="goToNextChecklist()">➡️ PROSSIMA CHECKLIST</button> <br>
+        <button class="btn btn-home" onclick="showMenu()">📋 MENU PRINCIPALE</button>
+      </div>
     </div>
 
-    <main>
-        <div>
-            <div id="skippedNotice" class="skipped-tag hidden">ELEMENTO SALTATO IN PRECEDENZA</div>
-            <div class="display-card">
-                <div id="itemIndexDisplay" class="item-info">Elemento 1</div>
-                <div id="itemLabelDisplay" class="item-title">Inizializzazione...</div>
-                <div id="itemActionDisplay" class="item-target-action">---</div>
-            </div>
-        </div>
+    <div>
+      <button class="btn btn-repeat" onclick="speakCurrent()">🔊 Ripeti</button>
+      <button class="btn btn-reset" onclick="resetChecklist()">🔄 Ricomincia</button>
+      <button class="btn btn-home" onclick="showMenu()">📋 Menu</button>
+    </div>
 
-        <div class="grid-buttons">
-            <button class="btn-action" onclick="previousStep()">
-                <span>⬅️ Indietro</span>
-            </button>
-            <button class="btn-action btn-skip-item" onclick="skipStep()">
-                <span>⏭️ Salta</span>
-            </button>
-            <button class="btn-action btn-voice-toggle" onclick="toggleVoice()">
-                <span id="voiceStatusLabel">🔊 Lettura: ON</span>
-            </button>
-            <button class="btn-action" onclick="restartCurrentPhase()">
-                <span>🔄 Riavvia Fase</span>
-            </button>
-            <button class="btn-action btn-main-confirm" onclick="confirmStep()">
-                <span>CONFERMA / NEXT ➔</span>
-            </button>
-        </div>
-    </main>
+    <table id="checklistTable">
+      <thead>
+        <tr>
+          <th>Elemento</th>
+          <th>Stato</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
 
-    <footer>
-        <span id="footerPhaseName">Fase 1 di 9</span>
-        <span id="footerSkippedTotal">Saltati: 0</span>
-    </footer>
+  <script>
+    // DEFINIZIONE STRUTTURA COMPLETA DELLE 10 CHECKLIST
+    const checklistsData = [
+      { 
+        id: 0, 
+        title: "1. CONTROLLI CABINA", 
+        data: [
+          { item: "Documenti pilota", status: "A BORDO", speak: "Documenti pilota: A bordo" },
+          { item: "Documenti aeromobile", status: "A BORDO", speak: "Documenti aeromobile: A bordo" },
+          { item: "Estintore / cassetta pronto soccorso", status: "A BORDO", speak: "Estintore e cassetta pronto soccorso: A bordo" },
+          { item: "ELT", status: "Verificare OFF", speak: "ELT: Verificare OFF" },
+          { item: "Giubbotti salvagente / Canotto / raft", status: "COME RICHIESTO", speak: "Giubbotti salvagente e canotto: Come richiesto" },
+          { item: "Equipagg. per sosta Tacchi Olio", status: "COME RICHIESTO", speak: "Equipaggiamento per sosta, tacchi e olio: Come richiesto" },
+          { item: "Comandi volo", status: "LIBERI E CORRETTI", speak: "Comandi di volo: Liberi e corretti" },
+          { item: "Miscela", status: "CHIUSA", speak: "Miscela: Chiusa" },
+          { item: "Magneti", status: "OFF", speak: "Magneti: OFF" },
+          { item: "Interruttori elettrici", status: "OFF", speak: "Interruttori elettrici: OFF" },
+          { item: "Radio e avionica", status: "OFF", speak: "Radio e avionica: OFF" },
+          { item: "Circuit breakers", status: "INSERITI", speak: "Circuit breakers: Inseriti" },
+          { item: "Batteria", status: "ON", speak: "Batteria: ON" },
+          { item: "Carburante televel", status: "VERIFICARE", speak: "Carburante televel: Verificare" },
+          { item: "Pannello annunciatore", status: "Spie ON", speak: "Pannello annunciatore: Spie ON" },
+          { item: "Batteria", status: "OFF", speak: "Batteria: OFF" },
+          { item: "Trim", status: "Zero", speak: "Trim: Zero" },
+          { item: "Parabrezza e finestrini", status: "PULITI", speak: "Parabrezza e finestrini: Puliti" }
+        ]
+      },
+      { 
+        id: 1, 
+        title: "2. AVVIAMENTO", 
+        data: [
+          { item: "Telefoni / disp elettronici", status: "OFF / MOD VOLO", speak: "Telefoni e dispositivi elettronici: OFF o Modalità Volo" },
+          { item: "Briefing passeggeri", status: "COME RICHIESTO", speak: "Briefing passeggeri: Come richiesto" },
+          { item: "Porta", status: "CHIUSA NO BLOCCATA", speak: "Porta: Chiusa non bloccata" },
+          { item: "Freno parcheggio", status: "INSERITO", speak: "Freno parcheggio: Inserito" },
+          { item: "Sedile", status: "REGOLATO E BLOCCATO", speak: "Sedile: Regolato e bloccato" },
+          { item: "Interruttori elettrici", status: "OFF", speak: "Interruttori elettrici: OFF" },
+          { item: "Ventilazione cabina", status: "OFF", speak: "Ventilazione cabina: OFF" },
+          { item: "Circuit breakers", status: "INSERITI", speak: "Circuit breakers: Inseriti" },
+          { item: "Master batteria / alternatore", status: "ON", speak: "Master batteria e alternatore: ON" },
+          { item: "Rotating beacon", status: "ON", speak: "Rotating beacon: ON" },
+          { item: "Aria carburatore", status: "OFF", speak: "Aria carburatore: OFF" },
+          { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" },
+          { item: "Serbatoio", status: "MENO PIENO", speak: "Serbatoio: Meno pieno" },
+          { item: "Trim elettrico", status: "OFF", speak: "Trim elettrico: OFF" },
+          { item: "Autopilot", status: "OFF", speak: "Autopilot: OFF" },
+          { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: ON" },
+          { item: "Manetta", status: "1 cm", speak: "Manetta: Un centimetro", section: "AVVIAMENTO A FREDDO" },
+          { item: "Primer", status: "3 / 4 volte poi BLOCCARE", speak: "Primer: Tre o quattro volte, poi bloccare" },
+          { item: "Via dall'elica", status: "ANNUNCIARE", speak: "Via dall'elica: Annunciare" },
+          { item: "Starter", status: "ON", speak: "Starter: ON" },
+          { item: "Manetta", status: "1.200 RPM", speak: "Manetta: 1200 RPM" },
+          { item: "Pressione OLIO", status: "ARCO VERDE ENTRO 30 \"", speak: "Pressione olio: Arco verde entro 30 secondi" },
+          { item: "Pompa elettrica carburante", status: "OFF", speak: "Pompa elettrica carburante: OFF" }
+        ]
+      },
+      { 
+        id: 2, 
+        title: "3. POST AVVIAMENTO", 
+        data: [
+          { item: "Amperometro", status: "VERIF. CON FARO", speak: "Amperometro: Verificare con faro" },
+          { item: "Avionica", status: "ON", speak: "Avionica: ON" },
+          { item: "Ventilazione cabina", status: "COME RICHIESTO", speak: "Ventilazione cabina: Come richiesto" },
+          { item: "Radio e avionica", status: "ON", speak: "Radio e avionica: ON" },
+          { item: "Radio", status: "VOLUME / SQUELCH", speak: "Radio: Volume e squelch" },
+          { item: "Intercom", status: "VOLUME / SQUELCH", speak: "Intercom: Volume e squelch" },
+          { item: "Transponder", status: "CODICE / STAND BY", speak: "Transponder: Codice, Stand by" },
+          { item: "VOR / GPS", status: "IMPOSTATI", speak: "VOR e GPS: Impostati" },
+          { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da 4,9 a 5,1" },
+          { item: "Anemometro", status: "0 KTS / 0 MPH", speak: "Anemometro: Zero nodi o zero miglia orarie" },
+          { item: "Orizzonte artificiale", status: "0° BANK / SAGOMINA", speak: "Orizzonte artificiale: Zero gradi di inclinazione, sagomina" },
+          { item: "Altimetro", status: "QNH +/- 75 ft", speak: "Altimetro: QNH più o meno 75 piedi" },
+          { item: "Coordinatore di virata", status: "NO BANDIERINA", speak: "Coordinatore di virata: Nessuna bandierina" },
+          { item: "Girodirezionale", status: "ALLINEARE CON BUSSOLA", speak: "Girodirezionale: Allineare con bussola" },
+          { item: "Variometro", status: "0 FT/MIN", speak: "Variometro: Zero piedi al minuto" },
+          { item: "Luci navigazione", status: "COME RICHIESTO", speak: "Luci di navigazione: Come richiesto" }
+        ]
+      },
+      { 
+        id: 3, 
+        title: "4. RULLAGGIO E RUN UP", 
+        data: [
+          { item: "Freni", status: "PROVARE", speak: "Freni: Provare", section: "RULLAGGIO" },
+          { item: "Bussola / Gyro: Piede DESTRO", status: "Valori AUMENTANO", speak: "Bussola e Gyro con piede destro: Valori aumentano" },
+          { item: "Bussola / Gyro: Piede SINISTRO", status: "Valori DIMINUISCONO", speak: "Bussola e Gyro con piede sinistro: Valori diminuiscono" },
+          { item: "Virometro: Piede DESTRO", status: "Virom. Destra / PALLINA a Sinistra", speak: "Virometro con piede destro: Virometro a destra, pallina a sinistra" },
+          { item: "Virometro: Piede SINISTRO", status: "Virom. Sinistra / PALLINA a Destra", speak: "Virometro con piede sinistro: Virometro a sinistra, pallina a destra" },
+          { item: "Freno parcheggio", status: "INSERITO", speak: "Freno parcheggio: Inserito", section: "PROVA MOTORE / MAGNETI" },
+          { item: "Serbatoio", status: "PIÙ PIENO", speak: "Serbatoio: Più pieno" },
+          { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
+          { item: "Manetta", status: "2.000 RPM", speak: "Manetta: 2000 RPM" },
+          { item: "Aria calda carburatore (drop 100 rpm)", status: "PROVARE", speak: "Aria calda carburatore drop 100 RPM: Provare" },
+          { item: "Miscela", status: "PROVARE", speak: "Miscela: Provare" },
+          { item: "Magneti: Magnete 1 test", status: "max drop 175 rpm / diff. 50 rpm", speak: "Magneti, test magnete 1: calo massimo 175 RPM, differenza massima 50 RPM" },
+          { item: "Magneti: Magnete 2 test", status: "max drop 175 rpm / diff. 50 rpm", speak: "Magneti, test magnete 2: calo massimo 175 RPM, differenza massima 50 RPM" },
+          { item: "Pressione olio", status: "ARCO VERDE", speak: "Pressione olio: Arco verde" },
+          { item: "Pressione carburante", status: "ARCO VERDE", speak: "Pressione carburante: Arco verde" },
+          { item: "Vacuum", status: "4,9 – 5,1 In Hg", speak: "Vacuum: Da 4,9 a 5,1 pollici di mercurio" },
+          { item: "Pannello annunciatore", status: "SPIE SPENTE", speak: "Pannello annunciatore: Spie spente" },
+          { item: "Manetta", status: "CONTROLLO MINIMO", speak: "Manetta: Controllo minimo" },
+          { item: "Manetta", status: "1.200 RPM", speak: "Manetta: 1200 RPM" }
+        ]
+      },
+      { 
+        id: 4, 
+        title: "5. PRE DECOLLO", 
+        data: [
+          { item: "Porta", status: "CHIUSA E BLOCCATA", speak: "Porta: Chiusa e bloccata" },
+          { item: "Cinture e spallacci", status: "ALLACCIATE", speak: "Cinture e spallacci: Allacciate" },
+          { item: "Comandi di volo", status: "LIBERI E CORRETTI", speak: "Comandi di volo: Liberi e corretti" },
+          { item: "Magneti", status: "ENTRAMBI", speak: "Magneti: Entrambi" },
+          { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" },
+          { item: "Aria carburatore", status: "FREDDA", speak: "Aria carburatore: Fredda" },
+          { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: ON" },
+          { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
+          { item: "Quantità carburante", status: "VERIFICARE", speak: "Quantità carburante: Verificare" },
+          { item: "Flaps", status: "SET", speak: "Flaps: Set" },
+          { item: "Trim", status: "POSIZIONE DECOLLO", speak: "Trim: Posizione decollo" },
+          { item: "Memo Decollo", status: "VR 60 / VX 76 / VY 85 Mph", speak: "Memo decollo: VR 60, VX 76, VY 85 miglia orarie", section: "PROMEMORIA VELOCITÀ" },
+          { item: "Max Efficienza", status: "80 Mph (SENZA FLAPS)", speak: "Massima efficienza: 80 miglia orarie senza flaps" }
+        ]
+      },
+      { 
+        id: 5, 
+        title: "6. ALLINEAMENTO", 
+        data: [
+          { item: "Manetta", status: "1.500 RPM", speak: "Manetta: 1500 RPM" },
+          { item: "Faro atterraggio", status: "ON", speak: "Faro atterraggio: ON" },
+          { item: "Transponder", status: "ON / ALT", speak: "Transponder: ON o ALT" },
+          { item: "Bussola / Gyro", status: "QFU", speak: "Bussola e Gyro: QFU" },
+          { item: "Full throttle RPM Min", status: "2.275 RPM", speak: "Full throttle RPM minimo: 2275 RPM" }
+        ]
+      },
+      { 
+        id: 6, 
+        title: "7. TAKE OFF E SALITA", 
+        data: [
+          { item: "Full throttle", status: "Min 2275", speak: "Full throttle: Minimo 2275 RPM", section: "TAKE OFF" },
+          { item: "Engine instrument", status: "All green", speak: "Strumenti motore: Tutti in verde" },
+          { item: "Runway clean", status: "Clean", speak: "Pista libera: Confermata" },
+          { item: "Airspeed", status: "Alive", speak: "Anemometro: Attivo" },
+          { item: "60 mph", status: "Rotation", speak: "60 miglia orarie: Rotazione" },
+          { item: "75 mph", status: "Climb VX", speak: "75 miglia orarie: Salita VX" },
+          { item: "80 mph", status: "Climb VY", speak: "80 miglia orarie: Salita VY" },
+          { item: "Flaps", status: "RETRATTI", speak: "Flaps: Retratti", section: "POST DECOLLO - SALITA" },
+          { item: "Faro atterraggio", status: "OFF", speak: "Faro atterraggio: OFF" },
+          { item: "Pompa elettrica carburante", status: "1.000 ft – OFF – verif. press", speak: "Pompa elettrica carburante: A 1000 piedi OFF, verificare pressione" },
+          { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
+          { item: "Altimetro", status: "QNH / QNE", speak: "Altimetro: QNH o QNE" }
+        ]
+      },
+      { 
+        id: 7, 
+        title: "8. CROCIERA", 
+        data: [
+          { item: "Manetta", status: "COME RICHIESTO", speak: "Manetta: Come richiesto" },
+          { item: "Miscela", status: "COME RICHIESTO", speak: "Miscela: Come richiesto" },
+          { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da 4,9 a 5,1" },
+          { item: "Gyro e bussola", status: "ALLINEARE", speak: "Gyro e bussola: Allineare" },
+          { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
+          { item: "Pompa elettrica", status: "ON", speak: "Pompa elettrica: ON", section: "CAMBIO SERBATOIO" },
+          { item: "Serbatoio", status: "CAMBIARE", speak: "Serbatoio: Cambiare" },
+          { item: "Pressione carburante", status: "VERIFICARE PRESSIONE", speak: "Pressione carburante: Verificare pressione" },
+          { item: "Pompa elettrica", status: "OFF", speak: "Pompa elettrica: OFF" },
+          { item: "Pressione carburante", status: "VERIFICARE PRESSIONE", speak: "Pressione carburante: Verificare pressione" }
+        ]
+      },
+      { 
+        id: 8, 
+        title: "9. DISCESA E AVVICINAMENTO", 
+        data: [
+          { item: "Cinture e spallacci", status: "ALLACCIATE", speak: "Cinture e spallacci: Allacciate" },
+          { item: "Informazioni meteo", status: "RICEVUTE", speak: "Informazioni meteo: Ricevute" },
+          { item: "Altimetro", status: "QNH / QFE", speak: "Altimetro: QNH o QFE" },
+          { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
+          { item: "Briefing atterraggio", status: "PISTA / CIRCUITO / QUOTA", speak: "Briefing atterraggio: Pista in uso, circuito e quota circuito" },
+          { item: "Memo Riattaccata", status: "ASSETTO + POTENZA + ARIA CARBURATORE OFF", speak: "Memo riattaccata: Assetto, tutta potenza, aria carburatore OFF", section: "MEMO RIATTACCATA" },
+          { item: "Velocità e Flaps", status: "VX 76 Mph – FLAPS GRADUALI", speak: "VX 76 miglia orarie, retrarre flaps gradualmente" }
+        ]
+      },
+      { 
+        id: 9, 
+        title: "10. SOTTOVENTO E FINALE", 
+        data: [
+          { item: "Aria carburatore", status: "ON", speak: "Aria carburatore: ON" },
+          { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" },
+          { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: ON" },
+          { item: "Faro atterraggio", status: "ON", speak: "Faro atterraggio: ON" },
+          { item: "Flaps", status: "10°", speak: "Flaps: 10 gradi" },
+          { item: "Serbatoio", status: "PIÙ PIENO", speak: "Serbatoio: Più pieno" },
+          { item: "Flaps", status: "25° / 40°", speak: "Flaps: 25 o 40 gradi" },
+          { item: "Memo atterraggio", status: "VREF 74 Mph (flaps 40°) / VREF 77 Mph (flaps 25°) + Xwind", speak: "Memo atterraggio: VREF 74 miglia orarie con flaps 40 gradi, oppure VREF 77 miglia orarie con flaps 25 gradi, più vento traverso" },
+          { item: "Aria carburatore", status: "OFF", speak: "Aria carburatore: OFF" }
+        ]
+      }
+    ];
 
-    <script>
-        // LE 9 FASI DELLA TUA CHECKLIST PIPER PA-28
-        const flightPhases = [
-            {
-                name: "1. Prima dell'Avviamento",
-                items: [
-                    { label: "Ispezione Pre-volo", action: "COMPLETATA" },
-                    { label: "Cinture di Sicurezza", action: "ALLACCIATE" },
-                    { label: "Freni di Stazionamento", action: "INSERITI" },
-                    { label: "Avionica & Carichi Elettrici", action: "OFF" },
-                    { label: "Selettore Carburante", action: "SERBATOIO PIÙ PIENO" }
-                ]
-            },
-            {
-                name: "2. Avviamento Motore",
-                items: [
-                    { label: "Miscela", action: "RICCA" },
-                    { label: "Aria Calda Carburatore", action: "FREDDA" },
-                    { label: "Pompa Elettrica Carburante", action: "ON" },
-                    { label: "Primer", action: "SE NECESSARIO (3 COLPI)" },
-                    { label: "Manetta", action: "APERTURA 1/4 POLLICE" },
-                    { label: "Area Elica", action: "LIBERA" },
-                    { label: "Chiave Avviamento", action: "START" },
-                    { label: "Pressione Olio", action: "VERIFICATA IN AUMENTO" },
-                    { label: "Pompa Elettrica", action: "OFF" },
-                    { label: "Master Switch & Alternatore", action: "ON" },
-                    { label: "Avionica", action: "ON" }
-                ]
-            },
-            {
-                name: "3. Rullaggio (Taxi)",
-                items: [
-                    { label: "Luce di Rullaggio", action: "ON" },
-                    { label: "Freni", action: "TESTATI" },
-                    { label: "Strumenti di Volo", action: "VERIFICATI IN VIRATA" }
-                ]
-            },
-            {
-                name: "4. Prova Motori (Run-Up)",
-                items: [
-                    { label: "Freni di Stazionamento", action: "INSERITI" },
-                    { label: "Temperature & Pressioni Olio", action: "ARCO VERDE" },
-                    { label: "Manetta", action: "2000 RPM" },
-                    { label: "Magneti (L e R)", action: "VERIFICATI (MAX CADUTA 175 RPM)" },
-                    { label: "Aria Calda Carburatore", action: "TEST" },
-                    { label: "Alternatore & Vuoto", action: "VERIFICATI" },
-                    { label: "Manetta", action: "MINIMO, POI 1000 RPM" },
-                    { label: "Frizioni & Comandi di Volo", action: "LIBERI E CORRETTI" }
-                ]
-            },
-            {
-                name: "5. Prima del Decollo",
-                items: [
-                    { label: "Flap", action: "IMPOSTATI PER DECOLLO" },
-                    { label: "Trim", action: "NEUTRO / DECOLLO" },
-                    { label: "Miscela", action: "RICCA" },
-                    { label: "Pompa Elettrica Carburante", action: "ON" },
-                    { label: "Luci Strobe / Decollo", action: "ON" },
-                    { label: "Transponder", action: "ALT / SQUAWK SETTATO" },
-                    { label: "Briefing Decollo", action: "COMPLETATO" },
-                    { label: "Pista e Finale", action: "LIBERI" }
-                ]
-            },
-            {
-                name: "6. Decollo e Salita",
-                items: [
-                    { label: "Manetta", action: "PIENA POTENZA" },
-                    { label: "RPM & Parametri Motore", action: "VERIFICATI" },
-                    { label: "Rotazione", action: "55-60 KIAS" },
-                    { label: "Salita", action: "75-80 KIAS" },
-                    { label: "Flap", action: "RETRATTI (QUOTA SICURA)" },
-                    { label: "Pompa Elettrica Carburante", action: "OFF" }
-                ]
-            },
-            {
-                name: "7. Crociera",
-                items: [
-                    { label: "Potenza di Crociera", action: "IMPOSTATA" },
-                    { label: "Trim", action: "REGOLATO" },
-                    { label: "Miscela", action: "SMAGRITA (SE APPLICABILE)" },
-                    { label: "Parametri Motore", action: "VERIFICATI" }
-                ]
-            },
-            {
-                name: "8. Discesa e Atterraggio",
-                items: [
-                    { label: "ATIS / QNH", action: "SETTATO" },
-                    { label: "Selettore Carburante", action: "SERBATOIO PIÙ PIENO" },
-                    { label: "Pompa Elettrica Carburante", action: "ON" },
-                    { label: "Miscela", action: "RICCA" },
-                    { label: "Flap", action: "SECONDO NECESSITÀ" },
-                    { label: "Velocità Finale", action: "63 KIAS" }
-                ]
-            },
-            {
-                name: "9. Dopo l'Atterraggio e Spegnimento",
-                items: [
-                    { label: "Flap", action: "COMPLETAMENTE RETRATTI" },
-                    { label: "Pompa Elettrica Carburante", action: "OFF" },
-                    { label: "Avionica", action: "OFF" },
-                    { label: "Manetta", action: "MINIMO" },
-                    { label: "Miscela", action: "CUT-OFF" },
-                    { label: "Magneti & Master Switch", action: "OFF" }
-                ]
+    let currentChecklistIndex = 0;
+    let currentChecklist = [];
+    let currentIndex = -1;
+    let recognition;
+    let isListening = false;
+    let isSpeaking = false;
+    let lastActionTime = 0;
+    let skippedItems = new Set();
+    
+    let isAskingReview = false;
+    let reviewQueue = [];
+    let reviewIndex = -1;
+
+    let wakeLock = null;
+    let lastTapTime = 0;
+    let lastTapIndex = -1;
+
+    function renderMenu() {
+      const menuContainer = document.getElementById('menuButtons');
+      menuContainer.innerHTML = '';
+      checklistsData.forEach((c, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-menu';
+        btn.innerHTML = `<span>${c.title}</span> <span class="badge-status">${c.data.length > 0 ? 'PRONTA' : 'VUOTA'}</span>`;
+        btn.onclick = () => openChecklist(idx);
+        menuContainer.appendChild(btn);
+      });
+    }
+
+    function showMenu() {
+      resetChecklist();
+      document.getElementById('checklistView').style.display = 'none';
+      document.getElementById('menuView').style.display = 'block';
+      renderMenu();
+    }
+
+    function openChecklist(index) {
+      currentChecklistIndex = index;
+      currentChecklist = checklistsData[index].data;
+      document.getElementById('checklistTitle').innerText = checklistsData[index].title;
+      document.getElementById('menuView').style.display = 'none';
+      document.getElementById('checklistView').style.display = 'block';
+      
+      buildTable();
+      resetChecklist();
+    }
+
+    function buildTable() {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+
+      if (currentChecklist.length === 0) {
+        let row = tbody.insertRow();
+        let cell = row.insertCell(0);
+        cell.colSpan = 2;
+        cell.style.textAlign = "center";
+        cell.style.padding = "20px";
+        cell.innerText = "Checklist vuota.";
+        return;
+      }
+
+      currentChecklist.forEach((entry, idx) => {
+        if (entry.section) {
+          let headerRow = tbody.insertRow();
+          headerRow.className = "section-header-row";
+          let cell = headerRow.insertCell(0);
+          cell.colSpan = 2;
+          cell.innerText = entry.section;
+        }
+
+        let row = tbody.insertRow();
+        row.id = "row-" + idx;
+        row.insertCell(0).innerText = entry.item;
+        row.insertCell(1).innerText = entry.status;
+        row.onclick = () => handleRowTap(idx);
+      });
+    }
+
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator && wakeLock === null) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {}
+    }
+
+    function releaseWakeLock() {
+      if (wakeLock !== null) {
+        wakeLock.release().then(() => { wakeLock = null; });
+      }
+    }
+
+    document.addEventListener('visibilitychange', async () => {
+      if (document.visibilityState === 'visible' && isListening) {
+        await requestWakeLock();
+      }
+    });
+
+    function handleRowTap(index) {
+      const currentTime = new Date().getTime();
+      const tapLength = currentTime - lastTapTime;
+      if (tapLength < 500 && tapLength > 0 && lastTapIndex === index) {
+        selectItem(index);
+      }
+      lastTapTime = currentTime;
+      lastTapIndex = index;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = 'it-IT';
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      recognition.onresult = (event) => {
+        if (isSpeaking || (Date.now() - lastActionTime < 600)) return;
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const spokenText = event.results[i][0].transcript.trim().toLowerCase();
+
+          if (isAskingReview) {
+            if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("verifica") || spokenText.includes("verifichiamo") || spokenText.includes("ok")) {
+              lastActionTime = Date.now();
+              isAskingReview = false;
+              startReviewMode();
+              break;
+            } else if (spokenText.includes("no") || spokenText.includes("annulla") || spokenText.includes("fine") || spokenText.includes("salta")) {
+              lastActionTime = Date.now();
+              isAskingReview = false;
+              finishChecklistCompletely();
+              break;
             }
-        ];
+          }
 
-        let activePhaseIndex = 0;
-        let activeItemIndex = 0;
-        let skippedList = [];
-        let isVoiceActive = true;
+          if (spokenText.includes("salta") || spokenText.includes("salta questa") || spokenText.includes("passa oltre")) {
+            lastActionTime = Date.now();
+            skipItem();
+            break;
+          }
 
-        const phaseDropdown = document.getElementById('phaseDropdown');
-        const itemIndexDisplay = document.getElementById('itemIndexDisplay');
-        const itemLabelDisplay = document.getElementById('itemLabelDisplay');
-        const itemActionDisplay = document.getElementById('itemActionDisplay');
-        const phaseProgress = document.getElementById('phaseProgress');
-        const footerPhaseName = document.getElementById('footerPhaseName');
-        const footerSkippedTotal = document.getElementById('footerSkippedTotal');
-        const skippedNotice = document.getElementById('skippedNotice');
+          const isCheck = 
+            spokenText.includes("check") || spokenText.includes("ceck") || spokenText.includes("cec") ||
+            spokenText.includes("ciec") || spokenText.includes("cek") || spokenText.includes("gec") ||
+            spokenText.includes("geck") || spokenText.includes("c'è") || spokenText.includes("c'e") ||
+            spokenText.includes("ce") || spokenText.includes("che") || spokenText.includes("cioè") ||
+            spokenText.includes("ok") || spokenText.includes("avanti") || spokenText.includes("passa") ||
+            spokenText.includes("fatto") || spokenText.includes("eseguito") || spokenText.includes("va bene") ||
+            spokenText.startsWith("ce") || spokenText.startsWith("ci") || spokenText === "c" || spokenText === "k";
 
-        function initApp() {
-            phaseDropdown.innerHTML = '';
-            flightPhases.forEach((phase, idx) => {
-                const option = document.createElement('option');
-                option.value = idx;
-                option.textContent = phase.name;
-                phaseDropdown.appendChild(option);
-            });
-            renderScreen();
+          if (isCheck) {
+            lastActionTime = Date.now();
+            nextItem();
+            break;
+          } else if (spokenText.includes("ripeti") || spokenText.includes("ancora")) {
+            lastActionTime = Date.now();
+            speakCurrent();
+            break;
+          } else if (spokenText.includes("ricomincia") || spokenText.includes("reset")) {
+            lastActionTime = Date.now();
+            resetChecklist();
+            break;
+          }
         }
+      };
 
-        function renderScreen() {
-            const phase = flightPhases[activePhaseIndex];
-            const item = phase.items[activeItemIndex];
-
-            phaseDropdown.value = activePhaseIndex;
-            itemIndexDisplay.textContent = `Elemento ${activeItemIndex + 1} di ${phase.items.length}`;
-            itemLabelDisplay.textContent = item.label;
-            itemActionDisplay.textContent = item.action;
-
-            const percentage = ((activeItemIndex + 1) / phase.items.length) * 100;
-            phaseProgress.style.width = `${percentage}%`;
-
-            footerPhaseName.textContent = phase.name;
-            footerSkippedTotal.textContent = `Saltati: ${skippedList.length}`;
-
-            const wasSkipped = skippedList.some(s => s.pIdx === activePhaseIndex && s.iIdx === activeItemIndex);
-            if (wasSkipped) {
-                skippedNotice.classList.remove('hidden');
-            } else {
-                skippedNotice.classList.add('hidden');
-            }
-
-            if (isVoiceActive) {
-                playVoicePrompt(`${item.label}, ${item.action}`);
-            }
+      recognition.onend = () => {
+        if (isListening && !isSpeaking) {
+          try { recognition.start(); } catch(e) {}
         }
+      };
+    }
 
-        function playVoicePrompt(phrase) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const speech = new SpeechSynthesisUtterance(phrase);
-                speech.lang = 'it-IT';
-                speech.rate = 1.0;
-                window.speechSynthesis.speak(speech);
-            }
+    function speak(text, callback) {
+      if (!('speechSynthesis' in window)) {
+        if (callback) callback();
+        return;
+      }
+
+      isSpeaking = true;
+      if (recognition) try { recognition.stop(); } catch(e) {}
+
+      document.getElementById('micStatus').innerText = "🔊 Lettura in corso...";
+      document.getElementById('micStatus').className = "mic-status";
+
+      window.speechSynthesis.cancel();
+      if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+
+      setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'it-IT';
+        utterance.rate = 1.2;
+        utterance.pitch = 1.0;
+
+        const voices = window.speechSynthesis.getVoices();
+        const itVoice = voices.find(v => v.lang && (v.lang.includes('it') || v.lang.includes('IT')));
+        if (itVoice) utterance.voice = itVoice;
+
+        let hasFinished = false;
+        const finishSpeech = () => {
+          if (hasFinished) return;
+          hasFinished = true;
+          isSpeaking = false;
+          lastActionTime = Date.now();
+          if (callback) callback();
+          else if (isListening) startListening();
+        };
+
+        utterance.onend = finishSpeech;
+        utterance.onerror = finishSpeech;
+
+        window.speechSynthesis.speak(utterance);
+
+        const estimatedTime = (text.length * 70) + 800;
+        setTimeout(() => {
+          if (isSpeaking && !hasFinished) finishSpeech();
+        }, estimatedTime);
+
+      }, 50);
+    }
+
+    function startChecklist() {
+      if (currentChecklist.length === 0) return;
+      
+      requestWakeLock();
+      if ('speechSynthesis' in window) window.speechSynthesis.resume();
+
+      currentIndex = 0;
+      isListening = true;
+      isAskingReview = false;
+      reviewQueue = [];
+      reviewIndex = -1;
+      skippedItems.clear();
+      updateUI();
+      
+      document.getElementById('startBtn').style.display = 'none';
+      document.getElementById('endControls').style.display = 'none';
+
+      const headerText = `Avvio ${checklistsData[currentChecklistIndex].title}`;
+      const firstItemText = currentChecklist[0].speak;
+      speak(`${headerText}. ${firstItemText}`);
+    }
+
+    function startListening() {
+      if (recognition && isListening && !isSpeaking) {
+        requestWakeLock();
+        try {
+          recognition.start();
+          document.getElementById('micStatus').innerText = isAskingReview ? "🎙️ In ascolto ('VERIFICA', 'SÌ', 'NO')" : "🎙️ In ascolto ('CHECK', 'SALTA', 'RIPETI')";
+          document.getElementById('micStatus').className = "mic-status mic-active";
+        } catch(e) {}
+      }
+    }
+
+    function selectItem(index) {
+      if (currentChecklist.length === 0) return;
+      currentIndex = index;
+      reviewQueue = [];
+      reviewIndex = -1;
+      isAskingReview = false;
+      updateUI();
+      speakCurrent();
+    }
+
+    function nextItem() {
+      if (reviewQueue.length > 0) {
+        const actualIdx = reviewQueue[reviewIndex];
+        skippedItems.delete(actualIdx);
+        advanceReviewQueue();
+      } else {
+        if (currentIndex >= 0) skippedItems.delete(currentIndex);
+        advanceChecklist();
+      }
+    }
+
+    function skipItem() {
+      if (reviewQueue.length > 0) {
+        advanceReviewQueue();
+      } else {
+        if (currentIndex >= 0) skippedItems.add(currentIndex);
+        advanceChecklist();
+      }
+    }
+
+    function advanceChecklist() {
+      if (currentIndex < currentChecklist.length - 1) {
+        currentIndex++;
+        updateUI();
+        speakCurrent();
+      } else if (currentIndex === currentChecklist.length - 1) {
+        handleChecklistEnd();
+      }
+    }
+
+    function handleChecklistEnd() {
+      const countSkipped = skippedItems.size;
+      if (countSkipped > 0) {
+        isAskingReview = true;
+        const parola = countSkipped === 1 ? "istruzione saltata" : "istruzioni saltate";
+        document.getElementById('itemText').innerText = "Verifica istruzioni saltate?";
+        document.getElementById('statusText').innerText = `⚠️ ${countSkipped} SALTATE`;
+        updateUI();
+        speak(`Checklist completata. Attenzione: ${countSkipped} ${parola}. Vuoi verificarle?`);
+      } else {
+        finishChecklistCompletely();
+      }
+    }
+
+    function startReviewMode() {
+      reviewQueue = Array.from(skippedItems).sort((a, b) => a - b);
+      reviewIndex = 0;
+      currentIndex = reviewQueue[0];
+      updateUI();
+      speakCurrent();
+    }
+
+    function advanceReviewQueue() {
+      reviewIndex++;
+      if (reviewIndex < reviewQueue.length) {
+        currentIndex = reviewQueue[reviewIndex];
+        updateUI();
+        speakCurrent();
+      } else {
+        reviewQueue = [];
+        reviewIndex = -1;
+        if (skippedItems.size > 0) handleChecklistEnd();
+        else finishChecklistCompletely();
+      }
+    }
+
+    function finishChecklistCompletely() {
+      isListening = false;
+      isAskingReview = false;
+      currentIndex = -1;
+      
+      releaseWakeLock();
+      if (recognition) try { recognition.stop(); } catch(e) {}
+
+      document.getElementById('itemText').innerText = "Checklist Completata!";
+      document.getElementById('statusText').innerText = "OK";
+      document.getElementById('micStatus').innerText = "Microfono spento";
+      document.getElementById('micStatus').className = "mic-status";
+      document.getElementById('startBtn').style.display = 'none';
+      
+      document.getElementById('endControls').style.display = 'block';
+      if (currentChecklistIndex < checklistsData.length - 1) {
+        document.getElementById('nextChecklistBtn').innerText = `➡️ PASSA A: ${checklistsData[currentChecklistIndex + 1].title}`;
+        document.getElementById('nextChecklistBtn').style.display = 'inline-block';
+      } else {
+        document.getElementById('nextChecklistBtn').style.display = 'none';
+      }
+
+      updateUI();
+      speak("Checklist completata, tutte le voci verificate");
+    }
+
+    function goToNextChecklist() {
+      if (currentChecklistIndex < checklistsData.length - 1) {
+        openChecklist(currentChecklistIndex + 1);
+      }
+    }
+
+    function speakCurrent() {
+      if (currentIndex >= 0 && currentIndex < currentChecklist.length) {
+        speak(currentChecklist[currentIndex].speak);
+      }
+    }
+
+    function updateUI() {
+      if (currentIndex >= 0 && currentIndex < currentChecklist.length && !isAskingReview) {
+        document.getElementById('itemText').innerText = currentChecklist[currentIndex].item;
+        document.getElementById('statusText').innerText = currentChecklist[currentIndex].status;
+      }
+
+      currentChecklist.forEach((_, idx) => {
+        const row = document.getElementById("row-" + idx);
+        if (!row) return;
+        row.classList.remove("active-row");
+
+        if (idx === currentIndex) {
+          row.classList.add("active-row");
+          row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (skippedItems.has(idx)) {
+          row.classList.add("skipped-row");
+        } else {
+          row.classList.remove("skipped-row");
         }
+      });
+    }
 
-        function toggleVoice() {
-            isVoiceActive = !isVoiceActive;
-            document.getElementById('voiceStatusLabel').textContent = isVoiceActive ? "🔊 Lettura: ON" : "🔇 Lettura: OFF";
-            if (!isVoiceActive && 'speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-            }
-        }
+    function resetChecklist() {
+      isListening = false;
+      isSpeaking = false;
+      isAskingReview = false;
+      reviewQueue = [];
+      reviewIndex = -1;
+      skippedItems.clear();
+      
+      releaseWakeLock();
+      if (recognition) try { recognition.stop(); } catch(e) {}
+      
+      currentIndex = -1;
+      document.getElementById('itemText').innerText = "Premi AVVIA per iniziare";
+      document.getElementById('statusText').innerText = "---";
+      document.getElementById('micStatus').innerText = "Microfono spento";
+      document.getElementById('micStatus').className = "mic-status";
+      document.getElementById('startBtn').style.display = 'inline-block';
+      document.getElementById('endControls').style.display = 'none';
+      
+      currentChecklist.forEach((_, idx) => {
+        const row = document.getElementById("row-" + idx);
+        if (row) row.classList.remove("active-row", "skipped-row");
+      });
+      
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-        function confirmStep() {
-            skippedList = skippedList.filter(s => !(s.pIdx === activePhaseIndex && s.iIdx === activeItemIndex));
-            
-            const phase = flightPhases[activePhaseIndex];
-            if (activeItemIndex < phase.items.length - 1) {
-                activeItemIndex++;
-            } else {
-                if (activePhaseIndex < flightPhases.length - 1) {
-                    activePhaseIndex++;
-                    activeItemIndex = 0;
-                } else {
-                    alert("Tutte le 9 fasi della checklist sono state completate!");
-                }
-            }
-            renderScreen();
-        }
+    renderMenu();
+  </script>
 
-        function skipStep() {
-            const alreadyInSkipped = skippedList.some(s => s.pIdx === activePhaseIndex && s.iIdx === activeItemIndex);
-            if (!alreadyInSkipped) {
-                skippedList.push({ pIdx: activePhaseIndex, iIdx: activeItemIndex });
-            }
-            confirmStep();
-        }
-
-        function previousStep() {
-            if (activeItemIndex > 0) {
-                activeItemIndex--;
-            } else if (activePhaseIndex > 0) {
-                activePhaseIndex--;
-                activeItemIndex = flightPhases[activePhaseIndex].items.length - 1;
-            }
-            renderScreen();
-        }
-
-        function selectPhase(index) {
-            activePhaseIndex = parseInt(index, 10);
-            activeItemIndex = 0;
-            renderScreen();
-        }
-
-        function restartCurrentPhase() {
-            activeItemIndex = 0;
-            renderScreen();
-        }
-
-        window.onload = initApp;
-    </script>
 </body>
 </html>
