@@ -251,7 +251,6 @@
       };
     }
 
-    // NUOVA FUNZIONE DI LETTURA CON FORZATURA E SBLOCCO ENGINE
     function speak(text, callback) {
       if (!('speechSynthesis' in window)) {
         if (callback) callback();
@@ -266,7 +265,6 @@
       document.getElementById('micStatus').innerText = "🔊 Lettura in corso...";
       document.getElementById('micStatus').className = "mic-status";
 
-      // Sblocca e forza il ripristino del sintetizzatore audio del browser
       window.speechSynthesis.cancel();
       if (window.speechSynthesis.paused) {
         window.speechSynthesis.resume();
@@ -275,10 +273,11 @@
       setTimeout(() => {
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'it-IT';
-        utterance.rate = 1.0;
+        
+        // Impostiamo la velocità rapida (1.2 per lettura fluida da cabina)
+        utterance.rate = 1.2;
         utterance.pitch = 1.0;
 
-        // Se disponibile, cerca una voce italiana esplicita
         const voices = window.speechSynthesis.getVoices();
         const itVoice = voices.find(v => v.lang && (v.lang.includes('it') || v.lang.includes('IT')));
         if (itVoice) {
@@ -300,14 +299,12 @@
 
         utterance.onend = finishSpeech;
         utterance.onerror = (e) => {
-          console.log("Errore sintesi:", e);
           finishSpeech();
         };
 
         window.speechSynthesis.speak(utterance);
 
-        // Backup di sicurezza se 'onend' non scatta per bug del dispositivo
-        const estimatedTime = (text.length * 90) + 1000;
+        const estimatedTime = (text.length * 70) + 800;
         setTimeout(() => {
           if (isSpeaking && !hasFinished) {
             finishSpeech();
@@ -318,7 +315,6 @@
     }
 
     function startChecklist() {
-      // Sblocco audio al click iniziale
       if ('speechSynthesis' in window) {
         window.speechSynthesis.resume();
       }
