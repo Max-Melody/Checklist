@@ -144,6 +144,28 @@
       row.onclick = () => selectItem(idx);
     });
 
+    // Suono di errore stile quiz ("buzzer" basso e discendente)
+    function playErrorSound() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.3);
+
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+      } catch(e) {}
+    }
+
     // Configurazione Riconoscimento Vocale
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -181,8 +203,10 @@
               isAskingReview = false;
               finishChecklistCompletely();
               break;
+            } else {
+              playErrorSound();
+              break;
             }
-            continue;
           }
 
           // COMANDO: SALTA
@@ -239,6 +263,11 @@
           ) {
             lastActionTime = Date.now();
             resetChecklist();
+            break;
+          }
+          // NESSUN COMANDO RICONOSCIUTO
+          else {
+            playErrorSound();
             break;
           }
         }
@@ -411,8 +440,6 @@
       document.getElementById('startBtn').style.display = 'inline-block';
       
       updateUI();
-      
-      // Conferma esplicita di completamento pulito senza pendenze
       speak(`${checklistName} completata, tutte le voci verificate`);
     }
 
@@ -430,7 +457,6 @@
 
       checklist.forEach((_, idx) => {
         const row = document.getElementById("row-" + idx);
-        
         row.classList.remove("active-row");
 
         if (idx === currentIndex) {
