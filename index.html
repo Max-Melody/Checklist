@@ -159,7 +159,7 @@
   </div>
 
   <script>
-    // DEFINIZIONE STRUTTURA 10 CHECKLIST
+    // DEFINIZIONE STRUTTURA COMPLETA DELLE 10 CHECKLIST
     const checklistsData = [
       { 
         id: 0, 
@@ -338,7 +338,21 @@
           { item: "Velocità e Flaps", status: "VX 76 Mph – FLAPS GRADUALI", speak: "VX 76 miglia orarie, retrarre flaps gradualmente" }
         ]
       },
-      { id: 9, title: "10. SOTTOVENTO E FINALE", data: [] }
+      { 
+        id: 9, 
+        title: "10. SOTTOVENTO E FINALE", 
+        data: [
+          { item: "Aria carburatore", status: "ON", speak: "Aria carburatore: ON" },
+          { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" },
+          { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: ON" },
+          { item: "Faro atterraggio", status: "ON", speak: "Faro atterraggio: ON" },
+          { item: "Flaps", status: "10°", speak: "Flaps: 10 gradi" },
+          { item: "Serbatoio", status: "PIÙ PIENO", speak: "Serbatoio: Più pieno" },
+          { item: "Flaps", status: "25° / 40°", speak: "Flaps: 25 o 40 gradi" },
+          { item: "Memo atterraggio", status: "VREF 74 Mph (flaps 40°) / VREF 77 Mph (flaps 25°) + Xwind", speak: "Memo atterraggio: VREF 74 miglia orarie con flaps 40 gradi, oppure VREF 77 miglia orarie con flaps 25 gradi, più vento traverso" },
+          { item: "Aria carburatore", status: "OFF", speak: "Aria carburatore: OFF" }
+        ]
+      }
     ];
 
     let currentChecklistIndex = 0;
@@ -398,7 +412,7 @@
         cell.colSpan = 2;
         cell.style.textAlign = "center";
         cell.style.padding = "20px";
-        cell.innerText = "Checklist in fase di inserimento...";
+        cell.innerText = "Checklist vuota.";
         return;
       }
 
