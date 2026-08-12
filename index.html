@@ -512,7 +512,7 @@
       };
     }
 
-    // SINTESI VOCALE PULITA ORIGINALE
+    // SINTESI VOCALE CON VELOCITÀ AUMENTATA (RATE 1.25)
     function speak(text, callback) {
       if (!('speechSynthesis' in window)) {
         if (callback) callback();
@@ -525,13 +525,24 @@
       document.getElementById('micStatus').innerText = "🔊 Lettura in corso...";
       document.getElementById('micStatus').className = "mic-status";
 
+      // Sblocco preventivo canale audio
+      if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+      window.speechSynthesis.cancel();
+
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'it-IT';
-      utterance.rate = 1.0;
+      
+      // Velocità di lettura aumentata per evitare l'effetto lento del Huawei
+      utterance.rate = 1.25; 
       utterance.pitch = 1.0;
 
       if (availableVoices.length === 0) loadVoices();
-      const itVoice = availableVoices.find(v => v.lang && (v.lang.includes('it') || v.lang.includes('IT')));
+      
+      // Privilegia le voci Google se presenti sul sistema
+      let itVoice = availableVoices.find(v => v.lang && (v.lang.includes('it') || v.lang.includes('IT')) && v.name.includes('Google'));
+      if (!itVoice) {
+        itVoice = availableVoices.find(v => v.lang && (v.lang.includes('it') || v.lang.includes('IT')));
+      }
       if (itVoice) utterance.voice = itVoice;
 
       utterance.onend = () => {
