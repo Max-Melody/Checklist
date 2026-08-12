@@ -131,7 +131,18 @@
     let isAskingReview = false;
     let reviewQueue = [];
     let reviewIndex = -1;
-    let audioCtx = null;
+    let availableVoices = [];
+
+    // Pre-carica le voci di sistema del browser
+    function loadVoices() {
+      if ('speechSynthesis' in window) {
+        availableVoices = window.speechSynthesis.getVoices();
+      }
+    }
+    loadVoices();
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
 
     // Popola la tabella
     const tbody = document.getElementById('tableBody');
@@ -145,12 +156,9 @@
 
     function playStartBeep() {
       try {
-        if (!audioCtx) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const audioCtx = new AudioCtx();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
 
@@ -287,6 +295,11 @@
     }
 
     function speak(text, callback) {
+      if (!('speechSynthesis' in window)) {
+        if (callback) callback();
+        return;
+      }
+
       window.speechSynthesis.cancel();
       isSpeaking = true;
       
@@ -301,7 +314,19 @@
       utterance.lang = 'it-IT';
       utterance.rate = 1.1;
 
-      utterance.onend = () => {
+      // Assegna la voce italiana se presente tra quelle precaricate
+      if (availableVoices.length === 0) {
+        availableVoices = window.speechSynthesis.getVoices();
+      }
+      const itVoice = availableVoices.find(v => v.lang && v.lang.includes('it'));
+      if (itVoice) {
+        utterance.voice = itVoice;
+      }
+
+      let hasFinished = false;
+      const onSpeechEnd = () => {
+        if (hasFinished) return;
+        hasFinished = true;
         isSpeaking = false;
         lastActionTime = Date.now();
         if (callback) {
@@ -311,9 +336,10 @@
         }
       };
 
-      utterance.onerror = () => {
-        isSpeaking = false;
-        if (isListening) startListening();
+      utterance.onend = onSpeechEnd;
+      utterance.onerror = (e) => {
+        // In caso di errore della sintesi vocale, sblocca comunque il flusso
+        onSpeechEnd();
       };
 
       window.speechSynthesis.speak(utterance);
@@ -473,7 +499,9 @@
         row.classList.remove("active-row", "skipped-row");
       });
       
-      window.speechSynthesis.cancel();
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   </script>
