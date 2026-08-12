@@ -144,6 +144,38 @@
       row.onclick = () => selectItem(idx);
     });
 
+    // Funzione per il doppio bip raddoppiato (coppia acuto/grave x2)
+    function playDoubleBeep() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Sequenza dei 4 toni: [frequenza Hz, momento di inizio sec, durata sec]
+        const tones = [
+          { freq: 880, start: 0.00, duration: 0.08 }, // Bip piccolo (acuto)
+          { freq: 440, start: 0.10, duration: 0.12 }, // Bip grosso (grave)
+          { freq: 880, start: 0.28, duration: 0.08 }, // Ripetizione: Bip piccolo
+          { freq: 440, start: 0.38, duration: 0.12 }  // Ripetizione: Bip grosso
+        ];
+
+        tones.forEach(t => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(t.freq, audioCtx.currentTime + t.start);
+
+          gain.gain.setValueAtTime(0.3, audioCtx.currentTime + t.start);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + t.start + t.duration);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start(audioCtx.currentTime + t.start);
+          osc.stop(audioCtx.currentTime + t.start + t.duration);
+        });
+      } catch(e) {}
+    }
+
     // Configurazione Riconoscimento Vocale
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -182,7 +214,6 @@
               finishChecklistCompletely();
               break;
             }
-            continue;
           }
 
           // COMANDO: SALTA
@@ -411,8 +442,6 @@
       document.getElementById('startBtn').style.display = 'inline-block';
       
       updateUI();
-      
-      // Conferma esplicita di completamento pulito senza pendenze
       speak(`${checklistName} completata, tutte le voci verificate`);
     }
 
@@ -430,7 +459,6 @@
 
       checklist.forEach((_, idx) => {
         const row = document.getElementById("row-" + idx);
-        
         row.classList.remove("active-row");
 
         if (idx === currentIndex) {
