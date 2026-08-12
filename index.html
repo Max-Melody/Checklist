@@ -360,17 +360,6 @@
     let reviewIndex = -1;
 
     let wakeLock = null;
-    let availableVoices = [];
-
-    function loadVoices() {
-      if ('speechSynthesis' in window) {
-        availableVoices = window.speechSynthesis.getVoices();
-      }
-    }
-    if ('speechSynthesis' in window) {
-      loadVoices();
-      window.speechSynthesis.onvoiceschanged = loadVoices;
-    }
 
     function renderMenu() {
       const menuContainer = document.getElementById('menuButtons');
@@ -429,7 +418,9 @@
         row.id = "row-" + idx;
         row.insertCell(0).innerText = entry.item;
         row.insertCell(1).innerText = entry.status;
-        row.onclick = () => selectItem(idx);
+        
+        // DOPPIO TAP PER EVITARE LETTURE INAVVERTITE
+        row.ondblclick = () => selectItem(idx);
       });
     }
 
@@ -461,7 +452,7 @@
           const spokenText = event.results[i][0].transcript.trim().toLowerCase();
 
           if (isAskingReview) {
-            if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("verifica") || spokenText.includes("ok")) {
+            if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("verifica") || spokenText.includes("verifichiamo") || spokenText.includes("verificare") || spokenText.includes("ok")) {
               lastActionTime = Date.now();
               isAskingReview = false;
               startReviewMode();
@@ -512,7 +503,7 @@
       };
     }
 
-    // SINTESI VOCALE CON VELOCITÀ AUMENTATA (RATE 1.25)
+    // SINTESI VOCALE PULITA - COMPATIBILE CON HUAWEI ED EMUI (RATE 1.2)
     function speak(text, callback) {
       if (!('speechSynthesis' in window)) {
         if (callback) callback();
@@ -525,25 +516,14 @@
       document.getElementById('micStatus').innerText = "🔊 Lettura in corso...";
       document.getElementById('micStatus').className = "mic-status";
 
-      // Sblocco preventivo canale audio
-      if (window.speechSynthesis.paused) window.speechSynthesis.resume();
       window.speechSynthesis.cancel();
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'it-IT';
       
-      // Velocità di lettura aumentata per evitare l'effetto lento del Huawei
-      utterance.rate = 1.25; 
+      // Velocità regolata a 1.2
+      utterance.rate = 1.2; 
       utterance.pitch = 1.0;
-
-      if (availableVoices.length === 0) loadVoices();
-      
-      // Privilegia le voci Google se presenti sul sistema
-      let itVoice = availableVoices.find(v => v.lang && (v.lang.includes('it') || v.lang.includes('IT')) && v.name.includes('Google'));
-      if (!itVoice) {
-        itVoice = availableVoices.find(v => v.lang && (v.lang.includes('it') || v.lang.includes('IT')));
-      }
-      if (itVoice) utterance.voice = itVoice;
 
       utterance.onend = () => {
         isSpeaking = false;
@@ -589,7 +569,7 @@
         requestWakeLock();
         try {
           recognition.start();
-          document.getElementById('micStatus').innerText = isAskingReview ? "🎙️ In ascolto ('SÌ', 'NO')" : "🎙️ In ascolto ('CHECK', 'SALTA')";
+          document.getElementById('micStatus').innerText = isAskingReview ? "🎙️ In ascolto ('SÌ', 'NO', 'VERIFICA')" : "🎙️ In ascolto ('CHECK', 'SALTA')";
           document.getElementById('micStatus').className = "mic-status mic-active";
         } catch(e) {}
       }
@@ -643,7 +623,7 @@
         document.getElementById('itemText').innerText = "Verifica istruzioni saltate?";
         document.getElementById('statusText').innerText = `⚠️ ${countSkipped} SALTATE`;
         updateUI();
-        speak(`Checklist completata. Attenzione: ${countSkipped} ${parola}. Vuoi verificarle?`);
+        speak(`Attenzione, ${countSkipped} ${parola}. Vuoi verificarle?`);
       } else {
         finishChecklistCompletely();
       }
