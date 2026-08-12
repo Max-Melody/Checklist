@@ -214,7 +214,28 @@
           { item: "Pompa elettrica carburante", status: "OFF", speak: "Pompa elettrica carburante: OFF" }
         ]
       },
-      { id: 2, title: "3. POST AVVIAMENTO", data: [] },
+      { 
+        id: 2, 
+        title: "3. POST AVVIAMENTO", 
+        data: [
+          { item: "Amperometro", status: "VERIF. CON FARO", speak: "Amperometro: Verificare con faro" },
+          { item: "Avionica", status: "ON", speak: "Avionica: ON" },
+          { item: "Ventilazione cabina", status: "COME RICHIESTO", speak: "Ventilazione cabina: Come richiesto" },
+          { item: "Radio e avionica", status: "ON", speak: "Radio e avionica: ON" },
+          { item: "Radio", status: "VOLUME / SQUELCH", speak: "Radio: Volume e squelch" },
+          { item: "Intercom", status: "VOLUME / SQUELCH", speak: "Intercom: Volume e squelch" },
+          { item: "Transponder", status: "CODICE / STAND BY", speak: "Transponder: Codice, Stand by" },
+          { item: "VOR / GPS", status: "IMPOSTATI", speak: "VOR e GPS: Impostati" },
+          { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da 4,9 a 5,1" },
+          { item: "Anemometro", status: "0 KTS / 0 MPH", speak: "Anemometro: Zero nodi o zero miglia orarie" },
+          { item: "Orizzonte artificiale", status: "0° BANK / SAGOMINA", speak: "Orizzonte artificiale: Zero gradi di inclinazione, sagomina" },
+          { item: "Altimetro", status: "QNH +/- 75 ft", speak: "Altimetro: QNH più o meno 75 piedi" },
+          { item: "Coordinatore di virata", status: "NO BANDIERINA", speak: "Coordinatore di virata: Nessuna bandierina" },
+          { item: "Girodirezionale", status: "ALLINEARE CON BUSSOLA", speak: "Girodirezionale: Allineare con bussola" },
+          { item: "Variometro", status: "0 FT/MIN", speak: "Variometro: Zero piedi al minuto" },
+          { item: "Luci navigazione", status: "COME RICHIESTO", speak: "Luci di navigazione: Come richiesto" }
+        ]
+      },
       { id: 3, title: "4. RULLAGGIO E RUN UP", data: [] },
       { id: 4, title: "5. PRE DECOLLO", data: [] },
       { id: 5, title: "6. ALLINEAMENTO", data: [] },
@@ -302,7 +323,6 @@
       });
     }
 
-    // Gestione WakeLock migliorata
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator && wakeLock === null) {
@@ -463,7 +483,6 @@
       document.getElementById('startBtn').style.display = 'none';
       document.getElementById('endControls').style.display = 'none';
 
-      // Modificato: Pronuncia l'intestazione e direttamente la prima voce di seguito
       const headerText = `Avvio ${checklistsData[currentChecklistIndex].title}`;
       const firstItemText = currentChecklist[0].speak;
       speak(`${headerText}. ${firstItemText}`);
@@ -471,7 +490,7 @@
 
     function startListening() {
       if (recognition && isListening && !isSpeaking) {
-        requestWakeLock(); // Rinforzato qui per garantire lo schermo acceso
+        requestWakeLock();
         try {
           recognition.start();
           document.getElementById('micStatus').innerText = isAskingReview ? "🎙️ In ascolto ('VERIFICA', 'SÌ', 'NO')" : "🎙️ In ascolto ('CHECK', 'SALTA', 'RIPETI')";
