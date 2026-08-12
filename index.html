@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checklist Avviamento Vocale</title>
+  <title>Checklist Piper PA-28</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,8 +12,35 @@
       background-color: #f4f4f9;
       text-align: center;
     }
-    h1 { color: #333; margin-bottom: 5px; }
+    h1 { color: #333; margin-bottom: 10px; font-size: 22px; }
     
+    /* MENU PRINCIPALE GRID */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      max-width: 450px;
+      margin: 15px auto;
+    }
+    .btn-menu {
+      padding: 16px;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      background-color: #007bff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-menu:active { background-color: #0056b3; }
+    .badge-status { font-size: 14px; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 5px; }
+
+    /* CARD E CONTROLLI CHECKLIST */
     .card {
       position: sticky;
       top: 10px;
@@ -38,18 +65,20 @@
     .mic-active { color: #28a745; }
 
     .btn {
-      padding: 12px 20px;
-      font-size: 16px;
+      padding: 12px 18px;
+      font-size: 15px;
       font-weight: bold;
       color: white;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      margin: 5px;
+      margin: 4px;
     }
-    .btn-start { background-color: #28a745; width: 80%; margin-top: 10px; }
+    .btn-start { background-color: #28a745; width: 85%; margin-top: 10px; }
     .btn-repeat { background-color: #ffc107; color: #333; }
     .btn-reset { background-color: #6c757d; }
+    .btn-home { background-color: #17a2b8; }
+    .btn-next { background-color: #28a745; font-size: 16px; padding: 14px 20px; margin-top: 10px; }
 
     table {
       width: 100%;
@@ -78,65 +107,102 @@
       font-weight: bold; 
       border-left: 5px solid #a71d2a;
     }
+
+    .end-controls {
+      display: none;
+      margin-top: 15px;
+      padding: 10px;
+      background: #e9ecef;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
 
-  <h1>AVVIAMENTO</h1>
-
-  <div class="card">
-    <div id="itemText" class="item-title">Premi AVVIA per iniziare</div>
-    <div id="statusText" class="item-status">---</div>
-    <div id="micStatus" class="mic-status">Microfono spento</div>
-    <button id="startBtn" class="btn btn-start" onclick="startChecklist()">🎙️ AVVIA CHECKLIST AVVIAMENTO</button>
+  <!-- VISTA 1: MENU PRINCIPALE -->
+  <div id="menuView">
+    <h1>PIPER PA-28 CHECKLIST</h1>
+    <div class="menu-grid" id="menuButtons"></div>
   </div>
 
-  <div>
-    <button class="btn btn-repeat" onclick="speakCurrent()">🔊 Ripeti</button>
-    <button class="btn btn-reset" onclick="resetChecklist()">🔄 Ricomincia</button>
-  </div>
+  <!-- VISTA 2: ESECUZIONE CHECKLIST -->
+  <div id="checklistView" style="display: none;">
+    <h1 id="checklistTitle">CHECKLIST</h1>
 
-  <table id="checklistTable">
-    <thead>
-      <tr>
-        <th>Elemento</th>
-        <th>Stato</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
+    <div class="card">
+      <div id="itemText" class="item-title">Premi AVVIA per iniziare</div>
+      <div id="statusText" class="item-status">---</div>
+      <div id="micStatus" class="mic-status">Microfono spento</div>
+      <button id="startBtn" class="btn btn-start" onclick="startChecklist()">🎙️ AVVIA CHECKLIST</button>
+      
+      <div id="endControls" class="end-controls">
+        <button id="nextChecklistBtn" class="btn btn-next" onclick="goToNextChecklist()">➡️ PROSSIMA CHECKLIST</button> <br>
+        <button class="btn btn-home" onclick="showMenu()">📋 MENU PRINCIPALE</button>
+      </div>
+    </div>
+
+    <div>
+      <button class="btn btn-repeat" onclick="speakCurrent()">🔊 Ripeti</button>
+      <button class="btn btn-reset" onclick="resetChecklist()">🔄 Ricomincia</button>
+      <button class="btn btn-home" onclick="showMenu()">📋 Menu</button>
+    </div>
+
+    <table id="checklistTable">
+      <thead>
+        <tr>
+          <th>Elemento</th>
+          <th>Stato</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
 
   <script>
-    const checklistName = "Checklist Avviamento";
-
-    const checklist = [
-      { item: "Telefoni / disp elettronici", status: "OFF / MOD VOLO", speak: "Telefoni e dispositivi elettronici: OFF o Modalità Volo" },
-      { item: "Briefing passeggeri", status: "COME RICHIESTO", speak: "Briefing passeggeri: Come richiesto" },
-      { item: "Porta", status: "CHIUSA NO BLOCCATA", speak: "Porta: Chiusa non bloccata" },
-      { item: "Freno parcheggio", status: "INSERITO", speak: "Freno parcheggio: Inserito" },
-      { item: "Sedile", status: "REGOLATO E BLOCCATO", speak: "Sedile: Regolato e bloccato" },
-      { item: "Interruttori elettrici", status: "OFF", speak: "Interruttori elettrici: OFF" },
-      { item: "Ventilazione cabina", status: "OFF", speak: "Ventilazione cabina: OFF" },
-      { item: "Circuit breakers", status: "INSERITI", speak: "Circuit breakers: Inseriti" },
-      { item: "Master batteria / alternatore", status: "ON", speak: "Master batteria e alternatore: ON" },
-      { item: "Rotating beacon", status: "ON", speak: "Rotating beacon: ON" },
-      { item: "Aria carburatore", status: "OFF", speak: "Aria carburatore: OFF" },
-      { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" },
-      { item: "Serbatoio", status: "MENO PIENO", speak: "Serbatoio: Meno pieno" },
-      { item: "Trim elettrico", status: "OFF", speak: "Trim elettrico: OFF" },
-      { item: "Autopilot", status: "OFF", speak: "Autopilot: OFF" },
-      { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: ON" },
-      
-      // AVVIAMENTO A FREDDO
-      { item: "Manetta", status: "1 cm", speak: "Manetta: Un centimetro" },
-      { item: "Primer", status: "3 / 4 volte poi BLOCCARE", speak: "Primer: Tre o quattro volte, poi bloccare" },
-      { item: "Via dall'elica", status: "ANNUNCIARE", speak: "Via dall'elica: Annunciare" },
-      { item: "Starter", status: "ON", speak: "Starter: ON" },
-      { item: "Manetta", status: "1.200 RPM", speak: "Manetta: 1200 RPM" },
-      { item: "Pressione OLIO", status: "ARCO VERDE ENTRO 30 \"", speak: "Pressione olio: Arco verde entro 30 secondi" },
-      { item: "Pompa elettrica carburante", status: "OFF", speak: "Pompa elettrica carburante: OFF" }
+    // DEFINIZIONE STRUTTURA 10 CHECKLIST
+    const checklistsData = [
+      { id: 0, title: "1. CONTROLLI CABINA", data: [] },
+      { 
+        id: 1, 
+        title: "2. AVVIAMENTO", 
+        data: [
+          { item: "Telefoni / disp elettronici", status: "OFF / MOD VOLO", speak: "Telefoni e dispositivi elettronici: OFF o Modalità Volo" },
+          { item: "Briefing passeggeri", status: "COME RICHIESTO", speak: "Briefing passeggeri: Come richiesto" },
+          { item: "Porta", status: "CHIUSA NO BLOCCATA", speak: "Porta: Chiusa non bloccata" },
+          { item: "Freno parcheggio", status: "INSERITO", speak: "Freno parcheggio: Inserito" },
+          { item: "Sedile", status: "REGOLATO E BLOCCATO", speak: "Sedile: Regolato e bloccato" },
+          { item: "Interruttori elettrici", status: "OFF", speak: "Interruttori elettrici: OFF" },
+          { item: "Ventilazione cabina", status: "OFF", speak: "Ventilazione cabina: OFF" },
+          { item: "Circuit breakers", status: "INSERITI", speak: "Circuit breakers: Inseriti" },
+          { item: "Master batteria / alternatore", status: "ON", speak: "Master batteria e alternatore: ON" },
+          { item: "Rotating beacon", status: "ON", speak: "Rotating beacon: ON" },
+          { item: "Aria carburatore", status: "OFF", speak: "Aria carburatore: OFF" },
+          { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" },
+          { item: "Serbatoio", status: "MENO PIENO", speak: "Serbatoio: Meno pieno" },
+          { item: "Trim elettrico", status: "OFF", speak: "Trim elettrico: OFF" },
+          { item: "Autopilot", status: "OFF", speak: "Autopilot: OFF" },
+          { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: ON" },
+          { item: "Manetta", status: "1 cm", speak: "Manetta: Un centimetro", section: "AVVIAMENTO A FREDDO" },
+          { item: "Primer", status: "3 / 4 volte poi BLOCCARE", speak: "Primer: Tre o quattro volte, poi bloccare" },
+          { item: "Via dall'elica", status: "ANNUNCIARE", speak: "Via dall'elica: Annunciare" },
+          { item: "Starter", status: "ON", speak: "Starter: ON" },
+          { item: "Manetta", status: "1.200 RPM", speak: "Manetta: 1200 RPM" },
+          { item: "Pressione OLIO", status: "ARCO VERDE ENTRO 30 \"", speak: "Pressione olio: Arco verde entro 30 secondi" },
+          { item: "Pompa elettrica carburante", status: "OFF", speak: "Pompa elettrica carburante: OFF" }
+        ]
+      },
+      { id: 2, title: "3. POST AVVIAMENTO", data: [] },
+      { id: 3, title: "4. RULLAGGIO E RUN UP", data: [] },
+      { id: 4, title: "5. PRE DECOLLO", data: [] },
+      { id: 5, title: "6. ALLINEAMENTO", data: [] },
+      { id: 6, title: "7. TAKE OFF E SALITA", data: [] },
+      { id: 7, title: "8. CROCIERA", data: [] },
+      { id: 8, title: "9. DISCESA E AVVICINAMENTO", data: [] },
+      { id: 9, title: "10. SOTTOVENTO E FINALE", data: [] }
     ];
 
+    let currentChecklistIndex = 1; // Default su Avviamento
+    let currentChecklist = [];
     let currentIndex = -1;
     let recognition;
     let isListening = false;
@@ -149,25 +215,80 @@
     let reviewIndex = -1;
 
     let wakeLock = null;
-
-    // Variabili per la gestione del Doppio Tap
     let lastTapTime = 0;
     let lastTapIndex = -1;
 
-    // Gestione Schermo Sempre Acceso
+    // Generazione Menu
+    function renderMenu() {
+      const menuContainer = document.getElementById('menuButtons');
+      menuContainer.innerHTML = '';
+      checklistsData.forEach((c, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-menu';
+        btn.innerHTML = `<span>${c.title}</span> <span class="badge-status">${c.data.length > 0 ? 'PRONTA' : 'VUOTA'}</span>`;
+        btn.onclick = () => openChecklist(idx);
+        menuContainer.appendChild(btn);
+      });
+    }
+
+    function showMenu() {
+      resetChecklist();
+      document.getElementById('checklistView').style.display = 'none';
+      document.getElementById('menuView').style.display = 'block';
+    }
+
+    function openChecklist(index) {
+      currentChecklistIndex = index;
+      currentChecklist = checklistsData[index].data;
+      document.getElementById('checklistTitle').innerText = checklistsData[index].title;
+      document.getElementById('menuView').style.display = 'none';
+      document.getElementById('checklistView').style.display = 'block';
+      
+      buildTable();
+      resetChecklist();
+    }
+
+    function buildTable() {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+
+      if (currentChecklist.length === 0) {
+        let row = tbody.insertRow();
+        let cell = row.insertCell(0);
+        cell.colSpan = 2;
+        cell.style.textAlign = "center";
+        cell.style.padding = "20px";
+        cell.innerText = "Checklist in fase di inserimento...";
+        return;
+      }
+
+      currentChecklist.forEach((entry, idx) => {
+        if (entry.section) {
+          let headerRow = tbody.insertRow();
+          headerRow.className = "section-header-row";
+          let cell = headerRow.insertCell(0);
+          cell.colSpan = 2;
+          cell.innerText = entry.section;
+        }
+
+        let row = tbody.insertRow();
+        row.id = "row-" + idx;
+        row.insertCell(0).innerText = entry.item;
+        row.insertCell(1).innerText = entry.status;
+        row.onclick = () => handleRowTap(idx);
+      });
+    }
+
+    // Gestione WakeLock
     async function requestWakeLock() {
       try {
-        if ('wakeLock' in navigator) {
-          wakeLock = await navigator.wakeLock.request('screen');
-        }
+        if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
       } catch (err) {}
     }
 
     function releaseWakeLock() {
       if (wakeLock !== null) {
-        wakeLock.release().then(() => {
-          wakeLock = null;
-        });
+        wakeLock.release().then(() => { wakeLock = null; });
       }
     }
 
@@ -177,35 +298,12 @@
       }
     });
 
-    // Popola la tabella
-    const tbody = document.getElementById('tableBody');
-    checklist.forEach((entry, idx) => {
-      if (idx === 16) {
-        let headerRow = tbody.insertRow();
-        headerRow.className = "section-header-row";
-        let cell = headerRow.insertCell(0);
-        cell.colSpan = 2;
-        cell.innerText = "AVVIAMENTO A FREDDO";
-      }
-
-      let row = tbody.insertRow();
-      row.id = "row-" + idx;
-      row.insertCell(0).innerText = entry.item;
-      row.insertCell(1).innerText = entry.status;
-      
-      // Controllo doppio tap di sicurezza
-      row.onclick = () => handleRowTap(idx);
-    });
-
     function handleRowTap(index) {
       const currentTime = new Date().getTime();
       const tapLength = currentTime - lastTapTime;
-
-      // Se il secondo tocco avviene entro 500ms sulla stessa riga
       if (tapLength < 500 && tapLength > 0 && lastTapIndex === index) {
         selectItem(index);
       }
-      
       lastTapTime = currentTime;
       lastTapIndex = index;
     }
@@ -224,19 +322,12 @@
           const spokenText = event.results[i][0].transcript.trim().toLowerCase();
 
           if (isAskingReview) {
-            if (
-              spokenText.includes("si") || spokenText.includes("sì") || 
-              spokenText.includes("verifica") || spokenText.includes("verifichiamo") || 
-              spokenText.includes("confermo") || spokenText.includes("ok")
-            ) {
+            if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("verifica") || spokenText.includes("ok")) {
               lastActionTime = Date.now();
               isAskingReview = false;
               startReviewMode();
               break;
-            } else if (
-              spokenText.includes("no") || spokenText.includes("annulla") || 
-              spokenText.includes("fine") || spokenText.includes("salta")
-            ) {
+            } else if (spokenText.includes("no") || spokenText.includes("annulla") || spokenText.includes("fine") || spokenText.includes("salta")) {
               lastActionTime = Date.now();
               isAskingReview = false;
               finishChecklistCompletely();
@@ -244,10 +335,7 @@
             }
           }
 
-          if (
-            spokenText.includes("salta") || spokenText.includes("salta questa") || 
-            spokenText.includes("passa oltre") || spokenText.includes("salto")
-          ) {
+          if (spokenText.includes("salta") || spokenText.includes("salta questa") || spokenText.includes("passa oltre")) {
             lastActionTime = Date.now();
             skipItem();
             break;
@@ -258,32 +346,19 @@
             spokenText.includes("ciec") || spokenText.includes("cek") || spokenText.includes("gec") ||
             spokenText.includes("geck") || spokenText.includes("c'è") || spokenText.includes("c'e") ||
             spokenText.includes("ce") || spokenText.includes("che") || spokenText.includes("cioè") ||
-            spokenText.includes("cioc") || spokenText.includes("ciao") || spokenText.includes("set") ||
-            spokenText.includes("sic") || spokenText.includes("shake") || spokenText.includes("jack") ||
-            spokenText.includes("seck") || spokenText.includes("c'era") || spokenText.includes("c'erano") ||
-            spokenText.includes("cieco") || spokenText.includes("ceco") || spokenText.includes("c'es") ||
-            spokenText.includes("ci e") || spokenText.includes("c e") || spokenText.includes("c'è k") ||
-            spokenText.includes("c'è c") || spokenText.includes("c'è che") || spokenText.includes("c'è il") ||
-            spokenText.includes("chek") || spokenText.includes("chec") || spokenText.includes("tech") ||
-            spokenText.includes("teck") || spokenText.includes("chack") || spokenText.includes("chaz") ||
             spokenText.includes("ok") || spokenText.includes("avanti") || spokenText.includes("passa") ||
             spokenText.includes("fatto") || spokenText.includes("eseguito") || spokenText.includes("va bene") ||
-            spokenText.startsWith("ce") || spokenText.startsWith("ci") || spokenText.startsWith("ge") ||
-            spokenText.startsWith("ja") || spokenText === "c" || spokenText === "k";
+            spokenText.startsWith("ce") || spokenText.startsWith("ci") || spokenText === "c" || spokenText === "k";
 
           if (isCheck) {
             lastActionTime = Date.now();
             nextItem();
             break;
-          } else if (
-            spokenText.includes("ripeti") || spokenText.includes("ancora") || spokenText.includes("come")
-          ) {
+          } else if (spokenText.includes("ripeti") || spokenText.includes("ancora")) {
             lastActionTime = Date.now();
             speakCurrent();
             break;
-          } else if (
-            spokenText.includes("ricomincia") || spokenText.includes("da capo") || spokenText.includes("reset")
-          ) {
+          } else if (spokenText.includes("ricomincia") || spokenText.includes("reset")) {
             lastActionTime = Date.now();
             resetChecklist();
             break;
@@ -305,30 +380,23 @@
       }
 
       isSpeaking = true;
-      if (recognition) {
-        try { recognition.stop(); } catch(e) {}
-      }
+      if (recognition) try { recognition.stop(); } catch(e) {}
 
       document.getElementById('micStatus').innerText = "🔊 Lettura in corso...";
       document.getElementById('micStatus').className = "mic-status";
 
       window.speechSynthesis.cancel();
-      if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
-      }
+      if (window.speechSynthesis.paused) window.speechSynthesis.resume();
 
       setTimeout(() => {
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'it-IT';
-        
         utterance.rate = 1.2;
         utterance.pitch = 1.0;
 
         const voices = window.speechSynthesis.getVoices();
         const itVoice = voices.find(v => v.lang && (v.lang.includes('it') || v.lang.includes('IT')));
-        if (itVoice) {
-          utterance.voice = itVoice;
-        }
+        if (itVoice) utterance.voice = itVoice;
 
         let hasFinished = false;
         const finishSpeech = () => {
@@ -336,36 +404,28 @@
           hasFinished = true;
           isSpeaking = false;
           lastActionTime = Date.now();
-          if (callback) {
-            callback();
-          } else if (isListening) {
-            startListening();
-          }
+          if (callback) callback();
+          else if (isListening) startListening();
         };
 
         utterance.onend = finishSpeech;
-        utterance.onerror = (e) => {
-          finishSpeech();
-        };
+        utterance.onerror = finishSpeech;
 
         window.speechSynthesis.speak(utterance);
 
         const estimatedTime = (text.length * 70) + 800;
         setTimeout(() => {
-          if (isSpeaking && !hasFinished) {
-            finishSpeech();
-          }
+          if (isSpeaking && !hasFinished) finishSpeech();
         }, estimatedTime);
 
       }, 50);
     }
 
     function startChecklist() {
+      if (currentChecklist.length === 0) return;
+      
       requestWakeLock();
-
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.resume();
-      }
+      if ('speechSynthesis' in window) window.speechSynthesis.resume();
 
       currentIndex = 0;
       isListening = true;
@@ -376,8 +436,9 @@
       updateUI();
       
       document.getElementById('startBtn').style.display = 'none';
+      document.getElementById('endControls').style.display = 'none';
 
-      speak(`Avvio ${checklistName}`, () => {
+      speak(`Avvio ${checklistsData[currentChecklistIndex].title}`, () => {
         speakCurrent();
       });
     }
@@ -386,17 +447,14 @@
       if (recognition && isListening && !isSpeaking) {
         try {
           recognition.start();
-          if (isAskingReview) {
-            document.getElementById('micStatus').innerText = "🎙️ In ascolto ('SÌ', 'VERIFICA', 'NO')";
-          } else {
-            document.getElementById('micStatus').innerText = "🎙️ In ascolto ('CHECK', 'SALTA', 'RIPETI')";
-          }
+          document.getElementById('micStatus').innerText = isAskingReview ? "🎙️ In ascolto ('SÌ', 'NO')" : "🎙️ In ascolto ('CHECK', 'SALTA', 'RIPETI')";
           document.getElementById('micStatus').className = "mic-status mic-active";
         } catch(e) {}
       }
     }
 
     function selectItem(index) {
+      if (currentChecklist.length === 0) return;
       currentIndex = index;
       reviewQueue = [];
       reviewIndex = -1;
@@ -411,9 +469,7 @@
         skippedItems.delete(actualIdx);
         advanceReviewQueue();
       } else {
-        if (currentIndex >= 0) {
-          skippedItems.delete(currentIndex);
-        }
+        if (currentIndex >= 0) skippedItems.delete(currentIndex);
         advanceChecklist();
       }
     }
@@ -422,36 +478,30 @@
       if (reviewQueue.length > 0) {
         advanceReviewQueue();
       } else {
-        if (currentIndex >= 0) {
-          skippedItems.add(currentIndex);
-        }
+        if (currentIndex >= 0) skippedItems.add(currentIndex);
         advanceChecklist();
       }
     }
 
     function advanceChecklist() {
-      if (currentIndex < checklist.length - 1) {
+      if (currentIndex < currentChecklist.length - 1) {
         currentIndex++;
         updateUI();
         speakCurrent();
-      } else if (currentIndex === checklist.length - 1) {
+      } else if (currentIndex === currentChecklist.length - 1) {
         handleChecklistEnd();
       }
     }
 
     function handleChecklistEnd() {
       const countSkipped = skippedItems.size;
-      
       if (countSkipped > 0) {
         isAskingReview = true;
-        const parolaIstruzione = countSkipped === 1 ? "istruzione saltata" : "istruzioni saltate";
-        const promptText = `${checklistName} completata. Attenzione: ${countSkipped} ${parolaIstruzione}. Vuoi verificarle?`;
-        
+        const parola = countSkipped === 1 ? "istruzione saltata" : "istruzioni saltate";
         document.getElementById('itemText').innerText = "Verifica istruzioni saltate?";
         document.getElementById('statusText').innerText = `⚠️ ${countSkipped} SALTATE`;
-        
         updateUI();
-        speak(promptText);
+        speak(`Checklist completata. Attenzione: ${countSkipped} ${parola}. Vuoi verificarle?`);
       } else {
         finishChecklistCompletely();
       }
@@ -474,49 +524,59 @@
       } else {
         reviewQueue = [];
         reviewIndex = -1;
-        if (skippedItems.size > 0) {
-          handleChecklistEnd();
-        } else {
-          finishChecklistCompletely();
-        }
+        if (skippedItems.size > 0) handleChecklistEnd();
+        else finishChecklistCompletely();
       }
     }
 
     function finishChecklistCompletely() {
       isListening = false;
       isAskingReview = false;
-      reviewQueue = [];
-      reviewIndex = -1;
       currentIndex = -1;
       
       releaseWakeLock();
-
       if (recognition) try { recognition.stop(); } catch(e) {}
 
-      document.getElementById('itemText').innerText = `${checklistName} Completata!`;
+      document.getElementById('itemText').innerText = "Checklist Completata!";
       document.getElementById('statusText').innerText = "OK";
       document.getElementById('micStatus').innerText = "Microfono spento";
       document.getElementById('micStatus').className = "mic-status";
-      document.getElementById('startBtn').style.display = 'inline-block';
+      document.getElementById('startBtn').style.display = 'none';
       
+      // Mostra pulsanti di avanzamento al termine
+      document.getElementById('endControls').style.display = 'block';
+      if (currentChecklistIndex < checklistsData.length - 1) {
+        document.getElementById('nextChecklistBtn').innerText = `➡️ PASSAPORTA A: ${checklistsData[currentChecklistIndex + 1].title}`;
+        document.getElementById('nextChecklistBtn').style.display = 'inline-block';
+      } else {
+        document.getElementById('nextChecklistBtn').style.display = 'none';
+      }
+
       updateUI();
-      speak(`${checklistName} completata, tutte le voci verificate`);
+      speak("Checklist completata, tutte le voci verificate");
+    }
+
+    function goToNextChecklist() {
+      if (currentChecklistIndex < checklistsData.length - 1) {
+        openChecklist(currentChecklistIndex + 1);
+      }
     }
 
     function speakCurrent() {
-      if (currentIndex >= 0 && currentIndex < checklist.length) {
-        speak(checklist[currentIndex].speak);
+      if (currentIndex >= 0 && currentIndex < currentChecklist.length) {
+        speak(currentChecklist[currentIndex].speak);
       }
     }
 
     function updateUI() {
-      if (currentIndex >= 0 && currentIndex < checklist.length && !isAskingReview) {
-        document.getElementById('itemText').innerText = checklist[currentIndex].item;
-        document.getElementById('statusText').innerText = checklist[currentIndex].status;
+      if (currentIndex >= 0 && currentIndex < currentChecklist.length && !isAskingReview) {
+        document.getElementById('itemText').innerText = currentChecklist[currentIndex].item;
+        document.getElementById('statusText').innerText = currentChecklist[currentIndex].status;
       }
 
-      checklist.forEach((_, idx) => {
+      currentChecklist.forEach((_, idx) => {
         const row = document.getElementById("row-" + idx);
+        if (!row) return;
         row.classList.remove("active-row");
 
         if (idx === currentIndex) {
@@ -539,7 +599,6 @@
       skippedItems.clear();
       
       releaseWakeLock();
-
       if (recognition) try { recognition.stop(); } catch(e) {}
       
       currentIndex = -1;
@@ -548,17 +607,19 @@
       document.getElementById('micStatus').innerText = "Microfono spento";
       document.getElementById('micStatus').className = "mic-status";
       document.getElementById('startBtn').style.display = 'inline-block';
+      document.getElementById('endControls').style.display = 'none';
       
-      checklist.forEach((_, idx) => {
+      currentChecklist.forEach((_, idx) => {
         const row = document.getElementById("row-" + idx);
-        row.classList.remove("active-row", "skipped-row");
+        if (row) row.classList.remove("active-row", "skipped-row");
       });
       
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    // Inizializzazione
+    renderMenu();
   </script>
 
 </body>
