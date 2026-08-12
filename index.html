@@ -2,233 +2,465 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Piper PA-28 Digital Checklist</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Piper PA-28 Digital Checklist System</title>
     <style>
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
-            --text-color: #e0e0e0;
-            --accent-color: #00e676;
-            --warning-color: #ff9800;
-            --danger-color: #f44336;
-            --button-bg: #2c2c2c;
-            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --card-header: #252525;
+            --text-main: #ffffff;
+            --text-sub: #b0b0b0;
+            --accent-green: #00e676;
+            --accent-orange: #ff9800;
+            --accent-blue: #29b6f6;
+            --border-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         body {
-            font-family: var(--font-family);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
+            color: var(--text-main);
             display: flex;
             flex-direction: column;
-            align-items: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 600px;
+            height: 100vh;
+            overflow: hidden;
         }
 
         header {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            margin: 0;
-            color: var(--accent-color);
-        }
-
-        .phase-title {
-            font-size: 1.2rem;
-            color: #888;
-            margin-top: 5px;
-        }
-
-        .checklist-card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            margin-bottom: 20px;
-        }
-
-        .item-row {
+            background-color: var(--card-header);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #333;
         }
 
-        .item-row:last-child {
-            border-bottom: none;
-        }
-
-        .item-label {
+        .title-container h1 {
             font-size: 1.1rem;
-            font-weight: 500;
+            font-weight: 700;
+            color: var(--accent-green);
         }
 
-        .item-action {
-            font-size: 1.1rem;
+        .phase-select {
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            outline: none;
+            max-width: 60%;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #222;
+            height: 6px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--accent-green);
+            width: 0%;
+            transition: width 0.2s ease;
+        }
+
+        main {
+            flex: 1;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-y: auto;
+        }
+
+        .display-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            margin-bottom: 16px;
+        }
+
+        .item-info {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .item-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 14px;
+            line-height: 1.3;
+        }
+
+        .item-target-action {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--accent-green);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .skipped-tag {
+            display: inline-block;
+            background-color: var(--accent-orange);
+            color: #000;
+            font-size: 0.75rem;
             font-weight: bold;
-            color: var(--accent-color);
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
         }
 
-        .controls {
+        .grid-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 12px;
         }
 
-        button {
-            background-color: var(--button-bg);
-            color: var(--text-color);
-            border: none;
-            padding: 15px;
-            border-radius: 8px;
+        .btn-action {
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: 10px;
             font-size: 1rem;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
-            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.1s, transform 0.1s;
         }
 
-        button:active {
-            background-color: #444;
+        .btn-action:active {
+            transform: scale(0.98);
         }
 
-        button.primary {
-            background-color: var(--accent-color);
-            color: #000;
+        .btn-main-confirm {
             grid-column: span 2;
+            background-color: var(--accent-green);
+            color: #000;
+            border: none;
+            font-size: 1.25rem;
+            padding: 20px;
         }
 
-        .progress-bar {
-            width: 100%;
-            background-color: #333;
-            height: 10px;
-            border-radius: 5px;
-            overflow: hidden;
-            margin-bottom: 20px;
+        .btn-skip-item {
+            background-color: #2a2010;
+            color: var(--accent-orange);
+            border-color: #4a3010;
         }
 
-        .progress-fill {
-            height: 100%;
-            background-color: var(--accent-color);
-            width: 0%;
-            transition: width 0.3s ease;
+        .btn-voice-toggle {
+            background-color: #102030;
+            color: var(--accent-blue);
+            border-color: #103050;
+        }
+
+        footer {
+            padding: 10px 16px;
+            background-color: var(--card-header);
+            border-top: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
     <header>
-        <h1>PIPER PA-28 ARCHER/WARRIOR</h1>
-        <div class="phase-title" id="phaseDisplay">Ispezione Pre-Volo</div>
+        <div class="title-container">
+            <h1>PIPER PA-28</h1>
+        </div>
+        <select id="phaseDropdown" class="phase-select" onchange="selectPhase(this.value)">
+            <!-- Le 9 fasi inserite da JavaScript -->
+        </select>
     </header>
 
-    <div class="progress-bar">
-        <div class="progress-fill" id="progressBar"></div>
+    <div class="progress-bar-container">
+        <div id="phaseProgress" class="progress-bar-fill"></div>
     </div>
 
-    <div class="checklist-card" id="checklistContainer">
-        <!-- I controlli della checklist vengono generati qui -->
-    </div>
-
-    <div class="controls">
-        <button id="btnPrev" onclick="prevItem()">Indietro</button>
-        <button id="btnSkip" onclick="skipItem()">Salta</button>
-        <button class="primary" id="btnNext" onclick="nextItem()">CONFERMA / NEXT</button>
-    </div>
-</div>
-
-<script>
-    const checklistData = [
-        {
-            phase: "Prima dell'Avviamento",
-            items: [
-                { item: "Controlli Pre-volo", action: "COMPLETATI" },
-                { item: "Cinture di Sicurezza", action: "ALLACCIATE" },
-                { item: "Freni di Stazionamento", action: "INSERITI" },
-                { item: "Selettore Carburante", action: "SERBATOIO PIÙ PIENO" },
-                { item: "Master Switch", action: "ON" }
-            ]
-        },
-        {
-            phase: "Avviamento Motore",
-            items: [
-                { item: "Miscela", action: "RICCA" },
-                { item: "Pompa Carburante", action: "ON" },
-                { item: "Manetta", action: "APERTURA 1/4" },
-                { item: "Area Elica", action: "LIBERA" },
-                { item: "Chiave Avviamento", action: "START" }
-            ]
-        }
-    ];
-
-    let currentPhaseIndex = 0;
-    let currentItemIndex = 0;
-
-    function updateUI() {
-        const currentPhase = checklistData[currentPhaseIndex];
-        const currentItem = currentPhase.items[currentItemIndex];
-
-        document.getElementById('phaseDisplay').innerText = currentPhase.phase;
-
-        const container = document.getElementById('checklistContainer');
-        container.innerHTML = `
-            <div class="item-row">
-                <span class="item-label">${currentItem.item}</span>
-                <span class="item-action">${currentItem.action}</span>
+    <main>
+        <div>
+            <div id="skippedNotice" class="skipped-tag hidden">ELEMENTO SALTATO IN PRECEDENZA</div>
+            <div class="display-card">
+                <div id="itemIndexDisplay" class="item-info">Elemento 1</div>
+                <div id="itemLabelDisplay" class="item-title">Inizializzazione...</div>
+                <div id="itemActionDisplay" class="item-target-action">---</div>
             </div>
-        `;
+        </div>
 
-        // Aggiorna la barra di avanzamento
-        const totalItems = currentPhase.items.length;
-        const progress = ((currentItemIndex + 1) / totalItems) * 100;
-        document.getElementById('progressBar').style.width = `${progress}%`;
-    }
+        <div class="grid-buttons">
+            <button class="btn-action" onclick="previousStep()">
+                <span>⬅️ Indietro</span>
+            </button>
+            <button class="btn-action btn-skip-item" onclick="skipStep()">
+                <span>⏭️ Salta</span>
+            </button>
+            <button class="btn-action btn-voice-toggle" onclick="toggleVoice()">
+                <span id="voiceStatusLabel">🔊 Lettura: ON</span>
+            </button>
+            <button class="btn-action" onclick="restartCurrentPhase()">
+                <span>🔄 Riavvia Fase</span>
+            </button>
+            <button class="btn-action btn-main-confirm" onclick="confirmStep()">
+                <span>CONFERMA / NEXT ➔</span>
+            </button>
+        </div>
+    </main>
 
-    function nextItem() {
-        const currentPhase = checklistData[currentPhaseIndex];
-        if (currentItemIndex < currentPhase.items.length - 1) {
-            currentItemIndex++;
-        } else if (currentPhaseIndex < checklistData.length - 1) {
-            currentPhaseIndex++;
-            currentItemIndex = 0;
-        } else {
-            alert("Checklist Completata!");
-            return;
+    <footer>
+        <span id="footerPhaseName">Fase 1 di 9</span>
+        <span id="footerSkippedTotal">Saltati: 0</span>
+    </footer>
+
+    <script>
+        // LE 9 FASI DELLA TUA CHECKLIST PIPER PA-28
+        const flightPhases = [
+            {
+                name: "1. Prima dell'Avviamento",
+                items: [
+                    { label: "Ispezione Pre-volo", action: "COMPLETATA" },
+                    { label: "Cinture di Sicurezza", action: "ALLACCIATE" },
+                    { label: "Freni di Stazionamento", action: "INSERITI" },
+                    { label: "Avionica & Carichi Elettrici", action: "OFF" },
+                    { label: "Selettore Carburante", action: "SERBATOIO PIÙ PIENO" }
+                ]
+            },
+            {
+                name: "2. Avviamento Motore",
+                items: [
+                    { label: "Miscela", action: "RICCA" },
+                    { label: "Aria Calda Carburatore", action: "FREDDA" },
+                    { label: "Pompa Elettrica Carburante", action: "ON" },
+                    { label: "Primer", action: "SE NECESSARIO (3 COLPI)" },
+                    { label: "Manetta", action: "APERTURA 1/4 POLLICE" },
+                    { label: "Area Elica", action: "LIBERA" },
+                    { label: "Chiave Avviamento", action: "START" },
+                    { label: "Pressione Olio", action: "VERIFICATA IN AUMENTO" },
+                    { label: "Pompa Elettrica", action: "OFF" },
+                    { label: "Master Switch & Alternatore", action: "ON" },
+                    { label: "Avionica", action: "ON" }
+                ]
+            },
+            {
+                name: "3. Rullaggio (Taxi)",
+                items: [
+                    { label: "Luce di Rullaggio", action: "ON" },
+                    { label: "Freni", action: "TESTATI" },
+                    { label: "Strumenti di Volo", action: "VERIFICATI IN VIRATA" }
+                ]
+            },
+            {
+                name: "4. Prova Motori (Run-Up)",
+                items: [
+                    { label: "Freni di Stazionamento", action: "INSERITI" },
+                    { label: "Temperature & Pressioni Olio", action: "ARCO VERDE" },
+                    { label: "Manetta", action: "2000 RPM" },
+                    { label: "Magneti (L e R)", action: "VERIFICATI (MAX CADUTA 175 RPM)" },
+                    { label: "Aria Calda Carburatore", action: "TEST" },
+                    { label: "Alternatore & Vuoto", action: "VERIFICATI" },
+                    { label: "Manetta", action: "MINIMO, POI 1000 RPM" },
+                    { label: "Frizioni & Comandi di Volo", action: "LIBERI E CORRETTI" }
+                ]
+            },
+            {
+                name: "5. Prima del Decollo",
+                items: [
+                    { label: "Flap", action: "IMPOSTATI PER DECOLLO" },
+                    { label: "Trim", action: "NEUTRO / DECOLLO" },
+                    { label: "Miscela", action: "RICCA" },
+                    { label: "Pompa Elettrica Carburante", action: "ON" },
+                    { label: "Luci Strobe / Decollo", action: "ON" },
+                    { label: "Transponder", action: "ALT / SQUAWK SETTATO" },
+                    { label: "Briefing Decollo", action: "COMPLETATO" },
+                    { label: "Pista e Finale", action: "LIBERI" }
+                ]
+            },
+            {
+                name: "6. Decollo e Salita",
+                items: [
+                    { label: "Manetta", action: "PIENA POTENZA" },
+                    { label: "RPM & Parametri Motore", action: "VERIFICATI" },
+                    { label: "Rotazione", action: "55-60 KIAS" },
+                    { label: "Salita", action: "75-80 KIAS" },
+                    { label: "Flap", action: "RETRATTI (QUOTA SICURA)" },
+                    { label: "Pompa Elettrica Carburante", action: "OFF" }
+                ]
+            },
+            {
+                name: "7. Crociera",
+                items: [
+                    { label: "Potenza di Crociera", action: "IMPOSTATA" },
+                    { label: "Trim", action: "REGOLATO" },
+                    { label: "Miscela", action: "SMAGRITA (SE APPLICABILE)" },
+                    { label: "Parametri Motore", action: "VERIFICATI" }
+                ]
+            },
+            {
+                name: "8. Discesa e Atterraggio",
+                items: [
+                    { label: "ATIS / QNH", action: "SETTATO" },
+                    { label: "Selettore Carburante", action: "SERBATOIO PIÙ PIENO" },
+                    { label: "Pompa Elettrica Carburante", action: "ON" },
+                    { label: "Miscela", action: "RICCA" },
+                    { label: "Flap", action: "SECONDO NECESSITÀ" },
+                    { label: "Velocità Finale", action: "63 KIAS" }
+                ]
+            },
+            {
+                name: "9. Dopo l'Atterraggio e Spegnimento",
+                items: [
+                    { label: "Flap", action: "COMPLETAMENTE RETRATTI" },
+                    { label: "Pompa Elettrica Carburante", action: "OFF" },
+                    { label: "Avionica", action: "OFF" },
+                    { label: "Manetta", action: "MINIMO" },
+                    { label: "Miscela", action: "CUT-OFF" },
+                    { label: "Magneti & Master Switch", action: "OFF" }
+                ]
+            }
+        ];
+
+        let activePhaseIndex = 0;
+        let activeItemIndex = 0;
+        let skippedList = [];
+        let isVoiceActive = true;
+
+        const phaseDropdown = document.getElementById('phaseDropdown');
+        const itemIndexDisplay = document.getElementById('itemIndexDisplay');
+        const itemLabelDisplay = document.getElementById('itemLabelDisplay');
+        const itemActionDisplay = document.getElementById('itemActionDisplay');
+        const phaseProgress = document.getElementById('phaseProgress');
+        const footerPhaseName = document.getElementById('footerPhaseName');
+        const footerSkippedTotal = document.getElementById('footerSkippedTotal');
+        const skippedNotice = document.getElementById('skippedNotice');
+
+        function initApp() {
+            phaseDropdown.innerHTML = '';
+            flightPhases.forEach((phase, idx) => {
+                const option = document.createElement('option');
+                option.value = idx;
+                option.textContent = phase.name;
+                phaseDropdown.appendChild(option);
+            });
+            renderScreen();
         }
-        updateUI();
-    }
 
-    function prevItem() {
-        if (currentItemIndex > 0) {
-            currentItemIndex--;
-        } else if (currentPhaseIndex > 0) {
-            currentPhaseIndex--;
-            currentItemIndex = checklistData[currentPhaseIndex].items.length - 1;
+        function renderScreen() {
+            const phase = flightPhases[activePhaseIndex];
+            const item = phase.items[activeItemIndex];
+
+            phaseDropdown.value = activePhaseIndex;
+            itemIndexDisplay.textContent = `Elemento ${activeItemIndex + 1} di ${phase.items.length}`;
+            itemLabelDisplay.textContent = item.label;
+            itemActionDisplay.textContent = item.action;
+
+            const percentage = ((activeItemIndex + 1) / phase.items.length) * 100;
+            phaseProgress.style.width = `${percentage}%`;
+
+            footerPhaseName.textContent = phase.name;
+            footerSkippedTotal.textContent = `Saltati: ${skippedList.length}`;
+
+            const wasSkipped = skippedList.some(s => s.pIdx === activePhaseIndex && s.iIdx === activeItemIndex);
+            if (wasSkipped) {
+                skippedNotice.classList.remove('hidden');
+            } else {
+                skippedNotice.classList.add('hidden');
+            }
+
+            if (isVoiceActive) {
+                playVoicePrompt(`${item.label}, ${item.action}`);
+            }
         }
-        updateUI();
-    }
 
-    function skipItem() {
-        nextItem();
-    }
+        function playVoicePrompt(phrase) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const speech = new SpeechSynthesisUtterance(phrase);
+                speech.lang = 'it-IT';
+                speech.rate = 1.0;
+                window.speechSynthesis.speak(speech);
+            }
+        }
 
-    // Inizializza l'interfaccia al caricamento
-    updateUI();
-</script>
+        function toggleVoice() {
+            isVoiceActive = !isVoiceActive;
+            document.getElementById('voiceStatusLabel').textContent = isVoiceActive ? "🔊 Lettura: ON" : "🔇 Lettura: OFF";
+            if (!isVoiceActive && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        }
 
+        function confirmStep() {
+            skippedList = skippedList.filter(s => !(s.pIdx === activePhaseIndex && s.iIdx === activeItemIndex));
+            
+            const phase = flightPhases[activePhaseIndex];
+            if (activeItemIndex < phase.items.length - 1) {
+                activeItemIndex++;
+            } else {
+                if (activePhaseIndex < flightPhases.length - 1) {
+                    activePhaseIndex++;
+                    activeItemIndex = 0;
+                } else {
+                    alert("Tutte le 9 fasi della checklist sono state completate!");
+                }
+            }
+            renderScreen();
+        }
+
+        function skipStep() {
+            const alreadyInSkipped = skippedList.some(s => s.pIdx === activePhaseIndex && s.iIdx === activeItemIndex);
+            if (!alreadyInSkipped) {
+                skippedList.push({ pIdx: activePhaseIndex, iIdx: activeItemIndex });
+            }
+            confirmStep();
+        }
+
+        function previousStep() {
+            if (activeItemIndex > 0) {
+                activeItemIndex--;
+            } else if (activePhaseIndex > 0) {
+                activePhaseIndex--;
+                activeItemIndex = flightPhases[activePhaseIndex].items.length - 1;
+            }
+            renderScreen();
+        }
+
+        function selectPhase(index) {
+            activePhaseIndex = parseInt(index, 10);
+            activeItemIndex = 0;
+            renderScreen();
+        }
+
+        function restartCurrentPhase() {
+            activeItemIndex = 0;
+            renderScreen();
+        }
+
+        window.onload = initApp;
+    </script>
 </body>
 </html>
