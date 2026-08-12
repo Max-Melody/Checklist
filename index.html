@@ -366,8 +366,27 @@
     let reviewIndex = -1;
 
     let wakeLock = null;
-    let lastTapTime = 0;
-    let lastTapIndex = -1;
+    let availableVoices = [];
+
+    // Precaricamento Voci di sistema
+    function loadVoices() {
+      if ('speechSynthesis' in window) {
+        availableVoices = window.speechSynthesis.getVoices();
+      }
+    }
+    if ('speechSynthesis' in window) {
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    // Keep-alive continuo contro il congelamento audio dei browser mobile
+    setInterval(() => {
+      if ('speechSynthesis' in window) {
+        if (window.speechSynthesis.speaking && window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+      }
+    }, 1000);
 
     function renderMenu() {
       const menuContainer = document.getElementById('menuButtons');
@@ -426,7 +445,7 @@
         row.id = "row-" + idx;
         row.insertCell(0).innerText = entry.item;
         row.insertCell(1).innerText = entry.status;
-        row.onclick = () => handleRowTap(idx);
+        row.onclick = () => selectItem(idx);
       });
     }
 
@@ -509,7 +528,7 @@
       };
     }
 
-    // MOTORE SINTESI VOCALE SBLOCCATO E CORRETTO
+    // FUNZIONE DI LETTURA VOCALE ULTRA-ROBUSTA
     function speak(text, callback) {
       if (!('speechSynthesis' in window)) {
         if (callback) callback();
@@ -522,8 +541,7 @@
       document.getElementById('micStatus').innerText = "🔊 Lettura in corso...";
       document.getElementById('micStatus').className = "mic-status";
 
-      // Reset completo del motore audio del browser
-      window.speechSynthesis.cancel();
+      // Sblocco e ripresa motore audio senza reset aggressivo
       window.speechSynthesis.resume();
 
       const utterance = new SpeechSynthesisUtterance(text);
@@ -531,8 +549,8 @@
       utterance.rate = 1.1;
       utterance.pitch = 1.0;
 
-      const voices = window.speechSynthesis.getVoices();
-      const itVoice = voices.find(v => v.lang && (v.lang.includes('it') || v.lang.includes('IT')));
+      if (availableVoices.length === 0) loadVoices();
+      const itVoice = availableVoices.find(v => v.lang && (v.lang.includes('it') || v.lang.includes('IT')));
       if (itVoice) utterance.voice = itVoice;
 
       let hasFinished = false;
@@ -551,13 +569,10 @@
       utterance.onend = finishSpeech;
       utterance.onerror = finishSpeech;
 
-      // Un breve ritardo previene l'interruzione su Chrome mobile
-      setTimeout(() => {
-        window.speechSynthesis.speak(utterance);
-      }, 50);
+      window.speechSynthesis.speak(utterance);
 
-      // Timeout di sicurezza nel caso in cui l'evento onend del browser si blocchi
-      const estimatedTime = (text.length * 90) + 1000;
+      // Timeout di sicurezza integrato per evitare blocchi permanenti
+      const estimatedTime = (text.length * 100) + 1200;
       setTimeout(() => {
         if (isSpeaking && !hasFinished) {
           finishSpeech();
@@ -570,9 +585,7 @@
       
       requestWakeLock();
       
-      // Sblocco Audio Safari/Chrome
       if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
         window.speechSynthesis.resume();
       }
 
@@ -601,16 +614,6 @@
           document.getElementById('micStatus').className = "mic-status mic-active";
         } catch(e) {}
       }
-    }
-
-    function handleRowTap(index) {
-      const currentTime = new Date().getTime();
-      const tapLength = currentTime - lastTapTime;
-      if (tapLength < 500 && tapLength > 0 && lastTapIndex === index) {
-        selectItem(index);
-      }
-      lastTapTime = currentTime;
-      lastTapIndex = index;
     }
 
     function selectItem(index) {
