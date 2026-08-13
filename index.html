@@ -340,7 +340,6 @@
             break;
           }
 
-          // Controllo rigoroso sullo stato della riga corrente o comando universale avanti
           let currentStatusMatch = "";
           if (currentIndex >= 0 && currentIndex < currentChecklist.length) {
             currentStatusMatch = currentChecklist[currentIndex].status.toLowerCase();
@@ -353,12 +352,11 @@
             spokenText.includes("eseguito") || spokenText.includes("ok") || 
             spokenText.includes("va bene") || spokenText === "c" || spokenText === "k";
 
-          // Verifica se l'utente ha pronunciato lo stato specifico atteso in questa riga
+          // Controllo dello stato specifico rigoroso
           let isSpecificStatusMatch = false;
           if (currentStatusMatch && spokenText.includes(currentStatusMatch)) {
             isSpecificStatusMatch = true;
           } else {
-            // Controlli mirati sulle parole chiave del tuo elenco se presenti nello stato corrente
             if (currentStatusMatch.includes("on") && (spokenText.includes("on") || spokenText === "on")) isSpecificStatusMatch = true;
             else if (currentStatusMatch.includes("off") && (spokenText.includes("off") || spokenText === "off")) isSpecificStatusMatch = true;
             else if (currentStatusMatch.includes("inserit") && (spokenText.includes("inseriti") || spokenText.includes("inserito"))) isSpecificStatusMatch = true;
