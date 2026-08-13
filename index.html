@@ -5,170 +5,217 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checklist Piper PA-28</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 15px;
-      padding: 0;
-      background-color: #f4f4f9;
-      text-align: center;
-    }
+    body { font-family: Arial, sans-serif; margin: 15px; padding: 0; background-color: #f4f4f9; text-align: center; }
     h1 { color: #333; margin-bottom: 10px; font-size: 22px; }
-    
-    .menu-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-      max-width: 450px;
-      margin: 15px auto;
-    }
-    .btn-menu {
-      padding: 16px;
-      font-size: 18px;
-      font-weight: bold;
-      color: white;
-      background-color: #007bff;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      text-transform: uppercase;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    .menu-grid { display: grid; grid-template-columns: 1fr; gap: 12px; max-width: 450px; margin: 15px auto; }
+    .btn-menu { padding: 16px; font-size: 18px; font-weight: bold; color: white; background-color: #007bff; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
     .btn-menu:active { background-color: #0056b3; }
     .badge-status { font-size: 14px; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 5px; }
-
-    .card {
-      position: sticky;
-      top: 10px;
-      z-index: 100;
-      background: white;
-      border: 2px solid #007bff;
-      border-radius: 10px;
-      padding: 15px;
-      margin: 10px auto;
-      max-width: 400px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    }
+    .card { position: sticky; top: 10px; z-index: 100; background: white; border: 2px solid #007bff; border-radius: 10px; padding: 15px; margin: 10px auto; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
     .item-title { font-size: 20px; font-weight: bold; color: #333; }
     .item-status { font-size: 24px; font-weight: bold; color: #d9534f; margin-top: 8px; }
-    
-    .mic-status {
-      font-size: 14px;
-      font-weight: bold;
-      margin-top: 8px;
-      color: #666;
-    }
+    .mic-status { font-size: 14px; font-weight: bold; margin-top: 8px; color: #666; }
     .mic-active { color: #28a745; }
-
-    .btn {
-      padding: 12px 18px;
-      font-size: 15px;
-      font-weight: bold;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin: 4px;
-    }
+    .btn { padding: 12px 18px; font-size: 15px; font-weight: bold; color: white; border: none; border-radius: 8px; cursor: pointer; margin: 4px; }
     .btn-start { background-color: #28a745; width: 85%; margin-top: 10px; }
     .btn-repeat { background-color: #ffc107; color: #333; }
     .btn-reset { background-color: #6c757d; }
     .btn-home { background-color: #17a2b8; }
     .btn-next { background-color: #28a745; font-size: 16px; padding: 14px 20px; margin-top: 10px; }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-      background: white;
-    }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
     th, td { border: 1px solid #ccc; padding: 12px 8px; text-align: left; }
-    
-    .section-header-row td {
-      background-color: #e9ecef;
-      font-weight: bold;
-      text-align: center;
-      color: #333;
-    }
-
-    .active-row { 
-      background-color: #d4edda !important; 
-      font-weight: bold; 
-      border-left: 5px solid #28a745;
-      color: #000 !important;
-    }
-    .skipped-row { 
-      background-color: #dc3545 !important; 
-      color: white !important; 
-      font-weight: bold; 
-      border-left: 5px solid #a71d2a;
-    }
-
-    .end-controls {
-      display: none;
-      margin-top: 15px;
-      padding: 10px;
-      background: #e9ecef;
-      border-radius: 8px;
-    }
+    .section-header-row td { background-color: #e9ecef; font-weight: bold; text-align: center; color: #333; }
+    .active-row { background-color: #d4edda !important; font-weight: bold; border-left: 5px solid #28a745; color: #000 !important; }
+    .skipped-row { background-color: #dc3545 !important; color: white !important; font-weight: bold; border-left: 5px solid #a71d2a; }
+    .end-controls { display: none; margin-top: 15px; padding: 10px; background: #e9ecef; border-radius: 8px; }
   </style>
 </head>
 <body>
 
-  <!-- VISTA 1: MENU PRINCIPALE -->
   <div id="menuView">
     <h1>PIPER PA-28 CHECKLIST</h1>
     <div class="menu-grid" id="menuButtons"></div>
   </div>
 
-  <!-- VISTA 2: ESECUZIONE CHECKLIST -->
   <div id="checklistView" style="display: none;">
     <h1 id="checklistTitle">CHECKLIST</h1>
-
     <div class="card">
       <div id="itemText" class="item-title">Premi AVVIA per iniziare</div>
       <div id="statusText" class="item-status">---</div>
       <div id="micStatus" class="mic-status">Microfono spento</div>
       <button id="startBtn" class="btn btn-start" onclick="startChecklist()">🎙️ AVVIA CHECKLIST</button>
-      
       <div id="endControls" class="end-controls">
         <button id="nextChecklistBtn" class="btn btn-next" onclick="goToNextChecklist()">➡️ PROSSIMA CHECKLIST</button> <br>
         <button class="btn btn-home" onclick="showMenu()">📋 MENU PRINCIPALE</button>
       </div>
     </div>
-
     <div>
       <button class="btn btn-repeat" onclick="speakCurrent()">🔊 Ripeti</button>
       <button class="btn btn-reset" onclick="resetChecklist()">🔄 Ricomincia</button>
       <button class="btn btn-home" onclick="showMenu()">📋 Menu</button>
     </div>
-
     <table id="checklistTable">
-      <thead>
-        <tr>
-          <th>Elemento</th>
-          <th>Stato</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Elemento</th><th>Stato</th></tr></thead>
       <tbody id="tableBody"></tbody>
     </table>
   </div>
 
   <script>
+    // Inserisco qui l'array completo di tutti i tuoi dati
     const checklistsData = [
-      { id: 0, title: "1. CONTROLLI CABINA", data: [{ item: "Documenti pilota", status: "A BORDO", speak: "Documenti pilota: A bordo" }, { item: "Documenti aeromobile", status: "A BORDO", speak: "Documenti aeromobile: A bordo" }, { item: "Estintore / cassetta pronto soccorso", status: "A BORDO", speak: "Estintore e cassetta pronto soccorso: A bordo" }, { item: "ELT", status: "Verificare OFF", speak: "I-El-Ti: Verificare off" }, { item: "Giubbotti salvagente / Canotto / raft", status: "COME RICHIESTO", speak: "Giubbotti salvagente e canotto raft: Come richiesto" }, { item: "Equipagg. per sosta Tacchi Olio", status: "COME RICHIESTO", speak: "Equipaggiamento per sosta, tacchi e olio: Come richiesto" }, { item: "Comandi volo", status: "LIBERI E CORRETTI", speak: "Comandi di volo: Liberi e corretti" }, { item: "Miscela", status: "CHIUSA", speak: "Miscela: Chiusa" }, { item: "Magneti", status: "OFF", speak: "Magneti: Off" }, { item: "Interruttori elettrici", status: "OFF", speak: "Interruttori elettrici: Off" }, { item: "Radio e avionica", status: "OFF", speak: "Radio e avionica: Off" }, { item: "Circuit breakers", status: "INSERITI", speak: "sircuit brechers: Inseriti" }, { item: "Batteria", status: "ON", speak: "Batteria: On" }, { item: "Carburante televel", status: "VERIFICARE", speak: "Carburante televel: Verificare" }, { item: "Pannello annunciatore", status: "Spie ON", speak: "Pannello annunciatore: Spie on" }, { item: "Batteria", status: "OFF", speak: "Batteria: Off" }, { item: "Trim", status: "Zero", speak: "Trim: Zero" }, { item: "Parabrezza e finestrini", status: "PULITI", speak: "Parabrezza e finestrini: Puliti" }] },
-      { id: 1, title: "2. AVVIAMENTO", data: [{ item: "Telefoni / disp elettronici", status: "OFF / MOD VOLO", speak: "Telefoni e dispositivi elettronici: Off o modalità volo" }, { item: "Briefing passeggeri", status: "COME RICHIESTO", speak: "Briefing passeggeri: Come richiesto" }, { item: "Porta", status: "CHIUSA NO BLOCCATA", speak: "Porta: Chiusa non bloccata" }, { item: "Freno parcheggio", status: "INSERITO", speak: "Freno parcheggio: Inserito" }, { item: "Sedile", status: "REGOLATO E BLOCCATO", speak: "Sedile: Regolato e bloccato" }, { item: "Interruttori elettrici", status: "OFF", speak: "Interruttori elettrici: Off" }, { item: "Ventilazione cabina", status: "OFF", speak: "Ventilazione cabina: Off" }, { item: "Circuit breakers", status: "INSERITI", speak: "sircuit brechers: Inseriti" }, { item: "Master batteria / alternatore", status: "ON", speak: "Master batteria e alternatore: On" }, { item: "Rotating beacon", status: "ON", speak: "roting bicon: On" }, { item: "Aria carburatore", status: "OFF", speak: "Aria carburatore: Off" }, { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" }, { item: "Serbatoio", status: "MENO PIENO", speak: "Serbatoio: Meno pieno" }, { item: "Trim elettrico", status: "OFF", speak: "Trim elettrico: Off" }, { item: "Autopilot", status: "OFF", speak: "Autopilot: Off" }, { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: On" }, { item: "Manetta", status: "1 cm", speak: "Manetta: Un centimetro", section: "AVVIAMENTO A FREDDO" }, { item: "Primer", status: "3 / 4 volte poi BLOCCARE", speak: "Primer: Tre o quattro volte, poi bloccare" }, { item: "Via dall'elica", status: "ANNUNCIARE", speak: "Via dall'elica: Annunciare" }, { item: "Starter", status: "ON", speak: "Starter: On" }, { item: "Manetta", status: "1.200 RPM", speak: "Manetta: 1200 erre-pi-em" }, { item: "Pressione OLIO", status: "ARCO VERDE ENTRO 30 \"", speak: "Pressione olio: Arco verde entro trenta secondi" }, { item: "Pompa elettrica carburante", status: "OFF", speak: "Pompa elettrica carburante: Off" }] },
-      { id: 2, title: "3. POST AVVIAMENTO", data: [{ item: "Amperometro", status: "VERIF. CON FARO", speak: "Amperometro: Verificare con faro" }, { item: "Avionica", status: "ON", speak: "Avionica: On" }, { item: "Ventilazione cabina", status: "COME RICHIESTO", speak: "Ventilazione cabina: Come richiesto" }, { item: "Radio e avionica", status: "ON", speak: "Radio e avionica: On" }, { item: "Radio", status: "VOLUME / SQUELCH", speak: "Radio: Volume e squelch" }, { item: "Intercom", status: "VOLUME / SQUELCH", speak: "Intercom: Volume e squelch" }, { item: "Transponder", status: "CODICE / STAND BY", speak: "Transponder: Codice, stand by" }, { item: "VOR / GPS", status: "IMPOSTATI", speak: "VOR e GPS: Impostati" }, { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" }, { item: "Anemometro", status: "0 KTS / 0 MPH", speak: "Anemometro: Zero nodi o zero emme pi acca" }, { item: "Orizzonte artificiale", status: "0° BANK / SAGOMINA", speak: "Orizzonte artificiale: Zero gradi bank, sagomina" }, { item: "Altimetro", status: "QNH +/- 75 ft", speak: "Altimetro: Q-N-H più o meno settantacinque fit" }, { item: "Coordinatore di virata", status: "NO BANDIERINA", speak: "Coordinatore di virata: Nessuna bandierina" }, { item: "Girodirezionale", status: "ALLINEARE CON BUSSOLA", speak: "Girodirezionale: Allineare con bussola" }, { item: "Variometro", status: "0 FT/MIN", speak: "Variometro: Zero fit al minuto" }, { item: "Luci navigazione", status: "COME RICHIESTO", speak: "Luci di navigazione: Come richiesto" }] },
-      { id: 3, title: "4. RULLAGGIO E RUN UP", data: [{ item: "Freni", status: "PROVARE", speak: "Freni: Provare", section: "RULLAGGIO" }, { item: "Bussola / Gyro: Piede DESTRO", status: "Valori AUMENTANO", speak: "Bussola e giairo con piede destro: Valori aumentano" }, { item: "Bussola / Gyro: Piede SINISTRO", status: "Valori DIMINUISCONO", speak: "Bussola e giairo con piede sinistro: Valori diminuiscono" }, { item: "Virometro: Piede DESTRO", status: "Virom. Destra / PALLINA a Sinistra", speak: "Virometro con piede destro: Virometro a destra, pallina a sinistra" }, { item: "Virometro: Piede SINISTRO", status: "Virom. Sinistra / PALLINA a Destra", speak: "Virometro con piede sinistro: Virometro a sinistra, pallina a destra" }, { item: "Freno parcheggio", status: "INSERITO", speak: "Freno parcheggio: Inserito", section: "PROVA MOTORE / MAGNETI" }, { item: "Serbatoio", status: "PIÙ PIENO", speak: "Serbatoio: Più pieno" }, { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" }, { item: "Manetta", status: "2.000 RPM", speak: "Manetta: 2000 erre-pi-em" }, { item: "Aria calda carburatore (drop 100 rpm)", status: "PROVARE", speak: "Aria calda carburatore, drop cento erre-pi-em: Provare" }, { item: "Miscela", status: "PROVARE", speak: "Miscela: Provare" }, { item: "Magneti: Magnete 1 test", status: "max drop 175 rpm / diff. 50 rpm", speak: "Magneti, test magnete uno: calo massimo centosettantacinque erre-pi-em, differenza massima cinquanta erre-pi-em" }, { item: "Magneti: Magnete 2 test", status: "max drop 175 rpm / diff. 50 rpm", speak: "Magneti, test magnete due: calo massimo centosettantacinque erre-pi-em, differenza massima cinquanta erre-pi-em" }, { item: "Pressione olio", status: "ARCO VERDE", speak: "Pressione olio: Arco verde" }, { item: "Pressione carburante", status: "ARCO VERDE", speak: "Pressione carburante: Arco verde" }, { item: "Vacuum", status: "4,9 – 5,1 In Hg", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno pollici di mercurio" }, { item: "Pannello annunciatore", status: "SPIE SPENTE", speak: "Pannello annunciatore: Spie spente" }, { item: "Manetta", status: "CONTROLLO MINIMO", speak: "Manetta: Controllo minimo" }, { item: "Manetta", status: "1.200 RPM", speak: "Manetta: 1200 erre-pi-em" }] },
-      { id: 4, title: "5. PRE DECOLLO", data: [{ item: "Porta", status: "CHIUSA E BLOCCATA", speak: "Porta: Chiusa e bloccata" }, { item: "Cinture e spallacci", status: "ALLACCIATE", speak: "Cinture e spallacci: Allacciate" }, { item: "Comandi di volo", status: "LIBERI E CORRETTI", speak: "Comandi di volo: Liberi e corretti" }, { item: "Magneti", status: "ENTRAMBI", speak: "Magneti: Entrambi" }, { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" }, { item: "Aria carburatore", status: "FREDDA", speak: "Aria carburatore: Fredda" }, { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: On" }, { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" }, { item: "Quantità carburante", status: "VERIFICARE", speak: "Quantità carburante: Verificare" }, { item: "Flaps", status: "SET", speak: "Flaps: Set" }, { item: "Trim", status: "POSIZIONE DECOLLO", speak: "Trim: Posizione decollo" }, { item: "Memo Decollo", status: "VR 60 / VX 76 / VY 85 Mph", speak: "Memo decollo: VR sessanta emme pi acca, VX settantasei emme pi acca, VY ottantacinque emme pi acca", section: "PROMEMORIA VELOCITÀ" }, { item: "Max Efficienza", status: "80 Mph (SENZA FLAPS)", speak: "Massima efficienza: Ottanta emme pi acca senza flaps" }] },
-      { id: 5, title: "6. ALLINEAMENTO, TAKE OFF E SALITA", data: [{ item: "Manetta", status: "1.500 RPM", speak: "Manetta: 1500 erre-pi-em", section: "ALLINEAMENTO" }, { item: "Faro atterraggio", status: "ON", speak: "Faro atterraggio: On" }, { item: "Transponder", status: "ON / ALT", speak: "Transponder: On o Alt" }, { item: "Bussola / Gyro", status: "QFU", speak: "Bussola e giairo: Q-F-U" }, { item: "Full throttle RPM Min", status: "2.275 RPM", speak: "ful trattol erre-pi-em minimo: 2275 erre-pi-em" }, { item: "Full throttle", status: "Min 2275", speak: "ful trattol: Minimo 2275 erre-pi-em", section: "TAKE OFF" }, { item: "Engine instrument", status: "All green", speak: "engin instrument: All green" }, { item: "Runway clean", status: "Clean", speak: "ranuei clin: Pista libera clin" }, { item: "Airspeed", status: "Alive", speak: "Airspeed: alaiv, anemometro attivo" }, { item: "60 mph", status: "Rotation", speak: "Sessanta emme pi acca: tecoff rotation" }, { item: "75 mph", status: "Climb VX", speak: "Settantasei emme pi acca: claimb VX" }, { item: "80 mph", status: "Climb VY", speak: "Ottanta emme pi acca: claimb VY" }, { item: "Flaps", status: "RETRATTI", speak: "Flaps: Retratti", section: "POST DECOLLO - SALITA" }, { item: "Faro atterraggio", status: "OFF", speak: "Faro atterraggio: Off" }, { item: "Pompa elettrica carburante", status: "1.000 ft – OFF – verif. press", speak: "Pompa elettrica carburante: A mille fit, off, verificare pressione" }, { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" }, { item: "Altimetro", status: "QNH / QNE", speak: "Altimetro: Q-N-H o Q-N-E" }] },
-      { id: 6, title: "7. CROCIERA", data: [{ item: "Manetta", status: "COME RICHIESTO", speak: "Manetta: Come richiesto" }, { item: "Miscela", status: "COME RICHIESTO", speak: "Miscela: Come richiesto" }, { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" }, { item: "Gyro e bussola", status: "ALLINEARE", speak: "giairo e bussola: Allineare" }, { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" }, { item: "Pompa elettrica", status: "ON", speak: "Pompa elettrica: On", section: "CAMBIO SERBATOIO" }, { item: "Serbatoio", status: "CAMBIARE", speak: "Serbatoio: Cambiare" }, { item: "Pressione carburante", status: "VERIFICARE PRESSIONE", speak: "Pressione carburante: Verificare pressione" }, { item: "Pompa elettrica", status: "OFF", speak: "Pompa elettrica: Off" }, { item: "Pressione carburante", status: "VERIFICARE PRESSIONE", speak: "Pressione carburante: Verificare pressione" }] },
-      { id: 7, title: "8. DISCESA E AVVICINAMENTO", data: [{ item: "Cinture e spallacci", status: "ALLACCIATE", speak: "Cinture e spallacci: Allacciate" }, { item: "Informazioni meteo", status: "RICEVUTE", speak: "Informazioni meteo: Ricevute" }, { item: "Altimetro", status: "QNH / QFE", speak: "Altimetro: Q-N-H o Q-F-E" }, { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" }, { item: "Briefing atterraggio", status: "PISTA / CIRCUITO / QUOTA", speak: "Briefing atterraggio: Pista in uso, circuito e quota circuito" }, { item: "Memo Riattaccata", status: "ASSETTO + POTENZA + ARIA CARBURATORE OFF", speak: "Memo riattaccata: Assetto, tutta potenza, aria carburatore off", section: "MEMO RIATTACCATA" }, { item: "Velocità e Flaps", status: "VX 76 Mph – FLAPS GRADUALI", speak: "VX settantasei emme pi acca, retrarre flaps gradualmente" }] },
-      { id: 8, title: "9. SOTTOVENTO E FINALE", data: [{ item: "Aria carburatore", status: "ON", speak: "Aria carburatore: On" }, { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" }, { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: On" }, { item: "Faro atterraggio", status: "ON", speak: "Faro atterraggio: On" }, { item: "Flaps", status: "10°", speak: "Flaps: Dieci gradi" }, { item: "Serbatoio", status: "PIÙ PIENO", speak: "Serbatoio: Più pieno" }, { item: "Flaps", status: "25° / 40°", speak: "Flaps: Venticinque o quaranta gradi" }, { item: "Memo atterraggio", status: "VREF 74 Mph (flaps 40°) / VREF 77 Mph (flaps 25°) + Xwind", speak: "Memo atterraggio: V-ref settantaquattro emme pi acca con flaps quaranta gradi, oppure V-ref settantasette emme pi acca con flaps venticinque gradi, più crosuind" }, { item: "Aria carburatore", status: "OFF", speak: "Aria carburatore: Off" }] }
+      { id: 0, title: "1. CONTROLLI CABINA", data: [
+        { item: "Documenti pilota", status: "A BORDO", speak: "Documenti pilota: A bordo" },
+        { item: "Documenti aeromobile", status: "A BORDO", speak: "Documenti aeromobile: A bordo" },
+        { item: "Estintore / cassetta pronto soccorso", status: "A BORDO", speak: "Estintore e cassetta pronto soccorso: A bordo" },
+        { item: "ELT", status: "Verificare OFF", speak: "I-El-Ti: Verificare off" },
+        { item: "Giubbotti salvagente / Canotto / raft", status: "COME RICHIESTO", speak: "Giubbotti salvagente e canotto raft: Come richiesto" },
+        { item: "Equipagg. per sosta Tacchi Olio", status: "COME RICHIESTO", speak: "Equipaggiamento per sosta, tacchi e olio: Come richiesto" },
+        { item: "Comandi volo", status: "LIBERI E CORRETTI", speak: "Comandi di volo: Liberi e corretti" },
+        { item: "Miscela", status: "CHIUSA", speak: "Miscela: Chiusa" },
+        { item: "Magneti", status: "OFF", speak: "Magneti: Off" },
+        { item: "Interruttori elettrici", status: "OFF", speak: "Interruttori elettrici: Off" },
+        { item: "Radio e avionica", status: "OFF", speak: "Radio e avionica: Off" },
+        { item: "Circuit breakers", status: "INSERITI", speak: "sircuit brechers: Inseriti" },
+        { item: "Batteria", status: "ON", speak: "Batteria: On" },
+        { item: "Carburante televel", status: "VERIFICARE", speak: "Carburante televel: Verificare" },
+        { item: "Pannello annunciatore", status: "Spie ON", speak: "Pannello annunciatore: Spie on" },
+        { item: "Batteria", status: "OFF", speak: "Batteria: Off" },
+        { item: "Trim", status: "Zero", speak: "Trim: Zero" },
+        { item: "Parabrezza e finestrini", status: "PULITI", speak: "Parabrezza e finestrini: Puliti" }
+      ]},
+      { id: 1, title: "2. AVVIAMENTO", data: [
+        { item: "Telefoni / disp elettronici", status: "OFF / MOD VOLO", speak: "Telefoni e dispositivi elettronici: Off o modalità volo" },
+        { item: "Briefing passeggeri", status: "COME RICHIESTO", speak: "Briefing passeggeri: Come richiesto" },
+        { item: "Porta", status: "CHIUSA NO BLOCCATA", speak: "Porta: Chiusa non bloccata" },
+        { item: "Freno parcheggio", status: "INSERITO", speak: "Freno parcheggio: Inserito" },
+        { item: "Sedile", status: "REGOLATO E BLOCCATO", speak: "Sedile: Regolato e bloccato" },
+        { item: "Interruttori elettrici", status: "OFF", speak: "Interruttori elettrici: Off" },
+        { item: "Ventilazione cabina", status: "OFF", speak: "Ventilazione cabina: Off" },
+        { item: "Circuit breakers", status: "INSERITI", speak: "sircuit brechers: Inseriti" },
+        { item: "Master batteria / alternatore", status: "ON", speak: "Master batteria e alternatore: On" },
+        { item: "Rotating beacon", status: "ON", speak: "roting bicon: On" },
+        { item: "Aria carburatore", status: "OFF", speak: "Aria carburatore: Off" },
+        { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" },
+        { item: "Serbatoio", status: "MENO PIENO", speak: "Serbatoio: Meno pieno" },
+        { item: "Trim elettrico", status: "OFF", speak: "Trim elettrico: Off" },
+        { item: "Autopilot", status: "OFF", speak: "Autopilot: Off" },
+        { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: On" },
+        { item: "Manetta", status: "1 cm", speak: "Manetta: Un centimetro", section: "AVVIAMENTO A FREDDO" },
+        { item: "Primer", status: "3 / 4 volte poi BLOCCARE", speak: "Primer: Tre o quattro volte, poi bloccare" },
+        { item: "Via dall'elica", status: "ANNUNCIARE", speak: "Via dall'elica: Annunciare" },
+        { item: "Starter", status: "ON", speak: "Starter: On" },
+        { item: "Manetta", status: "1.200 RPM", speak: "Manetta: 1200 erre-pi-em" },
+        { item: "Pressione OLIO", status: "ARCO VERDE ENTRO 30 \"", speak: "Pressione olio: Arco verde entro trenta secondi" },
+        { item: "Pompa elettrica carburante", status: "OFF", speak: "Pompa elettrica carburante: Off" }
+      ]},
+      { id: 2, title: "3. POST AVVIAMENTO", data: [
+        { item: "Amperometro", status: "VERIF. CON FARO", speak: "Amperometro: Verificare con faro" },
+        { item: "Avionica", status: "ON", speak: "Avionica: On" },
+        { item: "Ventilazione cabina", status: "COME RICHIESTO", speak: "Ventilazione cabina: Come richiesto" },
+        { item: "Radio e avionica", status: "ON", speak: "Radio e avionica: On" },
+        { item: "Radio", status: "VOLUME / SQUELCH", speak: "Radio: Volume e squelch" },
+        { item: "Intercom", status: "VOLUME / SQUELCH", speak: "Intercom: Volume e squelch" },
+        { item: "Transponder", status: "CODICE / STAND BY", speak: "Transponder: Codice, stand by" },
+        { item: "VOR / GPS", status: "IMPOSTATI", speak: "VOR e GPS: Impostati" },
+        { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" },
+        { item: "Anemometro", status: "0 KTS / 0 MPH", speak: "Anemometro: Zero nodi o zero emme pi acca" },
+        { item: "Orizzonte artificiale", status: "0° BANK / SAGOMINA", speak: "Orizzonte artificiale: Zero gradi bank, sagomina" },
+        { item: "Altimetro", status: "QNH +/- 75 ft", speak: "Altimetro: Q-N-H più o meno settantacinque fit" },
+        { item: "Coordinatore di virata", status: "NO BANDIERINA", speak: "Coordinatore di virata: Nessuna bandierina" },
+        { item: "Girodirezionale", status: "ALLINEARE CON BUSSOLA", speak: "Girodirezionale: Allineare con bussola" },
+        { item: "Variometro", status: "0 FT/MIN", speak: "Variometro: Zero fit al minuto" },
+        { item: "Luci navigazione", status: "COME RICHIESTO", speak: "Luci di navigazione: Come richiesto" }
+      ]},
+      { id: 3, title: "4. RULLAGGIO E RUN UP", data: [
+        { item: "Freni", status: "PROVARE", speak: "Freni: Provare", section: "RULLAGGIO" },
+        { item: "Bussola / Gyro: Piede DESTRO", status: "Valori AUMENTANO", speak: "Bussola e giairo con piede destro: Valori aumentano" },
+        { item: "Bussola / Gyro: Piede SINISTRO", status: "Valori DIMINUISCONO", speak: "Bussola e giairo con piede sinistro: Valori diminuiscono" },
+        { item: "Virometro: Piede DESTRO", status: "Virom. Destra / PALLINA a Sinistra", speak: "Virometro con piede destro: Virometro a destra, pallina a sinistra" },
+        { item: "Virometro: Piede SINISTRO", status: "Virom. Sinistra / PALLINA a Destra", speak: "Virometro con piede sinistro: Virometro a sinistra, pallina a destra" },
+        { item: "Freno parcheggio", status: "INSERITO", speak: "Freno parcheggio: Inserito", section: "PROVA MOTORE / MAGNETI" },
+        { item: "Serbatoio", status: "PIÙ PIENO", speak: "Serbatoio: Più pieno" },
+        { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
+        { item: "Manetta", status: "2.000 RPM", speak: "Manetta: 2000 erre-pi-em" },
+        { item: "Aria calda carburatore (drop 100 rpm)", status: "PROVARE", speak: "Aria calda carburatore, drop cento erre-pi-em: Provare" },
+        { item: "Miscela", status: "PROVARE", speak: "Miscela: Provare" },
+        { item: "Magneti: Magnete 1 test", status: "max drop 175 rpm / diff. 50 rpm", speak: "Magneti, test magnete uno: calo massimo centosettantacinque erre-pi-em, differenza massima cinquanta erre-pi-em" },
+        { item: "Magneti: Magnete 2 test", status: "max drop 175 rpm / diff. 50 rpm", speak: "Magneti, test magnete due: calo massimo centosettantacinque erre-pi-em, differenza massima cinquanta erre-pi-em" },
+        { item: "Pressione olio", status: "ARCO VERDE", speak: "Pressione olio: Arco verde" },
+        { item: "Pressione carburante", status: "ARCO VERDE", speak: "Pressione carburante: Arco verde" },
+        { item: "Vacuum", status: "4,9 – 5,1 In Hg", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno pollici di mercurio" },
+        { item: "Pannello annunciatore", status: "SPIE SPENTE", speak: "Pannello annunciatore: Spie spente" },
+        { item: "Manetta", status: "CONTROLLO MINIMO", speak: "Manetta: Controllo minimo" },
+        { item: "Manetta", status: "1.200 RPM", speak: "Manetta: 1200 erre-pi-em" }
+      ]},
+      { id: 4, title: "5. PRE DECOLLO", data: [
+        { item: "Porta", status: "CHIUSA E BLOCCATA", speak: "Porta: Chiusa e bloccata" },
+        { item: "Cinture e spallacci", status: "ALLACCIATE", speak: "Cinture e spallacci: Allacciate" },
+        { item: "Comandi di volo", status: "LIBERI E CORRETTI", speak: "Comandi di volo: Liberi e corretti" },
+        { item: "Magneti", status: "ENTRAMBI", speak: "Magneti: Entrambi" },
+        { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" },
+        { item: "Aria carburatore", status: "FREDDA", speak: "Aria carburatore: Fredda" },
+        { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: On" },
+        { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
+        { item: "Quantità carburante", status: "VERIFICARE", speak: "Quantità carburante: Verificare" },
+        { item: "Flaps", status: "SET", speak: "Flaps: Set" },
+        { item: "Trim", status: "POSIZIONE DECOLLO", speak: "Trim: Posizione decollo" },
+        { item: "Memo Decollo", status: "VR 60 / VX 76 / VY 85 Mph", speak: "Memo decollo: VR sessanta emme pi acca, VX settantasei emme pi acca, VY ottantacinque emme pi acca", section: "PROMEMORIA VELOCITÀ" },
+        { item: "Max Efficienza", status: "80 Mph (SENZA FLAPS)", speak: "Massima efficienza: Ottanta emme pi acca senza flaps" }
+      ]},
+      { id: 5, title: "6. ALLINEAMENTO, TAKE OFF E SALITA", data: [
+        { item: "Manetta", status: "1.500 RPM", speak: "Manetta: 1500 erre-pi-em", section: "ALLINEAMENTO" },
+        { item: "Faro atterraggio", status: "ON", speak: "Faro atterraggio: On" },
+        { item: "Transponder", status: "ON / ALT", speak: "Transponder: On o Alt" },
+        { item: "Bussola / Gyro", status: "QFU", speak: "Bussola e giairo: Q-F-U" },
+        { item: "Full throttle RPM Min", status: "2.275 RPM", speak: "ful trattol erre-pi-em minimo: 2275 erre-pi-em" },
+        { item: "Full throttle", status: "Min 2275", speak: "ful trattol: Minimo 2275 erre-pi-em", section: "TAKE OFF" },
+        { item: "Engine instrument", status: "All green", speak: "engin instrument: All green" },
+        { item: "Runway clean", status: "Clean", speak: "ranuei clin: Pista libera clin" },
+        { item: "Airspeed", status: "Alive", speak: "Airspeed: alaiv, anemometro attivo" },
+        { item: "60 mph", status: "Rotation", speak: "Sessanta emme pi acca: tecoff rotation" },
+        { item: "75 mph", status: "Climb VX", speak: "Settantasei emme pi acca: claimb VX" },
+        { item: "80 mph", status: "Climb VY", speak: "Ottanta emme pi acca: claimb VY" },
+        { item: "Flaps", status: "RETRATTI", speak: "Flaps: Retratti", section: "POST DECOLLO - SALITA" },
+        { item: "Faro atterraggio", status: "OFF", speak: "Faro atterraggio: Off" },
+        { item: "Pompa elettrica carburante", status: "1.000 ft – OFF – verif. press", speak: "Pompa elettrica carburante: A mille fit, off, verificare pressione" },
+        { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
+        { item: "Altimetro", status: "QNH / QNE", speak: "Altimetro: Q-N-H o Q-N-E" }
+      ]},
+      { id: 6, title: "7. CROCIERA", data: [
+        { item: "Manetta", status: "COME RICHIESTO", speak: "Manetta: Come richiesto" },
+        { item: "Miscela", status: "COME RICHIESTO", speak: "Miscela: Come richiesto" },
+        { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" },
+        { item: "Gyro e bussola", status: "ALLINEARE", speak: "giairo e bussola: Allineare" },
+        { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
+        { item: "Pompa elettrica", status: "ON", speak: "Pompa elettrica: On", section: "CAMBIO SERBATOIO" },
+        { item: "Serbatoio", status: "CAMBIARE", speak: "Serbatoio: Cambiare" },
+        { item: "Pressione carburante", status: "VERIFICARE PRESSIONE", speak: "Pressione carburante: Verificare pressione" },
+        { item: "Pompa elettrica", status: "OFF", speak: "Pompa elettrica: Off" },
+        { item: "Pressione carburante", status: "VERIFICARE PRESSIONE", speak: "Pressione carburante: Verificare pressione" }
+      ]},
+      { id: 7, title: "8. DISCESA E AVVICINAMENTO", data: [
+        { item: "Cinture e spallacci", status: "ALLACCIATE", speak: "Cinture e spallacci: Allacciate" },
+        { item: "Informazioni meteo", status: "RICEVUTE", speak: "Informazioni meteo: Ricevute" },
+        { item: "Altimetro", status: "QNH / QFE", speak: "Altimetro: Q-N-H o Q-F-E" },
+        { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
+        { item: "Briefing atterraggio", status: "PISTA / CIRCUITO / QUOTA", speak: "Briefing atterraggio: Pista in uso, circuito e quota circuito" },
+        { item: "Memo Riattaccata", status: "ASSETTO + POTENZA + ARIA CARBURATORE OFF", speak: "Memo riattaccata: Assetto, tutta potenza, aria carburatore off", section: "MEMO RIATTACCATA" },
+        { item: "Velocità e Flaps", status: "VX 76 Mph – FLAPS GRADUALI", speak: "VX settantasei emme pi acca, retrarre flaps gradualmente" }
+      ]},
+      { id: 8, title: "9. SOTTOVENTO E FINALE", data: [
+        { item: "Aria carburatore", status: "ON", speak: "Aria carburatore: On" },
+        { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" },
+        { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: On" },
+        { item: "Faro atterraggio", status: "ON", speak: "Faro atterraggio: On" },
+        { item: "Flaps", status: "10°", speak: "Flaps: Dieci gradi" },
+        { item: "Serbatoio", status: "PIÙ PIENO", speak: "Serbatoio: Più pieno" },
+        { item: "Flaps", status: "25° / 40°", speak: "Flaps: Venticinque o quaranta gradi" },
+        { item: "Memo atterraggio", status: "VREF 74 Mph (flaps 40°) / VREF 77 Mph (flaps 25°) + Xwind", speak: "Memo atterraggio: V-ref settantaquattro emme pi acca con flaps quaranta gradi, oppure V-ref settantasette emme pi acca con flaps venticinque gradi, più crosuind" },
+        { item: "Aria carburatore", status: "OFF", speak: "Aria carburatore: Off" }
+      ]}
     ];
 
+    // Variabili di stato
     let currentChecklistIndex = 0;
     let currentChecklist = [];
     let currentIndex = -1;
@@ -177,21 +224,20 @@
     let isSpeaking = false;
     let lastActionTime = 0;
     let skippedItems = new Set();
-    
     let isAskingReview = false;
     let isAskingNext = false;
     let reviewQueue = [];
     let reviewIndex = -1;
-
     let wakeLock = null;
 
+    // Funzioni Core
     function renderMenu() {
       const menuContainer = document.getElementById('menuButtons');
       menuContainer.innerHTML = '';
       checklistsData.forEach((c, idx) => {
         const btn = document.createElement('button');
         btn.className = 'btn-menu';
-        btn.innerHTML = `<span>${c.title}</span> <span class="badge-status">${c.data.length > 0 ? 'PRONTA' : 'VUOTA'}</span>`;
+        btn.innerHTML = `<span>${c.title}</span> <span class="badge-status">PRONTA</span>`;
         btn.onclick = () => openChecklist(idx);
         menuContainer.appendChild(btn);
       });
@@ -210,7 +256,6 @@
       document.getElementById('checklistTitle').innerText = checklistsData[index].title;
       document.getElementById('menuView').style.display = 'none';
       document.getElementById('checklistView').style.display = 'block';
-      
       buildTable();
       resetChecklist();
     }
@@ -218,32 +263,24 @@
     function buildTable() {
       const tbody = document.getElementById('tableBody');
       tbody.innerHTML = '';
-      if (currentChecklist.length === 0) return;
-
       currentChecklist.forEach((entry, idx) => {
         if (entry.section) {
-          let headerRow = tbody.insertRow();
-          headerRow.className = "section-header-row";
-          let cell = headerRow.insertCell(0);
+          let row = tbody.insertRow();
+          row.className = "section-header-row";
+          let cell = row.insertCell(0);
           cell.colSpan = 2;
           cell.innerText = entry.section;
         }
-
         let row = tbody.insertRow();
         row.id = "row-" + idx;
         row.insertCell(0).innerText = entry.item;
         row.insertCell(1).innerText = entry.status;
-        row.ondblclick = () => selectItem(idx);
       });
     }
 
-    async function requestWakeLock() {
-      try { if ('wakeLock' in navigator && wakeLock === null) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
-    }
-
-    function releaseWakeLock() {
-      if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); }
-    }
+    async function requestWakeLock() { try { if ('wakeLock' in navigator && wakeLock === null) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} }
+    
+    function releaseWakeLock() { if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); } }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -251,196 +288,102 @@
       recognition.lang = 'it-IT';
       recognition.continuous = true;
       recognition.interimResults = true;
-
       recognition.onresult = (event) => {
         if (isSpeaking || (Date.now() - lastActionTime < 600)) return;
-
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           const spokenText = event.results[i][0].transcript.trim().toLowerCase();
-
+          
+          // Logica per passaggio checklist
           if (isAskingNext) {
-            if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("ok") || spokenText.includes("passa") || spokenText.includes("avanti")) {
+            if (spokenText.includes("si") || spokenText.includes("ok") || spokenText.includes("passa")) {
               lastActionTime = Date.now();
               isAskingNext = false;
               goToNextChecklist();
-              break;
-            } else if (spokenText.includes("no") || spokenText.includes("fine") || spokenText.includes("basta")) {
-              lastActionTime = Date.now();
-              isAskingNext = false;
-              resetChecklist();
-              break;
+              return;
             }
           }
 
+          // Logica per revisione
           if (isAskingReview) {
-            if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("verifica") || spokenText.includes("verifichiamo") || spokenText.includes("verificare") || spokenText.includes("ok")) {
+            if (spokenText.includes("si") || spokenText.includes("verifica")) {
               lastActionTime = Date.now();
               isAskingReview = false;
               startReviewMode();
-              break;
-            } else if (spokenText.includes("no") || spokenText.includes("annulla") || spokenText.includes("fine") || spokenText.includes("salta")) {
+              return;
+            } else if (spokenText.includes("no") || spokenText.includes("basta")) {
               lastActionTime = Date.now();
               isAskingReview = false;
               finishChecklistCompletely();
-              break;
+              return;
             }
           }
 
-          if (spokenText.includes("salta") || spokenText.includes("passa oltre")) {
-            lastActionTime = Date.now();
-            skipItem();
-            break;
-          }
-
-          const isCheck = 
-            spokenText.includes("check") || spokenText.includes("ceck") || spokenText.includes("cec") ||
-            spokenText.includes("ciec") || spokenText.includes("cek") || spokenText.includes("gec") ||
-            spokenText.includes("geck") || spokenText.includes("c'è") || spokenText.includes("c'e") ||
-            spokenText.includes("ce") || spokenText.includes("che") || spokenText.includes("cioè") ||
-            spokenText.includes("ok") || spokenText.includes("avanti") || spokenText.includes("passa") ||
-            spokenText.includes("fatto") || spokenText.includes("eseguito") || spokenText.includes("va bene") ||
-            spokenText.startsWith("ce") || spokenText.startsWith("ci") || spokenText === "c" || spokenText === "k";
-
-          if (isCheck) {
-            lastActionTime = Date.now();
-            nextItem();
-            break;
-          } else if (spokenText.includes("ripeti") || spokenText.includes("ancora")) {
-            lastActionTime = Date.now();
-            speakCurrent();
-            break;
-          } else if (spokenText.includes("ricomincia") || spokenText.includes("reset")) {
-            lastActionTime = Date.now();
-            resetChecklist();
-            break;
-          }
+          // Navigazione normale
+          if (spokenText.includes("salta")) { skipItem(); return; }
+          const isCheck = spokenText.includes("check") || spokenText.includes("ok") || spokenText.includes("fatto") || spokenText.includes("vai");
+          if (isCheck) { nextItem(); return; }
+          if (spokenText.includes("ripeti")) { speakCurrent(); return; }
+          if (spokenText.includes("reset")) { resetChecklist(); return; }
         }
       };
-
-      recognition.onend = () => {
-        if (isListening && !isSpeaking) {
-          try { recognition.start(); } catch(e) {}
-        }
-      };
+      recognition.onend = () => { if (isListening && !isSpeaking) try { recognition.start(); } catch(e) {} };
     }
 
     function speak(text, callback) {
-      if (!('speechSynthesis' in window)) {
-        if (callback) callback();
-        return;
-      }
       isSpeaking = true;
       if (recognition) try { recognition.stop(); } catch(e) {}
-      document.getElementById('micStatus').innerText = "🔊 Lettura in corso...";
-      document.getElementById('micStatus').className = "mic-status";
+      document.getElementById('micStatus').innerText = "🔊 Lettura...";
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'it-IT';
-      utterance.rate = 1.2; 
-      utterance.pitch = 1.0;
-      utterance.onend = () => {
-        isSpeaking = false;
-        lastActionTime = Date.now();
-        if (callback) callback();
-        else if (isListening) startListening();
-      };
-      utterance.onerror = () => { isSpeaking = false; if (isListening) startListening(); };
+      utterance.rate = 1.2;
+      utterance.onend = () => { isSpeaking = false; lastActionTime = Date.now(); if (callback) callback(); else if (isListening) startListening(); };
       window.speechSynthesis.speak(utterance);
     }
 
     function startChecklist() {
-      if (currentChecklist.length === 0) return;
       requestWakeLock();
       currentIndex = 0;
       isListening = true;
-      isAskingReview = false;
-      isAskingNext = false;
-      reviewQueue = [];
-      reviewIndex = -1;
       skippedItems.clear();
       updateUI();
       document.getElementById('startBtn').style.display = 'none';
-      document.getElementById('endControls').style.display = 'none';
-      const title = checklistsData[currentChecklistIndex].title;
-      speak(`Avvio checklist ${title}. ${currentChecklist[0].speak}`);
+      speak(`Avvio checklist. ${currentChecklist[0].speak}`);
     }
 
-    function startListening() {
-      if (recognition && isListening && !isSpeaking) {
-        requestWakeLock();
-        try {
-          recognition.start();
-          document.getElementById('micStatus').innerText = "🎙️ In ascolto";
-          document.getElementById('micStatus').className = "mic-status mic-active";
-        } catch(e) {}
-      }
-    }
-
-    function selectItem(index) {
-      currentIndex = index;
-      reviewQueue = [];
-      reviewIndex = -1;
-      isAskingReview = false;
-      updateUI();
-      speakCurrent();
-    }
+    function startListening() { if (recognition && isListening && !isSpeaking) { try { recognition.start(); document.getElementById('micStatus').innerText = "🎙️ In ascolto"; } catch(e) {} } }
 
     function nextItem() {
-      if (reviewQueue.length > 0) {
-        skippedItems.delete(reviewQueue[reviewIndex]);
-        advanceReviewQueue();
-      } else {
-        if (currentIndex >= 0) skippedItems.delete(currentIndex);
-        advanceChecklist();
-      }
+      if (reviewQueue.length > 0) advanceReviewQueue();
+      else advanceChecklist();
     }
 
     function skipItem() {
       if (reviewQueue.length > 0) advanceReviewQueue();
-      else {
-        if (currentIndex >= 0) skippedItems.add(currentIndex);
-        advanceChecklist();
-      }
+      else { if (currentIndex >= 0) skippedItems.add(currentIndex); advanceChecklist(); }
     }
 
     function advanceChecklist() {
-      if (currentIndex < currentChecklist.length - 1) {
-        currentIndex++;
-        updateUI();
-        speakCurrent();
-      } else if (currentIndex === currentChecklist.length - 1) {
-        handleChecklistEnd();
-      }
+      if (currentIndex < currentChecklist.length - 1) { currentIndex++; updateUI(); speakCurrent(); }
+      else handleChecklistEnd();
     }
 
     function handleChecklistEnd() {
       if (skippedItems.size > 0) {
         isAskingReview = true;
-        document.getElementById('itemText').innerText = "Verifica istruzioni saltate?";
-        updateUI();
-        speak(`Attenzione, ci sono istruzioni saltate. Vuoi verificarle?`);
-      } else {
-        finishChecklistCompletely();
-      }
+        speak("Ci sono istruzioni saltate. Vuoi verificarle?");
+      } else finishChecklistCompletely();
     }
 
     function finishChecklistCompletely() {
       isAskingReview = false;
-      currentIndex = -1;
-      updateUI();
       document.getElementById('endControls').style.display = 'block';
-
       if (currentChecklistIndex < checklistsData.length - 1) {
         isAskingNext = true;
         const nextTitle = checklistsData[currentChecklistIndex + 1].title;
         document.getElementById('nextChecklistBtn').innerText = `➡️ PASSA A: ${nextTitle}`;
-        document.getElementById('nextChecklistBtn').style.display = 'inline-block';
         speak(`Checklist completata. Passo alla checklist ${nextTitle}?`);
-      } else {
-        isListening = false;
-        releaseWakeLock();
-        speak("Checklist completata, tutte le voci verificate");
-      }
+      } else speak("Checklist completata.");
     }
 
     function startReviewMode() {
@@ -453,59 +396,26 @@
 
     function advanceReviewQueue() {
       reviewIndex++;
-      if (reviewIndex < reviewQueue.length) {
-        currentIndex = reviewQueue[reviewIndex];
-        updateUI();
-        speakCurrent();
-      } else {
-        reviewQueue = [];
-        reviewIndex = -1;
-        if (skippedItems.size > 0) handleChecklistEnd();
-        else finishChecklistCompletely();
-      }
+      if (reviewIndex < reviewQueue.length) { currentIndex = reviewQueue[reviewIndex]; updateUI(); speakCurrent(); }
+      else { reviewQueue = []; if (skippedItems.size > 0) handleChecklistEnd(); else finishChecklistCompletely(); }
     }
 
-    function goToNextChecklist() {
-      if (currentChecklistIndex < checklistsData.length - 1) openChecklist(currentChecklistIndex + 1);
-    }
+    function goToNextChecklist() { if (currentChecklistIndex < checklistsData.length - 1) openChecklist(currentChecklistIndex + 1); }
 
-    function speakCurrent() {
-      if (currentIndex >= 0 && currentIndex < currentChecklist.length) speak(currentChecklist[currentIndex].speak);
-    }
+    function speakCurrent() { if (currentIndex >= 0) speak(currentChecklist[currentIndex].speak); }
 
     function resetChecklist() {
-      isListening = false;
-      isSpeaking = false;
-      isAskingReview = false;
-      isAskingNext = false;
-      currentIndex = -1;
-      reviewQueue = [];
-      reviewIndex = -1;
-      skippedItems.clear();
-      releaseWakeLock();
-      if (recognition) try { recognition.stop(); } catch(e) {}
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-      document.getElementById('itemText').innerText = "Premi AVVIA per iniziare";
-      document.getElementById('statusText').innerText = "---";
-      document.getElementById('startBtn').style.display = 'inline-block';
-      document.getElementById('endControls').style.display = 'none';
-      updateUI();
+      isListening = false; currentIndex = -1; skippedItems.clear(); document.getElementById('startBtn').style.display = 'inline-block'; document.getElementById('endControls').style.display = 'none'; updateUI();
     }
 
     function updateUI() {
-      if (currentIndex >= 0 && currentIndex < currentChecklist.length && !isAskingReview && !isAskingNext) {
-        document.getElementById('itemText').innerText = currentChecklist[currentIndex].item;
-        document.getElementById('statusText').innerText = currentChecklist[currentIndex].status;
-      }
+      if (currentIndex >= 0) { document.getElementById('itemText').innerText = currentChecklist[currentIndex].item; document.getElementById('statusText').innerText = currentChecklist[currentIndex].status; }
       currentChecklist.forEach((_, idx) => {
         const row = document.getElementById('row-' + idx);
-        if (!row) return;
-        if (idx === currentIndex && !isAskingReview && !isAskingNext) row.className = "active-row";
-        else if (skippedItems.has(idx)) row.className = "skipped-row";
-        else row.className = "";
+        if (row) {
+          row.className = (idx === currentIndex && !isAskingReview && !isAskingNext) ? "active-row" : (skippedItems.has(idx) ? "skipped-row" : "");
+        }
       });
-      const activeRow = document.getElementById('row-' + currentIndex);
-      if (activeRow) activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     
     renderMenu();
