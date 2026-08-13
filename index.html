@@ -61,7 +61,6 @@
   </div>
 
   <script>
-    // Inserisco qui l'array completo di tutti i tuoi dati
     const checklistsData = [
       { id: 0, title: "1. CONTROLLI CABINA", data: [
         { item: "Documenti pilota", status: "A BORDO", speak: "Documenti pilota: A bordo" },
@@ -215,7 +214,6 @@
       ]}
     ];
 
-    // Variabili di stato
     let currentChecklistIndex = 0;
     let currentChecklist = [];
     let currentIndex = -1;
@@ -230,7 +228,6 @@
     let reviewIndex = -1;
     let wakeLock = null;
 
-    // Funzioni Core
     function renderMenu() {
       const menuContainer = document.getElementById('menuButtons');
       menuContainer.innerHTML = '';
@@ -279,7 +276,6 @@
     }
 
     async function requestWakeLock() { try { if ('wakeLock' in navigator && wakeLock === null) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} }
-    
     function releaseWakeLock() { if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); } }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -293,7 +289,6 @@
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           const spokenText = event.results[i][0].transcript.trim().toLowerCase();
           
-          // Logica per passaggio checklist
           if (isAskingNext) {
             if (spokenText.includes("si") || spokenText.includes("ok") || spokenText.includes("passa")) {
               lastActionTime = Date.now();
@@ -303,7 +298,6 @@
             }
           }
 
-          // Logica per revisione
           if (isAskingReview) {
             if (spokenText.includes("si") || spokenText.includes("verifica")) {
               lastActionTime = Date.now();
@@ -318,7 +312,6 @@
             }
           }
 
-          // Navigazione normale
           if (spokenText.includes("salta")) { skipItem(); return; }
           const isCheck = spokenText.includes("check") || spokenText.includes("ok") || spokenText.includes("fatto") || spokenText.includes("vai");
           if (isCheck) { nextItem(); return; }
