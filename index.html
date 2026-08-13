@@ -72,7 +72,6 @@
           audioCtx.resume();
         }
         let now = audioCtx.currentTime;
-        
         let osc1 = audioCtx.createOscillator();
         let gain1 = audioCtx.createGain();
         osc1.type = 'sine';
@@ -218,13 +217,13 @@
         { item: "Manetta", status: "COME RICHIESTO", speak: "Manetta: Come richiesto" },
         { item: "Miscela", status: "COME RICHIESTO", speak: "Miscela: Come richiesto" },
         { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" },
-        { item: "Gyro e bussola", status: "ALLINEARE", speak: "giairo e bussola: Allineare" },
+        { item: "Girodirezionale e bussola", status: "ALLINEARE", speak: "Girodirezionale e bussola: Allineare" },
         { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
         { item: "Pompa elettrica", status: "ON", speak: "Pompa elettrica: On", section: "CAMBIO SERBATOIO" },
-        { item: "Serbatoio", status: "CAMBIARE", speak: "Serbatoio: Cambiare" },
-        { item: "Pressione carburante", status: "VERIFICARE PRESSIONE", speak: "Pressione carburante: Verificare pressione" },
+        { item: "Cambiare", status: "SERBATOIO", speak: "Cambiare serbatoio" },
+        { item: "Verificare pressione", status: "PRESSIONE", speak: "Verificare pressione" },
         { item: "Pompa elettrica", status: "OFF", speak: "Pompa elettrica: Off" },
-        { item: "Pressione carburante", status: "VERIFICARE PRESSIONE", speak: "Pressione carburante: Verificare pressione" }
+        { item: "Verificare pressione", status: "PRESSIONE", speak: "Verificare pressione" }
       ]},
       { id: 7, title: "8. DISCESA E AVVICINAMENTO", data: [
         { item: "Cinture e spallacci", status: "ALLACCIATE", speak: "Cinture e spallacci: Allacciate" },
@@ -333,7 +332,7 @@
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
       recognition.lang = 'it-IT';
-      recognition.continuous = false; // Disattivato il continuous per evitare riavvii continui e bip di sistema
+      recognition.continuous = false;
       recognition.interimResults = false;
       
       recognition.onresult = (event) => {
@@ -439,38 +438,57 @@
 
       recognition.onerror = () => {
         if (isListening && !isSpeaking) {
-          setTimeout(startListening, 300);
+          setTimeout(startListening, 400);
         }
       };
 
       recognition.onend = () => {
         if (isListening && !isSpeaking) {
-          setTimeout(startListening, 300);
+          setTimeout(startListening, 400);
         }
       };
     }
 
     function speak(text, callback) {
       if (!('speechSynthesis' in window)) { if (callback) callback(); return; }
+      
+      // Ferma subito il microfono prima di parlare per evitare sovrapposizioni e bip indesiderati
       isSpeaking = true;
-      if (recognition) try { recognition.stop(); } catch(e) {}
+      if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+      }
+
       document.getElementById('micStatus').innerText = "🔊 Lettura in corso...";
       document.getElementById('micStatus').className = "mic-status";
       window.speechSynthesis.cancel();
+
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'it-IT';
       utterance.rate = 1.2;
       utterance.pitch = 1.0;
+      
       utterance.onend = () => {
         isSpeaking = false;
         lastActionTime = Date.now();
-        if (callback) callback();
-        else if (isListening) startListening();
+        if (callback) {
+          callback();
+        } else if (isListening) {
+          // Attendi un piccolo momento di silenzio prima di riaprire l'ascolto vocale
+          setTimeout(() => {
+            if (isListening && !isSpeaking) startListening();
+          }, 350);
+        }
       };
+
       utterance.onerror = () => { 
         isSpeaking = false; 
-        if (isListening) startListening(); 
+        if (isListening) {
+          setTimeout(() => {
+            if (isListening && !isSpeaking) startListening();
+          }, 350);
+        }
       };
+
       window.speechSynthesis.speak(utterance);
     }
 
