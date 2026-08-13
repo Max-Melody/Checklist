@@ -107,21 +107,21 @@
         { item: "Pompa elettrica", status: "OFF", speak: "Pompa elettrica: Off" }
       ]},
       { id: 2, title: "3. POST AVVIAMENTO", data: [
-        { item: "Amperometro", status: "VERIF. CON FARO", speak: "Amperometro: Verificare con faro" },
+        { item: "Amperometro", status: "VERIFICATO CON FARO", speak: "Amperometro: Verificato con faro" },
         { item: "Avionica", status: "ON", speak: "Avionica: On" },
         { item: "Ventilazione cabina", status: "COME RICHIESTO", speak: "Ventilazione cabina: Come richiesto" },
         { item: "Radio e avionica", status: "ON", speak: "Radio e avionica: On" },
-        { item: "Radio", status: "VOLUME / SQUELCH", speak: "Radio: Volume e squelch" },
-        { item: "Intercom", status: "VOLUME / SQUELCH", speak: "Intercom: Volume e squelch" },
-        { item: "Transponder", status: "CODICE / STAND BY", speak: "Transponder: Codice, stand by" },
+        { item: "Radio", status: "VOLUME/SQUELCH", speak: "Radio: Volume e squelch" },
+        { item: "Intercom", status: "VOLUME/SQUELCH", speak: "Intercom: Volume e squelch" },
+        { item: "Transponder", status: "CODICE E STAND BY", speak: "Transponder: Codice e stand by" },
         { item: "VOR / GPS", status: "IMPOSTATI", speak: "VOR e GPS: Impostati" },
         { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" },
-        { item: "Anemometro", status: "0 KTS / 0 MPH", speak: "Anemometro: Zero nodi o zero emme pi acca" },
-        { item: "Orizzonte artificiale", status: "0° BANK / SAGOMINA", speak: "Orizzonte artificiale: Zero gradi bank, sagomina" },
-        { item: "Altimetro", status: "QNH +/- 75 ft", speak: "Altimetro: Q-N-H più o meno settantacinque fit" },
+        { item: "Anemometro", status: "0", speak: "Anemometro: Zero" },
+        { item: "Orizzonte artificiale", status: "ALLINEARE", speak: "Orizzonte artificiale: Allineare" },
+        { item: "Altimetro", status: "QNH +/- 75 piedi", speak: "Altimetro: Q-N-H più o meno settantacinque piedi" },
         { item: "Coordinatore di virata", status: "NO BANDIERINA", speak: "Coordinatore di virata: Nessuna bandierina" },
-        { item: "Girodirezionale", status: "ALLINEARE CON BUSSOLA", speak: "Girodirezionale: Allineare con bussola" },
-        { item: "Variometro", status: "0 FT/MIN", speak: "Variometro: Zero fit al minuto" },
+        { item: "Girodirezionale", status: "ALLINEATO CON BUSSOLA", speak: "Girodirezionale: Allineato con bussola" },
+        { item: "Variometro", status: "0", speak: "Variometro: Zero" },
         { item: "Luci navigazione", status: "COME RICHIESTO", speak: "Luci di navigazione: Come richiesto" }
       ]},
       { id: 3, title: "4. RULLAGGIO E RUN UP", data: [
@@ -504,7 +504,10 @@
       } else {
         reviewQueue = [];
         reviewIndex = -1;
-        finishChecklistCompletely();
+        // Ripristinato l'annuncio prima di chiudere la checklist completamente
+        speak("Tutte le istruzioni completate.", () => {
+          finishChecklistCompletely();
+        });
       }
     }
 
