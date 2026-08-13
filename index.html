@@ -194,7 +194,7 @@
         { item: "Memo Decollo", status: "VR 60 Mph / VX 76 / VY 85", speak: "Memo decollo: V-R sessanta emme pi acca, V-X settantasei, V-Y ottantacinque", section: "PROMEMORIA VELOCITÀ" },
         { item: "Max Efficienza", status: "80 (SENZA FLAPS)", speak: "Massima efficienza: Ottanta senza flaps" }
       ]},
-      { id: 5, title: "6. ALLINEAMENTO, TAKE OFF E SALITA", data: [
+      { id: 5, title: "6. ALLINEAMENTO DECOLLO E SALITA", data: [
         { item: "Manetta", status: "1.500 RPM", speak: "Manetta: 1500 erre-pi-em", section: "ALLINEAMENTO" },
         { item: "Faro atterraggio", status: "ON", speak: "Faro atterraggio: On" },
         { item: "Transponder", status: "ON / ALT", speak: "Transponder: On o Alt" },
@@ -230,19 +230,22 @@
         { item: "Informazioni meteo", status: "RICEVUTE", speak: "Informazioni meteo: Ricevute" },
         { item: "Altimetro", status: "QNH / QFE", speak: "Altimetro: Q-N-H o Q-F-E" },
         { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
-        { item: "Briefing atterraggio", status: "PISTA / CIRCUITO / QUOTA", speak: "Briefing atterraggio: Pista in uso, circuito e quota circuito" },
-        { item: "Memo Riattaccata", status: "ASSETTO + POTENZA + ARIA CARBURATORE OFF", speak: "Memo riattaccata: Assetto, tutta potenza, aria carburatore off", section: "MEMO RIATTACCATA" },
-        { item: "Velocità e Flaps", status: "VX 76 Mph – FLAPS GRADUALI", speak: "VX settantasei emme pi acca, retrarre flaps gradualmente" }
+        { item: "Aria carburatore", status: "ON", speak: "Aria carburatore: On" },
+        { item: "Autopilota e trim elettrico", status: "OFF", speak: "Autopilota e trim elettrico: Off" },
+        { item: "Briefing atterraggio: Pista in uso", status: "PISTA IN USO", speak: "Briefing atterraggio: Pista in uso" },
+        { item: "Briefing atterraggio: Circuito", status: "CIRCUITO DX / SX", speak: "Briefing atterraggio: Circuito destro o sinistro" },
+        { item: "Briefing atterraggio: Quota", status: "QUOTA CIRCUITO", speak: "Briefing atterraggio: Quota circuito" },
+        { item: "Memo Riattaccata", status: "ASSETTO + TUTTA POTENZA + ARIA CARBURATORE OFF + VX 76 – FLAPS retrarre GRADUALMENTE", speak: "Memo riattaccata: Assetto, tutta potenza, aria carburatore off, V-X settantasei, flaps retrarre gradualmente", section: "MEMO RIATTACCATA" }
       ]},
       { id: 8, title: "9. SOTTOVENTO E FINALE", data: [
-        { item: "Aria carburatore", status: "ON", speak: "Aria carburatore: On" },
-        { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" },
-        { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: On" },
         { item: "Faro atterraggio", status: "ON", speak: "Faro atterraggio: On" },
+        { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" },
         { item: "Flaps", status: "10°", speak: "Flaps: Dieci gradi" },
-        { item: "Serbatoio", status: "PIÙ PIENO", speak: "Serbatoio: Più pieno" },
-        { item: "Flaps", status: "25° / 40°", speak: "Flaps: Venticinque o quaranta gradi" },
-        { item: "Memo atterraggio", status: "VREF 74 Mph (flaps 40°) / VREF 77 Mph (flaps 25°) + Xwind", speak: "Memo atterraggio: V-ref settantaquattro emme pi acca con flaps quaranta gradi, oppure V-ref settantasette emme pi acca con flaps venticinque gradi, più crosuind" },
+        { item: "Pompa elettrica", status: "ON", speak: "Pompa elettrica carburante: On" },
+        { item: "Serbatoio", status: "PIU' PIENO", speak: "Serbatoio: Più pieno" },
+        { item: "Base e finale Flaps", status: "25° / 40°", speak: "Base e finale Flaps: Venticinque o quaranta gradi" },
+        { item: "memo atterraggio: Flaps 40°", status: "76 + Xwind", speak: "Memo atterraggio flaps quaranta: settantasei più crosuind" },
+        { item: "memo atterraggio: Flaps 25°", status: "80 + Xwind", speak: "Memo atterraggio flaps venticinque: ottanta più crosuind" },
         { item: "Aria carburatore", status: "OFF", speak: "Aria carburatore: Off" }
       ]}
     ];
@@ -452,7 +455,6 @@
     function speak(text, callback) {
       if (!('speechSynthesis' in window)) { if (callback) callback(); return; }
       
-      // Ferma subito il microfono prima di parlare per evitare sovrapposizioni e bip indesiderati
       isSpeaking = true;
       if (recognition) {
         try { recognition.stop(); } catch(e) {}
@@ -473,7 +475,6 @@
         if (callback) {
           callback();
         } else if (isListening) {
-          // Attendi un piccolo momento di silenzio prima di riaprire l'ascolto vocale
           setTimeout(() => {
             if (isListening && !isSpeaking) startListening();
           }, 350);
