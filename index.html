@@ -63,24 +63,23 @@
   <script>
     const checklistsData = [
       { id: 0, title: "1. CONTROLLI CABINA", data: [
-        { item: "Documenti pilota", status: "A BORDO", speak: "Documenti pilota: A bordo" },
-        { item: "Documenti aeromobile", status: "A BORDO", speak: "Documenti aeromobile: A bordo" },
-        { item: "Estintore / cassetta pronto soccorso", status: "A BORDO", speak: "Estintore e cassetta pronto soccorso: A bordo" },
-        { item: "ELT", status: "Verificare OFF", speak: "I-El-Ti: Verificare off" },
-        { item: "Giubbotti salvagente / Canotto / raft", status: "COME RICHIESTO", speak: "Giubbotti salvagente e canotto raft: Come richiesto" },
-        { item: "Equipagg. per sosta Tacchi Olio", status: "COME RICHIESTO", speak: "Equipaggiamento per sosta, tacchi e olio: Come richiesto" },
+        { item: "Documenti pilota e aeromobile", status: "A BORDO", speak: "Documenti pilota e aeromobile: A bordo" },
+        { item: "Estintore/cassetta pronto soccorso", status: "A BORDO", speak: "Estintore e cassetta pronto soccorso: A bordo" },
+        { item: "ELT verificare", status: "OFF", speak: "I-El-Ti verificare: Off" },
+        { item: "Giubbotti salvagente / canotto", status: "COME RICHIESTO", speak: "Giubbotti salvagente e canotto: Come richiesto" },
+        { item: "Equipagg. Per sosta Tacchi Olio", status: "COME RICHIESTO", speak: "Equipaggiamento per sosta, tacchi e olio: Come richiesto" },
         { item: "Comandi volo", status: "LIBERI E CORRETTI", speak: "Comandi di volo: Liberi e corretti" },
         { item: "Miscela", status: "CHIUSA", speak: "Miscela: Chiusa" },
         { item: "Magneti", status: "OFF", speak: "Magneti: Off" },
         { item: "Interruttori elettrici", status: "OFF", speak: "Interruttori elettrici: Off" },
-        { item: "Radio e avionica", status: "OFF", speak: "Radio e avionica: Off" },
-        { item: "Circuit breakers", status: "INSERITI", speak: "sircuit brechers: Inseriti" },
+        { item: "Circuit breakers", status: "INSERITO", speak: "sircuit brechers: Inserito" },
         { item: "Batteria", status: "ON", speak: "Batteria: On" },
-        { item: "Carburante televel", status: "VERIFICARE", speak: "Carburante televel: Verificare" },
-        { item: "Pannello annunciatore", status: "Spie ON", speak: "Pannello annunciatore: Spie on" },
+        { item: "Radio e avionica", status: "ON e FREQUENZE", speak: "Radio e avionica: On e frequenze" },
+        { item: "Carburante indicatori", status: "VERIFICARE", speak: "Carburante indicatori: Verificare" },
+        { item: "Pannello annunciatore spie", status: "ON", speak: "Pannello annunciatore spie: On" },
+        { item: "Radio e avionica", status: "OFF", speak: "Radio e avionica: Off" },
         { item: "Batteria", status: "OFF", speak: "Batteria: Off" },
-        { item: "Trim", status: "Zero", speak: "Trim: Zero" },
-        { item: "Parabrezza e finestrini", status: "PULITI", speak: "Parabrezza e finestrini: Puliti" }
+        { item: "Trim", status: "Zero", speak: "Trim: Zero" }
       ]},
       { id: 1, title: "2. AVVIAMENTO", data: [
         { item: "Telefoni / disp elettronici", status: "OFF / MOD VOLO", speak: "Telefoni e dispositivi elettronici: Off o modalità volo" },
@@ -105,7 +104,7 @@
         { item: "Starter", status: "ON", speak: "Starter: On" },
         { item: "Manetta", status: "1.200 RPM", speak: "Manetta: 1200 erre-pi-em" },
         { item: "Pressione OLIO", status: "ARCO VERDE ENTRO 30 \"", speak: "Pressione olio: Arco verde entro trenta secondi" },
-        { item: "Pompa elettrica carburante", status: "OFF", speak: "Pompa elettrica carburante: Off" }
+        { item: "Pompa elettrica", status: "OFF", speak: "Pompa elettrica: Off" }
       ]},
       { id: 2, title: "3. POST AVVIAMENTO", data: [
         { item: "Amperometro", status: "VERIF. CON FARO", speak: "Amperometro: Verificare con faro" },
@@ -345,14 +344,12 @@
             currentStatusMatch = currentChecklist[currentIndex].status.toLowerCase();
           }
 
-          // Comando universale sempre valido per andare avanti
           const isUniversalForward = 
             spokenText.includes("avanti") || spokenText.includes("check") || 
             spokenText.includes("ceck") || spokenText.includes("fatto") || 
             spokenText.includes("eseguito") || spokenText.includes("ok") || 
             spokenText.includes("va bene") || spokenText === "c" || spokenText === "k";
 
-          // Controllo dello stato specifico rigoroso
           let isSpecificStatusMatch = false;
           if (currentStatusMatch && spokenText.includes(currentStatusMatch)) {
             isSpecificStatusMatch = true;
