@@ -16,6 +16,7 @@
     .item-status { font-size: 24px; font-weight: bold; color: #d9534f; margin-top: 8px; }
     .mic-status { font-size: 14px; font-weight: bold; margin-top: 8px; color: #666; }
     .mic-active { color: #28a745; }
+    .mic-standby { color: #ffc107 !important; }
     .btn { padding: 12px 18px; font-size: 15px; font-weight: bold; color: white; border: none; border-radius: 8px; cursor: pointer; margin: 4px; }
     .btn-start { background-color: #28a745; width: 85%; margin-top: 10px; }
     .btn-repeat { background-color: #ffc107; color: #333; }
@@ -128,22 +129,21 @@
         { item: "Freni", status: "PROVARE", speak: "Freni: Provare", section: "RULLAGGIO" },
         { item: "Bussola / Gyro: Piede DESTRO", status: "Valori AUMENTANO", speak: "Bussola e giairo con piede destro: Valori aumentano" },
         { item: "Bussola / Gyro: Piede SINISTRO", status: "Valori DIMINUISCONO", speak: "Bussola e giairo con piede sinistro: Valori diminuiscono" },
-        { item: "Virometro: Piede DESTRO", status: "Virom. Destra / PALLINA a Sinistra", speak: "Virometro con piede destro: Virometro a destra, pallina a sinistra" },
-        { item: "Virometro: Piede SINISTRO", status: "Virom. Sinistra / PALLINA a Destra", speak: "Virometro con piede sinistro: Virometro a sinistra, pallina a destra" },
+        { item: "Sbandometro: Piede DESTRO", status: "SBANDOMETRO Destra / PALLINA a Sinistra", speak: "Sbandometro con piede destro: Sbandometro a destra, pallina a sinistra" },
+        { item: "Sbandometro: Piede SINISTRO", status: "SBANDOMETRO Sinistra / PALLINA a Destra", speak: "Sbandometro con piede sinistro: Sbandometro a sinistra, pallina a destra" },
         { item: "Freno parcheggio", status: "INSERITO", speak: "Freno parcheggio: Inserito", section: "PROVA MOTORE / MAGNETI" },
-        { item: "Serbatoio", status: "PIÙ PIENO", speak: "Serbatoio: Più pieno" },
+        { item: "Serbatoio", status: "PIU' PIENO", speak: "Serbatoio: Più pieno" },
         { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
         { item: "Manetta", status: "2.000 RPM", speak: "Manetta: 2000 erre-pi-em" },
-        { item: "Aria calda carburatore (drop 100 rpm)", status: "PROVARE", speak: "Aria calda carburatore, drop cento erre-pi-em: Provare" },
+        { item: "Aria calda carburatore", status: "PROVARE", speak: "Aria calda carburatore, drop cento erre-pi-em: Provare" },
         { item: "Miscela", status: "PROVARE", speak: "Miscela: Provare" },
         { item: "Magneti: Magnete 1 test", status: "max drop 175 rpm / diff. 50 rpm", speak: "Magneti, test magnete uno: calo massimo centosettantacinque erre-pi-em, differenza massima cinquanta erre-pi-em" },
         { item: "Magneti: Magnete 2 test", status: "max drop 175 rpm / diff. 50 rpm", speak: "Magneti, test magnete due: calo massimo centosettantacinque erre-pi-em, differenza massima cinquanta erre-pi-em" },
         { item: "Pressione olio", status: "ARCO VERDE", speak: "Pressione olio: Arco verde" },
         { item: "Pressione carburante", status: "ARCO VERDE", speak: "Pressione carburante: Arco verde" },
-        { item: "Vacuum", status: "4,9 – 5,1 In Hg", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno pollici di mercurio" },
+        { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" },
         { item: "Pannello annunciatore", status: "SPIE SPENTE", speak: "Pannello annunciatore: Spie spente" },
-        { item: "Manetta", status: "CONTROLLO MINIMO", speak: "Manetta: Controllo minimo" },
-        { item: "Manetta", status: "1.200 RPM", speak: "Manetta: 1200 erre-pi-em" }
+        { item: "Manetta", status: "CONTROLLO MINIMO poi 1200 rpm", speak: "Manetta: Controllo minimo, poi 1200 erre-pi-em" }
       ]},
       { id: 4, title: "5. PRE DECOLLO", data: [
         { item: "Porta", status: "CHIUSA E BLOCCATA", speak: "Porta: Chiusa e bloccata" },
@@ -219,6 +219,7 @@
     let recognition;
     let isListening = false;
     let isSpeaking = false;
+    let isStandby = false; // Flag per la modalità Standby
     let lastActionTime = 0;
     let skippedItems = new Set();
     
@@ -303,6 +304,33 @@
         if (isSpeaking) return;
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           const spokenText = event.results[i][0].transcript.trim().toLowerCase();
+
+          // Gestione Standby / Pausa
+          if (!isStandby && (spokenText.includes("standby") || spokenText.includes("stand by") || spokenText.includes("pausa"))) {
+            isStandby = true;
+            lastActionTime = Date.now();
+            updateUI();
+            speak("Checklist in standby.");
+            break;
+          }
+
+          // Gestione Ripresa / Continua
+          if (isStandby && (spokenText.includes("riprendi") || spokenText.includes("continua") || spokenText.includes("avanti") || spokenText.includes("ok"))) {
+            isStandby = false;
+            lastActionTime = Date.now();
+            updateUI();
+            // Riprende dall'ultima istruzione già confermata (cioè currentIndex - 1, se > 0)
+            if (currentIndex > 0) {
+              currentIndex--;
+            }
+            speak("Ripresa checklist. " + currentChecklist[currentIndex].speak);
+            break;
+          }
+
+          if (isStandby) {
+            // Se siamo in standby, ignoriamo tutti gli altri comandi vocali
+            break;
+          }
 
           if (isAskingNext) {
             if (spokenText.includes("avvia") || spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("ok")) {
@@ -413,6 +441,7 @@
       requestWakeLock();
       currentIndex = 0;
       isListening = true;
+      isStandby = false;
       isAskingReview = false;
       isAskingNext = false;
       reviewQueue = [];
@@ -430,8 +459,13 @@
         requestWakeLock();
         try {
           recognition.start();
-          document.getElementById('micStatus').innerText = isAskingNext ? "🎙️ In ascolto ('SÌ', 'NO')" : (isAskingReview ? "🎙️ In ascolto ('SÌ', 'NO', 'VERIFICA')" : "🎙️ In ascolto (Pronuncia lo stato o 'AVANTI')");
-          document.getElementById('micStatus').className = "mic-status mic-active";
+          if (isStandby) {
+            document.getElementById('micStatus').innerText = "⏸️ IN STANDBY (Pronuncia 'RIPRENDI')";
+            document.getElementById('micStatus').className = "mic-status mic-standby";
+          } else {
+            document.getElementById('micStatus').innerText = isAskingNext ? "🎙️ In ascolto ('SÌ', 'NO')" : (isAskingReview ? "🎙️ In ascolto ('SÌ', 'NO', 'VERIFICA')" : "🎙️ In ascolto (Pronuncia lo stato, 'AVANTI' o 'STANDBY')");
+            document.getElementById('micStatus').className = "mic-status mic-active";
+          }
         } catch(e) {}
       }
     }
@@ -441,6 +475,7 @@
       currentIndex = index;
       reviewQueue = [];
       reviewIndex = -1;
+      isStandby = false;
       isAskingReview = false;
       isAskingNext = false;
       updateUI();
@@ -504,7 +539,6 @@
       } else {
         reviewQueue = [];
         reviewIndex = -1;
-        // Ripristinato l'annuncio prima di chiudere la checklist completamente
         speak("Tutte le istruzioni completate.", () => {
           finishChecklistCompletely();
         });
@@ -547,6 +581,7 @@
     function resetChecklist() {
       isListening = false;
       isSpeaking = false;
+      isStandby = false;
       isAskingReview = false;
       isAskingNext = false;
       currentIndex = -1;
@@ -579,8 +614,10 @@
         if (!row) return;
         
         if (idx === currentIndex && !isAskingReview && !isAskingNext) {
-          row.className = "active-row";
-          row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          row.className = isStandby ? "skipped-row" : "active-row";
+          if (!isStandby) {
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
         } else if (skippedItems.has(idx)) {
           row.className = "skipped-row";
         } else {
