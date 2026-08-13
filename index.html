@@ -340,16 +340,32 @@
             break;
           }
 
+          // Controllo dinamico basato sui tuoi stati e comandi vocali naturali
+          let currentStatusMatch = "";
+          if (currentIndex >= 0 && currentIndex < currentChecklist.length) {
+            currentStatusMatch = currentChecklist[currentIndex].status.toLowerCase();
+          }
+
           const isCheck = 
-            spokenText.includes("check") || spokenText.includes("ceck") || spokenText.includes("cec") ||
-            spokenText.includes("ciec") || spokenText.includes("cek") || spokenText.includes("gec") ||
-            spokenText.includes("geck") || spokenText.includes("c'è") || spokenText.includes("c'e") ||
-            spokenText.includes("ce") || spokenText.includes("che") || spokenText.includes("cioè") ||
-            spokenText.includes("ok") || spokenText.includes("avanti") || spokenText.includes("passa") ||
-            spokenText.includes("fatto") || spokenText.includes("eseguito") || spokenText.includes("va bene") ||
-            spokenText.includes("on") || spokenText.includes("off") || spokenText.includes("inserito") ||
-            spokenText.includes("chiuso") || spokenText.includes("aperto") || spokenText.includes("set") ||
-            spokenText.startsWith("ce") || spokenText.startsWith("ci") || spokenText === "c" || spokenText === "k";
+            // Voci del tuo elenco e comandi generali
+            spokenText.includes("on") || spokenText.includes("off") || 
+            spokenText.includes("inseriti") || spokenText.includes("inserito") ||
+            spokenText.includes("chiusa") || spokenText.includes("bloccata") || 
+            spokenText.includes("allacciate") || spokenText.includes("liberi") || 
+            spokenText.includes("corretti") || spokenText.includes("entrambi") || 
+            spokenText.includes("ricca") || spokenText.includes("fredda") || 
+            spokenText.includes("negli archi") || spokenText.includes("verificare") || 
+            spokenText.includes("set") || spokenText.includes("grin") || 
+            spokenText.includes("green") || spokenText.includes("clean") ||
+            // Se la parola detta include lo stato attuale visualizzato nella riga
+            (currentStatusMatch && spokenText.includes(currentStatusMatch)) ||
+            // Comandi standard di conferma universali
+            spokenText.includes("check") || spokenText.includes("ceck") || 
+            spokenText.includes("ok") || spokenText.includes("avanti") || 
+            spokenText.includes("passa") || spokenText.includes("fatto") || 
+            spokenText.includes("eseguito") || spokenText.includes("va bene") ||
+            spokenText.startsWith("ce") || spokenText.startsWith("ci") || 
+            spokenText === "c" || spokenText === "k";
 
           if (isCheck) {
             lastActionTime = Date.now();
@@ -412,7 +428,7 @@
         requestWakeLock();
         try {
           recognition.start();
-          document.getElementById('micStatus').innerText = isAskingNext ? "🎙️ In ascolto ('SÌ', 'NO')" : (isAskingReview ? "🎙️ In ascolto ('SÌ', 'NO', 'VERIFICA')" : "🎙️ In ascolto ('CHECK', 'SALTA')");
+          document.getElementById('micStatus').innerText = isAskingNext ? "🎙️ In ascolto ('SÌ', 'NO')" : (isAskingReview ? "🎙️ In ascolto ('SÌ', 'NO', 'VERIFICA')" : "🎙️ In ascolto (Pronuncia lo stato o 'AVANTI')");
           document.getElementById('micStatus').className = "mic-status mic-active";
         } catch(e) {}
       }
