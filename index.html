@@ -77,7 +77,7 @@
 </div>
 
 <script>
-    // Definizione delle checklist
+    // Definizione delle checklist originali complete
     const tutteLeChecklist = [
         {
             id: 0,
@@ -126,8 +126,7 @@
         let chk = tutteLeChecklist[indiceChecklistAttuale];
         document.getElementById('titoloChecklistCorrente').innerText = (indiceChecklistAttuale + 1) + ". " + chk.nome;
 
-        // Annuncio iniziale modificato con "Avvio checklist..."
-        parlaTesto("Avvio checklist " + (indiceChecklistAttuale + 1) + " " + chk.nome, () => {
+        parlaTesto("Avvio " + (indiceChecklistAttuale + 1) + ", " + chk.nome, () => {
             mostraVoceCorrente();
         });
     }
@@ -144,7 +143,6 @@
         document.getElementById('statusCorrente').innerText = voce.status;
 
         parlaTesto(voce.speak, () => {
-            // Simulazione dell'ascolto o comando vocale "Avanti"
             setTimeout(() => {
                 indiceVoceAttuale++;
                 mostraVoceCorrente();
@@ -165,16 +163,11 @@
             btnSuccessiva.className = "btn";
             btnSuccessiva.style.backgroundColor = "#28a745";
             btnSuccessiva.innerText = testoFine;
-            
-            // MODIFICA: Tappando sul "Passa a", parte direttamente in automatico
             btnSuccessiva.onclick = () => {
-                // Rimuove il bottone prima di procedere
-                btnSuccessiva.remove();
                 selezionaChecklist(prossimoIndice);
             };
             
             document.getElementById('schermataChecklist').appendChild(btnSuccessiva);
-
             parlaTesto(testoFine, () => {});
         } else {
             parlaTesto("Tutte le checklist sono completate", () => {});
@@ -205,7 +198,6 @@
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
         }
-        // Pulisce eventuali bottoni dinamici rimasti
         let schermata = document.getElementById('schermataChecklist');
         let bottoniExtra = schermata.querySelectorAll('.btn:not([style*="background-color: #d9534f"])');
         bottoniExtra.forEach(b => b.remove());
@@ -215,7 +207,6 @@
         avviaMenu();
     }
 
-    // Inizializza il menu all'avvio
     window.onload = avviaMenu;
 </script>
 
