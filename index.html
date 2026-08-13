@@ -158,192 +158,15 @@
 
   <script>
     const checklistsData = [
-      { 
-        id: 0, 
-        title: "1. CONTROLLI CABINA", 
-        data: [
-          { item: "Documenti pilota", status: "A BORDO", speak: "Documenti pilota: A bordo" },
-          { item: "Documenti aeromobile", status: "A BORDO", speak: "Documenti aeromobile: A bordo" },
-          { item: "Estintore / cassetta pronto soccorso", status: "A BORDO", speak: "Estintore e cassetta pronto soccorso: A bordo" },
-          { item: "ELT", status: "Verificare OFF", speak: "I-El-Ti: Verificare off" },
-          { item: "Giubbotti salvagente / Canotto / raft", status: "COME RICHIESTO", speak: "Giubbotti salvagente e canotto raft: Come richiesto" },
-          { item: "Equipagg. per sosta Tacchi Olio", status: "COME RICHIESTO", speak: "Equipaggiamento per sosta, tacchi e olio: Come richiesto" },
-          { item: "Comandi volo", status: "LIBERI E CORRETTI", speak: "Comandi di volo: Liberi e corretti" },
-          { item: "Miscela", status: "CHIUSA", speak: "Miscela: Chiusa" },
-          { item: "Magneti", status: "OFF", speak: "Magneti: Off" },
-          { item: "Interruttori elettrici", status: "OFF", speak: "Interruttori elettrici: Off" },
-          { item: "Radio e avionica", status: "OFF", speak: "Radio e avionica: Off" },
-          { item: "Circuit breakers", status: "INSERITI", speak: "sircuit brechers: Inseriti" },
-          { item: "Batteria", status: "ON", speak: "Batteria: On" },
-          { item: "Carburante televel", status: "VERIFICARE", speak: "Carburante televel: Verificare" },
-          { item: "Pannello annunciatore", status: "Spie ON", speak: "Pannello annunciatore: Spie on" },
-          { item: "Batteria", status: "OFF", speak: "Batteria: Off" },
-          { item: "Trim", status: "Zero", speak: "Trim: Zero" },
-          { item: "Parabrezza e finestrini", status: "PULITI", speak: "Parabrezza e finestrini: Puliti" }
-        ]
-      },
-      { 
-        id: 1, 
-        title: "2. AVVIAMENTO", 
-        data: [
-          { item: "Telefoni / disp elettronici", status: "OFF / MOD VOLO", speak: "Telefoni e dispositivi elettronici: Off o modalità volo" },
-          { item: "Briefing passeggeri", status: "COME RICHIESTO", speak: "Briefing passeggeri: Come richiesto" },
-          { item: "Porta", status: "CHIUSA NO BLOCCATA", speak: "Porta: Chiusa non bloccata" },
-          { item: "Freno parcheggio", status: "INSERITO", speak: "Freno parcheggio: Inserito" },
-          { item: "Sedile", status: "REGOLATO E BLOCCATO", speak: "Sedile: Regolato e bloccato" },
-          { item: "Interruttori elettrici", status: "OFF", speak: "Interruttori elettrici: Off" },
-          { item: "Ventilazione cabina", status: "OFF", speak: "Ventilazione cabina: Off" },
-          { item: "Circuit breakers", status: "INSERITI", speak: "sircuit brechers: Inseriti" },
-          { item: "Master batteria / alternatore", status: "ON", speak: "Master batteria e alternatore: On" },
-          { item: "Rotating beacon", status: "ON", speak: "roting bicon: On" },
-          { item: "Aria carburatore", status: "OFF", speak: "Aria carburatore: Off" },
-          { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" },
-          { item: "Serbatoio", status: "MENO PIENO", speak: "Serbatoio: Meno pieno" },
-          { item: "Trim elettrico", status: "OFF", speak: "Trim elettrico: Off" },
-          { item: "Autopilot", status: "OFF", speak: "Autopilot: Off" },
-          { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: On" },
-          { item: "Manetta", status: "1 cm", speak: "Manetta: Un centimetro", section: "AVVIAMENTO A FREDDO" },
-          { item: "Primer", status: "3 / 4 volte poi BLOCCARE", speak: "Primer: Tre o quattro volte, poi bloccare" },
-          { item: "Via dall'elica", status: "ANNUNCIARE", speak: "Via dall'elica: Annunciare" },
-          { item: "Starter", status: "ON", speak: "Starter: On" },
-          { item: "Manetta", status: "1.200 RPM", speak: "Manetta: 1200 erre-pi-em" },
-          { item: "Pressione OLIO", status: "ARCO VERDE ENTRO 30 \"", speak: "Pressione olio: Arco verde entro trenta secondi" },
-          { item: "Pompa elettrica carburante", status: "OFF", speak: "Pompa elettrica carburante: Off" }
-        ]
-      },
-      { 
-        id: 2, 
-        title: "3. POST AVVIAMENTO", 
-        data: [
-          { item: "Amperometro", status: "VERIF. CON FARO", speak: "Amperometro: Verificare con faro" },
-          { item: "Avionica", status: "ON", speak: "Avionica: On" },
-          { item: "Ventilazione cabina", status: "COME RICHIESTO", speak: "Ventilazione cabina: Come richiesto" },
-          { item: "Radio e avionica", status: "ON", speak: "Radio e avionica: On" },
-          { item: "Radio", status: "VOLUME / SQUELCH", speak: "Radio: Volume e squelch" },
-          { item: "Intercom", status: "VOLUME / SQUELCH", speak: "Intercom: Volume e squelch" },
-          { item: "Transponder", status: "CODICE / STAND BY", speak: "Transponder: Codice, stand by" },
-          { item: "VOR / GPS", status: "IMPOSTATI", speak: "VOR e GPS: Impostati" },
-          { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" },
-          { item: "Anemometro", status: "0 KTS / 0 MPH", speak: "Anemometro: Zero nodi o zero emme pi acca" },
-          { item: "Orizzonte artificiale", status: "0° BANK / SAGOMINA", speak: "Orizzonte artificiale: Zero gradi bank, sagomina" },
-          { item: "Altimetro", status: "QNH +/- 75 ft", speak: "Altimetro: Q-N-H più o meno settantacinque fit" },
-          { item: "Coordinatore di virata", status: "NO BANDIERINA", speak: "Coordinatore di virata: Nessuna bandierina" },
-          { item: "Girodirezionale", status: "ALLINEARE CON BUSSOLA", speak: "Girodirezionale: Allineare con bussola" },
-          { item: "Variometro", status: "0 FT/MIN", speak: "Variometro: Zero fit al minuto" },
-          { item: "Luci navigazione", status: "COME RICHIESTO", speak: "Luci di navigazione: Come richiesto" }
-        ]
-      },
-      { 
-        id: 3, 
-        title: "4. RULLAGGIO E RUN UP", 
-        data: [
-          { item: "Freni", status: "PROVARE", speak: "Freni: Provare", section: "RULLAGGIO" },
-          { item: "Bussola / Gyro: Piede DESTRO", status: "Valori AUMENTANO", speak: "Bussola e giairo con piede destro: Valori aumentano" },
-          { item: "Bussola / Gyro: Piede SINISTRO", status: "Valori DIMINUISCONO", speak: "Bussola e giairo con piede sinistro: Valori diminuiscono" },
-          { item: "Virometro: Piede DESTRO", status: "Virom. Destra / PALLINA a Sinistra", speak: "Virometro con piede destro: Virometro a destra, pallina a sinistra" },
-          { item: "Virometro: Piede SINISTRO", status: "Virom. Sinistra / PALLINA a Destra", speak: "Virometro con piede sinistro: Virometro a sinistra, pallina a destra" },
-          { item: "Freno parcheggio", status: "INSERITO", speak: "Freno parcheggio: Inserito", section: "PROVA MOTORE / MAGNETI" },
-          { item: "Serbatoio", status: "PIÙ PIENO", speak: "Serbatoio: Più pieno" },
-          { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
-          { item: "Manetta", status: "2.000 RPM", speak: "Manetta: 2000 erre-pi-em" },
-          { item: "Aria calda carburatore (drop 100 rpm)", status: "PROVARE", speak: "Aria calda carburatore, drop cento erre-pi-em: Provare" },
-          { item: "Miscela", status: "PROVARE", speak: "Miscela: Provare" },
-          { item: "Magneti: Magnete 1 test", status: "max drop 175 rpm / diff. 50 rpm", speak: "Magneti, test magnete uno: calo massimo centosettantacinque erre-pi-em, differenza massima cinquanta erre-pi-em" },
-          { item: "Magneti: Magnete 2 test", status: "max drop 175 rpm / diff. 50 rpm", speak: "Magneti, test magnete due: calo massimo centosettantacinque erre-pi-em, differenza massima cinquanta erre-pi-em" },
-          { item: "Pressione olio", status: "ARCO VERDE", speak: "Pressione olio: Arco verde" },
-          { item: "Pressione carburante", status: "ARCO VERDE", speak: "Pressione carburante: Arco verde" },
-          { item: "Vacuum", status: "4,9 – 5,1 In Hg", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno pollici di mercurio" },
-          { item: "Pannello annunciatore", status: "SPIE SPENTE", speak: "Pannello annunciatore: Spie spente" },
-          { item: "Manetta", status: "CONTROLLO MINIMO", speak: "Manetta: Controllo minimo" },
-          { item: "Manetta", status: "1.200 RPM", speak: "Manetta: 1200 erre-pi-em" }
-        ]
-      },
-      { 
-        id: 4, 
-        title: "5. PRE DECOLLO", 
-        data: [
-          { item: "Porta", status: "CHIUSA E BLOCCATA", speak: "Porta: Chiusa e bloccata" },
-          { item: "Cinture e spallacci", status: "ALLACCIATE", speak: "Cinture e spallacci: Allacciate" },
-          { item: "Comandi di volo", status: "LIBERI E CORRETTI", speak: "Comandi di volo: Liberi e corretti" },
-          { item: "Magneti", status: "ENTRAMBI", speak: "Magneti: Entrambi" },
-          { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" },
-          { item: "Aria carburatore", status: "FREDDA", speak: "Aria carburatore: Fredda" },
-          { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: On" },
-          { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
-          { item: "Quantità carburante", status: "VERIFICARE", speak: "Quantità carburante: Verificare" },
-          { item: "Flaps", status: "SET", speak: "Flaps: Set" },
-          { item: "Trim", status: "POSIZIONE DECOLLO", speak: "Trim: Posizione decollo" },
-          { item: "Memo Decollo", status: "VR 60 / VX 76 / VY 85 Mph", speak: "Memo decollo: VR sessanta emme pi acca, VX settantasei emme pi acca, VY ottantacinque emme pi acca", section: "PROMEMORIA VELOCITÀ" },
-          { item: "Max Efficienza", status: "80 Mph (SENZA FLAPS)", speak: "Massima efficienza: Ottanta emme pi acca senza flaps" }
-        ]
-      },
-      { 
-        id: 5, 
-        title: "6. ALLINEAMENTO, TAKE OFF E SALITA", 
-        data: [
-          { item: "Manetta", status: "1.500 RPM", speak: "Manetta: 1500 erre-pi-em", section: "ALLINEAMENTO" },
-          { item: "Faro atterraggio", status: "ON", speak: "Faro atterraggio: On" },
-          { item: "Transponder", status: "ON / ALT", speak: "Transponder: On o Alt" },
-          { item: "Bussola / Gyro", status: "QFU", speak: "Bussola e giairo: Q-F-U" },
-          { item: "Full throttle RPM Min", status: "2.275 RPM", speak: "ful trattol erre-pi-em minimo: 2275 erre-pi-em" },
-          { item: "Full throttle", status: "Min 2275", speak: "ful trattol: Minimo 2275 erre-pi-em", section: "TAKE OFF" },
-          { item: "Engine instrument", status: "All green", speak: "engin instrument: All green" },
-          { item: "Runway clean", status: "Clean", speak: "ranuei clin: Pista libera clin" },
-          { item: "Airspeed", status: "Alive", speak: "Airspeed: alaiv, anemometro attivo" },
-          { item: "60 mph", status: "Rotation", speak: "Sessanta emme pi acca: tecoff rotation" },
-          { item: "75 mph", status: "Climb VX", speak: "Settantasei emme pi acca: claimb VX" },
-          { item: "80 mph", status: "Climb VY", speak: "Ottanta emme pi acca: claimb VY" },
-          { item: "Flaps", status: "RETRATTI", speak: "Flaps: Retratti", section: "POST DECOLLO - SALITA" },
-          { item: "Faro atterraggio", status: "OFF", speak: "Faro atterraggio: Off" },
-          { item: "Pompa elettrica carburante", status: "1.000 ft – OFF – verif. press", speak: "Pompa elettrica carburante: A mille fit, off, verificare pressione" },
-          { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
-          { item: "Altimetro", status: "QNH / QNE", speak: "Altimetro: Q-N-H o Q-N-E" }
-        ]
-      },
-      { 
-        id: 6, 
-        title: "7. CROCIERA", 
-        data: [
-          { item: "Manetta", status: "COME RICHIESTO", speak: "Manetta: Come richiesto" },
-          { item: "Miscela", status: "COME RICHIESTO", speak: "Miscela: Come richiesto" },
-          { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" },
-          { item: "Gyro e bussola", status: "ALLINEARE", speak: "giairo e bussola: Allineare" },
-          { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
-          { item: "Pompa elettrica", status: "ON", speak: "Pompa elettrica: On", section: "CAMBIO SERBATOIO" },
-          { item: "Serbatoio", status: "CAMBIARE", speak: "Serbatoio: Cambiare" },
-          { item: "Pressione carburante", status: "VERIFICARE PRESSIONE", speak: "Pressione carburante: Verificare pressione" },
-          { item: "Pompa elettrica", status: "OFF", speak: "Pompa elettrica: Off" },
-          { item: "Pressione carburante", status: "VERIFICARE PRESSIONE", speak: "Pressione carburante: Verificare pressione" }
-        ]
-      },
-      { 
-        id: 7, 
-        title: "8. DISCESA E AVVICINAMENTO", 
-        data: [
-          { item: "Cinture e spallacci", status: "ALLACCIATE", speak: "Cinture e spallacci: Allacciate" },
-          { item: "Informazioni meteo", status: "RICEVUTE", speak: "Informazioni meteo: Ricevute" },
-          { item: "Altimetro", status: "QNH / QFE", speak: "Altimetro: Q-N-H o Q-F-E" },
-          { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
-          { item: "Briefing atterraggio", status: "PISTA / CIRCUITO / QUOTA", speak: "Briefing atterraggio: Pista in uso, circuito e quota circuito" },
-          { item: "Memo Riattaccata", status: "ASSETTO + POTENZA + ARIA CARBURATORE OFF", speak: "Memo riattaccata: Assetto, tutta potenza, aria carburatore off", section: "MEMO RIATTACCATA" },
-          { item: "Velocità e Flaps", status: "VX 76 Mph – FLAPS GRADUALI", speak: "VX settantasei emme pi acca, retrarre flaps gradualmente" }
-        ]
-      },
-      { 
-        id: 8, 
-        title: "9. SOTTOVENTO E FINALE", 
-        data: [
-          { item: "Aria carburatore", status: "ON", speak: "Aria carburatore: On" },
-          { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" },
-          { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: On" },
-          { item: "Faro atterraggio", status: "ON", speak: "Faro atterraggio: On" },
-          { item: "Flaps", status: "10°", speak: "Flaps: Dieci gradi" },
-          { item: "Serbatoio", status: "PIÙ PIENO", speak: "Serbatoio: Più pieno" },
-          { item: "Flaps", status: "25° / 40°", speak: "Flaps: Venticinque o quaranta gradi" },
-          { item: "Memo atterraggio", status: "VREF 74 Mph (flaps 40°) / VREF 77 Mph (flaps 25°) + Xwind", speak: "Memo atterraggio: V-ref settantaquattro emme pi acca con flaps quaranta gradi, oppure V-ref settantasette emme pi acca con flaps venticinque gradi, più crosuind" },
-          { item: "Aria carburatore", status: "OFF", speak: "Aria carburatore: Off" }
-        ]
-      }
+      { id: 0, title: "1. CONTROLLI CABINA", data: [{ item: "Documenti pilota", status: "A BORDO", speak: "Documenti pilota: A bordo" }, { item: "Documenti aeromobile", status: "A BORDO", speak: "Documenti aeromobile: A bordo" }, { item: "Estintore / cassetta pronto soccorso", status: "A BORDO", speak: "Estintore e cassetta pronto soccorso: A bordo" }, { item: "ELT", status: "Verificare OFF", speak: "I-El-Ti: Verificare off" }, { item: "Giubbotti salvagente / Canotto / raft", status: "COME RICHIESTO", speak: "Giubbotti salvagente e canotto raft: Come richiesto" }, { item: "Equipagg. per sosta Tacchi Olio", status: "COME RICHIESTO", speak: "Equipaggiamento per sosta, tacchi e olio: Come richiesto" }, { item: "Comandi volo", status: "LIBERI E CORRETTI", speak: "Comandi di volo: Liberi e corretti" }, { item: "Miscela", status: "CHIUSA", speak: "Miscela: Chiusa" }, { item: "Magneti", status: "OFF", speak: "Magneti: Off" }, { item: "Interruttori elettrici", status: "OFF", speak: "Interruttori elettrici: Off" }, { item: "Radio e avionica", status: "OFF", speak: "Radio e avionica: Off" }, { item: "Circuit breakers", status: "INSERITI", speak: "sircuit brechers: Inseriti" }, { item: "Batteria", status: "ON", speak: "Batteria: On" }, { item: "Carburante televel", status: "VERIFICARE", speak: "Carburante televel: Verificare" }, { item: "Pannello annunciatore", status: "Spie ON", speak: "Pannello annunciatore: Spie on" }, { item: "Batteria", status: "OFF", speak: "Batteria: Off" }, { item: "Trim", status: "Zero", speak: "Trim: Zero" }, { item: "Parabrezza e finestrini", status: "PULITI", speak: "Parabrezza e finestrini: Puliti" }] },
+      { id: 1, title: "2. AVVIAMENTO", data: [{ item: "Telefoni / disp elettronici", status: "OFF / MOD VOLO", speak: "Telefoni e dispositivi elettronici: Off o modalità volo" }, { item: "Briefing passeggeri", status: "COME RICHIESTO", speak: "Briefing passeggeri: Come richiesto" }, { item: "Porta", status: "CHIUSA NO BLOCCATA", speak: "Porta: Chiusa non bloccata" }, { item: "Freno parcheggio", status: "INSERITO", speak: "Freno parcheggio: Inserito" }, { item: "Sedile", status: "REGOLATO E BLOCCATO", speak: "Sedile: Regolato e bloccato" }, { item: "Interruttori elettrici", status: "OFF", speak: "Interruttori elettrici: Off" }, { item: "Ventilazione cabina", status: "OFF", speak: "Ventilazione cabina: Off" }, { item: "Circuit breakers", status: "INSERITI", speak: "sircuit brechers: Inseriti" }, { item: "Master batteria / alternatore", status: "ON", speak: "Master batteria e alternatore: On" }, { item: "Rotating beacon", status: "ON", speak: "roting bicon: On" }, { item: "Aria carburatore", status: "OFF", speak: "Aria carburatore: Off" }, { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" }, { item: "Serbatoio", status: "MENO PIENO", speak: "Serbatoio: Meno pieno" }, { item: "Trim elettrico", status: "OFF", speak: "Trim elettrico: Off" }, { item: "Autopilot", status: "OFF", speak: "Autopilot: Off" }, { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: On" }, { item: "Manetta", status: "1 cm", speak: "Manetta: Un centimetro", section: "AVVIAMENTO A FREDDO" }, { item: "Primer", status: "3 / 4 volte poi BLOCCARE", speak: "Primer: Tre o quattro volte, poi bloccare" }, { item: "Via dall'elica", status: "ANNUNCIARE", speak: "Via dall'elica: Annunciare" }, { item: "Starter", status: "ON", speak: "Starter: On" }, { item: "Manetta", status: "1.200 RPM", speak: "Manetta: 1200 erre-pi-em" }, { item: "Pressione OLIO", status: "ARCO VERDE ENTRO 30 \"", speak: "Pressione olio: Arco verde entro trenta secondi" }, { item: "Pompa elettrica carburante", status: "OFF", speak: "Pompa elettrica carburante: Off" }] },
+      { id: 2, title: "3. POST AVVIAMENTO", data: [{ item: "Amperometro", status: "VERIF. CON FARO", speak: "Amperometro: Verificare con faro" }, { item: "Avionica", status: "ON", speak: "Avionica: On" }, { item: "Ventilazione cabina", status: "COME RICHIESTO", speak: "Ventilazione cabina: Come richiesto" }, { item: "Radio e avionica", status: "ON", speak: "Radio e avionica: On" }, { item: "Radio", status: "VOLUME / SQUELCH", speak: "Radio: Volume e squelch" }, { item: "Intercom", status: "VOLUME / SQUELCH", speak: "Intercom: Volume e squelch" }, { item: "Transponder", status: "CODICE / STAND BY", speak: "Transponder: Codice, stand by" }, { item: "VOR / GPS", status: "IMPOSTATI", speak: "VOR e GPS: Impostati" }, { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" }, { item: "Anemometro", status: "0 KTS / 0 MPH", speak: "Anemometro: Zero nodi o zero emme pi acca" }, { item: "Orizzonte artificiale", status: "0° BANK / SAGOMINA", speak: "Orizzonte artificiale: Zero gradi bank, sagomina" }, { item: "Altimetro", status: "QNH +/- 75 ft", speak: "Altimetro: Q-N-H più o meno settantacinque fit" }, { item: "Coordinatore di virata", status: "NO BANDIERINA", speak: "Coordinatore di virata: Nessuna bandierina" }, { item: "Girodirezionale", status: "ALLINEARE CON BUSSOLA", speak: "Girodirezionale: Allineare con bussola" }, { item: "Variometro", status: "0 FT/MIN", speak: "Variometro: Zero fit al minuto" }, { item: "Luci navigazione", status: "COME RICHIESTO", speak: "Luci di navigazione: Come richiesto" }] },
+      { id: 3, title: "4. RULLAGGIO E RUN UP", data: [{ item: "Freni", status: "PROVARE", speak: "Freni: Provare", section: "RULLAGGIO" }, { item: "Bussola / Gyro: Piede DESTRO", status: "Valori AUMENTANO", speak: "Bussola e giairo con piede destro: Valori aumentano" }, { item: "Bussola / Gyro: Piede SINISTRO", status: "Valori DIMINUISCONO", speak: "Bussola e giairo con piede sinistro: Valori diminuiscono" }, { item: "Virometro: Piede DESTRO", status: "Virom. Destra / PALLINA a Sinistra", speak: "Virometro con piede destro: Virometro a destra, pallina a sinistra" }, { item: "Virometro: Piede SINISTRO", status: "Virom. Sinistra / PALLINA a Destra", speak: "Virometro con piede sinistro: Virometro a sinistra, pallina a destra" }, { item: "Freno parcheggio", status: "INSERITO", speak: "Freno parcheggio: Inserito", section: "PROVA MOTORE / MAGNETI" }, { item: "Serbatoio", status: "PIÙ PIENO", speak: "Serbatoio: Più pieno" }, { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" }, { item: "Manetta", status: "2.000 RPM", speak: "Manetta: 2000 erre-pi-em" }, { item: "Aria calda carburatore (drop 100 rpm)", status: "PROVARE", speak: "Aria calda carburatore, drop cento erre-pi-em: Provare" }, { item: "Miscela", status: "PROVARE", speak: "Miscela: Provare" }, { item: "Magneti: Magnete 1 test", status: "max drop 175 rpm / diff. 50 rpm", speak: "Magneti, test magnete uno: calo massimo centosettantacinque erre-pi-em, differenza massima cinquanta erre-pi-em" }, { item: "Magneti: Magnete 2 test", status: "max drop 175 rpm / diff. 50 rpm", speak: "Magneti, test magnete due: calo massimo centosettantacinque erre-pi-em, differenza massima cinquanta erre-pi-em" }, { item: "Pressione olio", status: "ARCO VERDE", speak: "Pressione olio: Arco verde" }, { item: "Pressione carburante", status: "ARCO VERDE", speak: "Pressione carburante: Arco verde" }, { item: "Vacuum", status: "4,9 – 5,1 In Hg", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno pollici di mercurio" }, { item: "Pannello annunciatore", status: "SPIE SPENTE", speak: "Pannello annunciatore: Spie spente" }, { item: "Manetta", status: "CONTROLLO MINIMO", speak: "Manetta: Controllo minimo" }, { item: "Manetta", status: "1.200 RPM", speak: "Manetta: 1200 erre-pi-em" }] },
+      { id: 4, title: "5. PRE DECOLLO", data: [{ item: "Porta", status: "CHIUSA E BLOCCATA", speak: "Porta: Chiusa e bloccata" }, { item: "Cinture e spallacci", status: "ALLACCIATE", speak: "Cinture e spallacci: Allacciate" }, { item: "Comandi di volo", status: "LIBERI E CORRETTI", speak: "Comandi di volo: Liberi e corretti" }, { item: "Magneti", status: "ENTRAMBI", speak: "Magneti: Entrambi" }, { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" }, { item: "Aria carburatore", status: "FREDDA", speak: "Aria carburatore: Fredda" }, { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: On" }, { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" }, { item: "Quantità carburante", status: "VERIFICARE", speak: "Quantità carburante: Verificare" }, { item: "Flaps", status: "SET", speak: "Flaps: Set" }, { item: "Trim", status: "POSIZIONE DECOLLO", speak: "Trim: Posizione decollo" }, { item: "Memo Decollo", status: "VR 60 / VX 76 / VY 85 Mph", speak: "Memo decollo: VR sessanta emme pi acca, VX settantasei emme pi acca, VY ottantacinque emme pi acca", section: "PROMEMORIA VELOCITÀ" }, { item: "Max Efficienza", status: "80 Mph (SENZA FLAPS)", speak: "Massima efficienza: Ottanta emme pi acca senza flaps" }] },
+      { id: 5, title: "6. ALLINEAMENTO, TAKE OFF E SALITA", data: [{ item: "Manetta", status: "1.500 RPM", speak: "Manetta: 1500 erre-pi-em", section: "ALLINEAMENTO" }, { item: "Faro atterraggio", status: "ON", speak: "Faro atterraggio: On" }, { item: "Transponder", status: "ON / ALT", speak: "Transponder: On o Alt" }, { item: "Bussola / Gyro", status: "QFU", speak: "Bussola e giairo: Q-F-U" }, { item: "Full throttle RPM Min", status: "2.275 RPM", speak: "ful trattol erre-pi-em minimo: 2275 erre-pi-em" }, { item: "Full throttle", status: "Min 2275", speak: "ful trattol: Minimo 2275 erre-pi-em", section: "TAKE OFF" }, { item: "Engine instrument", status: "All green", speak: "engin instrument: All green" }, { item: "Runway clean", status: "Clean", speak: "ranuei clin: Pista libera clin" }, { item: "Airspeed", status: "Alive", speak: "Airspeed: alaiv, anemometro attivo" }, { item: "60 mph", status: "Rotation", speak: "Sessanta emme pi acca: tecoff rotation" }, { item: "75 mph", status: "Climb VX", speak: "Settantasei emme pi acca: claimb VX" }, { item: "80 mph", status: "Climb VY", speak: "Ottanta emme pi acca: claimb VY" }, { item: "Flaps", status: "RETRATTI", speak: "Flaps: Retratti", section: "POST DECOLLO - SALITA" }, { item: "Faro atterraggio", status: "OFF", speak: "Faro atterraggio: Off" }, { item: "Pompa elettrica carburante", status: "1.000 ft – OFF – verif. press", speak: "Pompa elettrica carburante: A mille fit, off, verificare pressione" }, { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" }, { item: "Altimetro", status: "QNH / QNE", speak: "Altimetro: Q-N-H o Q-N-E" }] },
+      { id: 6, title: "7. CROCIERA", data: [{ item: "Manetta", status: "COME RICHIESTO", speak: "Manetta: Come richiesto" }, { item: "Miscela", status: "COME RICHIESTO", speak: "Miscela: Come richiesto" }, { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" }, { item: "Gyro e bussola", status: "ALLINEARE", speak: "giairo e bussola: Allineare" }, { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" }, { item: "Pompa elettrica", status: "ON", speak: "Pompa elettrica: On", section: "CAMBIO SERBATOIO" }, { item: "Serbatoio", status: "CAMBIARE", speak: "Serbatoio: Cambiare" }, { item: "Pressione carburante", status: "VERIFICARE PRESSIONE", speak: "Pressione carburante: Verificare pressione" }, { item: "Pompa elettrica", status: "OFF", speak: "Pompa elettrica: Off" }, { item: "Pressione carburante", status: "VERIFICARE PRESSIONE", speak: "Pressione carburante: Verificare pressione" }] },
+      { id: 7, title: "8. DISCESA E AVVICINAMENTO", data: [{ item: "Cinture e spallacci", status: "ALLACCIATE", speak: "Cinture e spallacci: Allacciate" }, { item: "Informazioni meteo", status: "RICEVUTE", speak: "Informazioni meteo: Ricevute" }, { item: "Altimetro", status: "QNH / QFE", speak: "Altimetro: Q-N-H o Q-F-E" }, { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" }, { item: "Briefing atterraggio", status: "PISTA / CIRCUITO / QUOTA", speak: "Briefing atterraggio: Pista in uso, circuito e quota circuito" }, { item: "Memo Riattaccata", status: "ASSETTO + POTENZA + ARIA CARBURATORE OFF", speak: "Memo riattaccata: Assetto, tutta potenza, aria carburatore off", section: "MEMO RIATTACCATA" }, { item: "Velocità e Flaps", status: "VX 76 Mph – FLAPS GRADUALI", speak: "VX settantasei emme pi acca, retrarre flaps gradualmente" }] },
+      { id: 8, title: "9. SOTTOVENTO E FINALE", data: [{ item: "Aria carburatore", status: "ON", speak: "Aria carburatore: On" }, { item: "Miscela", status: "RICCA", speak: "Miscela: Ricca" }, { item: "Pompa elettrica carburante", status: "ON", speak: "Pompa elettrica carburante: On" }, { item: "Faro atterraggio", status: "ON", speak: "Faro atterraggio: On" }, { item: "Flaps", status: "10°", speak: "Flaps: Dieci gradi" }, { item: "Serbatoio", status: "PIÙ PIENO", speak: "Serbatoio: Più pieno" }, { item: "Flaps", status: "25° / 40°", speak: "Flaps: Venticinque o quaranta gradi" }, { item: "Memo atterraggio", status: "VREF 74 Mph (flaps 40°) / VREF 77 Mph (flaps 25°) + Xwind", speak: "Memo atterraggio: V-ref settantaquattro emme pi acca con flaps quaranta gradi, oppure V-ref settantasette emme pi acca con flaps venticinque gradi, più crosuind" }, { item: "Aria carburatore", status: "OFF", speak: "Aria carburatore: Off" }] }
     ];
 
     let currentChecklistIndex = 0;
@@ -356,6 +179,7 @@
     let skippedItems = new Set();
     
     let isAskingReview = false;
+    let isAskingNext = false;
     let reviewQueue = [];
     let reviewIndex = -1;
 
@@ -394,16 +218,7 @@
     function buildTable() {
       const tbody = document.getElementById('tableBody');
       tbody.innerHTML = '';
-
-      if (currentChecklist.length === 0) {
-        let row = tbody.insertRow();
-        let cell = row.insertCell(0);
-        cell.colSpan = 2;
-        cell.style.textAlign = "center";
-        cell.style.padding = "20px";
-        cell.innerText = "Checklist vuota.";
-        return;
-      }
+      if (currentChecklist.length === 0) return;
 
       currentChecklist.forEach((entry, idx) => {
         if (entry.section) {
@@ -418,23 +233,16 @@
         row.id = "row-" + idx;
         row.insertCell(0).innerText = entry.item;
         row.insertCell(1).innerText = entry.status;
-        
         row.ondblclick = () => selectItem(idx);
       });
     }
 
     async function requestWakeLock() {
-      try {
-        if ('wakeLock' in navigator && wakeLock === null) {
-          wakeLock = await navigator.wakeLock.request('screen');
-        }
-      } catch (err) {}
+      try { if ('wakeLock' in navigator && wakeLock === null) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
     }
 
     function releaseWakeLock() {
-      if (wakeLock !== null) {
-        wakeLock.release().then(() => { wakeLock = null; });
-      }
+      if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); }
     }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -449,6 +257,20 @@
 
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           const spokenText = event.results[i][0].transcript.trim().toLowerCase();
+
+          if (isAskingNext) {
+            if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("ok") || spokenText.includes("passa") || spokenText.includes("avanti")) {
+              lastActionTime = Date.now();
+              isAskingNext = false;
+              goToNextChecklist();
+              break;
+            } else if (spokenText.includes("no") || spokenText.includes("fine") || spokenText.includes("basta")) {
+              lastActionTime = Date.now();
+              isAskingNext = false;
+              resetChecklist();
+              break;
+            }
+          }
 
           if (isAskingReview) {
             if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("verifica") || spokenText.includes("verifichiamo") || spokenText.includes("verificare") || spokenText.includes("ok")) {
@@ -507,59 +329,40 @@
         if (callback) callback();
         return;
       }
-
       isSpeaking = true;
       if (recognition) try { recognition.stop(); } catch(e) {}
-
       document.getElementById('micStatus').innerText = "🔊 Lettura in corso...";
       document.getElementById('micStatus').className = "mic-status";
-
       window.speechSynthesis.cancel();
-
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'it-IT';
       utterance.rate = 1.2; 
       utterance.pitch = 1.0;
-
       utterance.onend = () => {
         isSpeaking = false;
         lastActionTime = Date.now();
-        if (callback) {
-          callback();
-        } else if (isListening) {
-          startListening();
-        }
+        if (callback) callback();
+        else if (isListening) startListening();
       };
-
-      utterance.onerror = () => {
-        isSpeaking = false;
-        if (isListening) startListening();
-      };
-
+      utterance.onerror = () => { isSpeaking = false; if (isListening) startListening(); };
       window.speechSynthesis.speak(utterance);
     }
 
     function startChecklist() {
       if (currentChecklist.length === 0) return;
-      
       requestWakeLock();
-
       currentIndex = 0;
       isListening = true;
       isAskingReview = false;
+      isAskingNext = false;
       reviewQueue = [];
       reviewIndex = -1;
       skippedItems.clear();
       updateUI();
-      
       document.getElementById('startBtn').style.display = 'none';
       document.getElementById('endControls').style.display = 'none';
-
-      // Modifica effettuata: aggiunto "checklist" nel saluto vocale
       const title = checklistsData[currentChecklistIndex].title;
-      const headerText = `Avvio checklist ${title}`;
-      const firstItemText = currentChecklist[0].speak;
-      speak(`${headerText}. ${firstItemText}`);
+      speak(`Avvio checklist ${title}. ${currentChecklist[0].speak}`);
     }
 
     function startListening() {
@@ -567,14 +370,13 @@
         requestWakeLock();
         try {
           recognition.start();
-          document.getElementById('micStatus').innerText = isAskingReview ? "🎙️ In ascolto ('SÌ', 'NO', 'VERIFICA')" : "🎙️ In ascolto ('CHECK', 'SALTA')";
+          document.getElementById('micStatus').innerText = "🎙️ In ascolto";
           document.getElementById('micStatus').className = "mic-status mic-active";
         } catch(e) {}
       }
     }
 
     function selectItem(index) {
-      if (currentChecklist.length === 0) return;
       currentIndex = index;
       reviewQueue = [];
       reviewIndex = -1;
@@ -585,8 +387,7 @@
 
     function nextItem() {
       if (reviewQueue.length > 0) {
-        const actualIdx = reviewQueue[reviewIndex];
-        skippedItems.delete(actualIdx);
+        skippedItems.delete(reviewQueue[reviewIndex]);
         advanceReviewQueue();
       } else {
         if (currentIndex >= 0) skippedItems.delete(currentIndex);
@@ -595,9 +396,8 @@
     }
 
     function skipItem() {
-      if (reviewQueue.length > 0) {
-        advanceReviewQueue();
-      } else {
+      if (reviewQueue.length > 0) advanceReviewQueue();
+      else {
         if (currentIndex >= 0) skippedItems.add(currentIndex);
         advanceChecklist();
       }
@@ -614,16 +414,32 @@
     }
 
     function handleChecklistEnd() {
-      const countSkipped = skippedItems.size;
-      if (countSkipped > 0) {
+      if (skippedItems.size > 0) {
         isAskingReview = true;
-        const parola = countSkipped === 1 ? "istruzione saltata" : "istruzioni saltate";
         document.getElementById('itemText').innerText = "Verifica istruzioni saltate?";
-        document.getElementById('statusText').innerText = `⚠️ ${countSkipped} SALTATE`;
         updateUI();
-        speak(`Attenzione, ${countSkipped} ${parola}. Vuoi verificarle?`);
+        speak(`Attenzione, ci sono istruzioni saltate. Vuoi verificarle?`);
       } else {
         finishChecklistCompletely();
+      }
+    }
+
+    function finishChecklistCompletely() {
+      isAskingReview = false;
+      currentIndex = -1;
+      updateUI();
+      document.getElementById('endControls').style.display = 'block';
+
+      if (currentChecklistIndex < checklistsData.length - 1) {
+        isAskingNext = true;
+        const nextTitle = checklistsData[currentChecklistIndex + 1].title;
+        document.getElementById('nextChecklistBtn').innerText = `➡️ PASSA A: ${nextTitle}`;
+        document.getElementById('nextChecklistBtn').style.display = 'inline-block';
+        speak(`Checklist completata. Passo alla checklist ${nextTitle}?`);
+      } else {
+        isListening = false;
+        releaseWakeLock();
+        speak("Checklist completata, tutte le voci verificate");
       }
     }
 
@@ -649,90 +465,47 @@
       }
     }
 
-    function finishChecklistCompletely() {
-      isListening = false;
-      isAskingReview = false;
-      currentIndex = -1;
-      
-      releaseWakeLock();
-      if (recognition) try { recognition.stop(); } catch(e) {}
-
-      document.getElementById('itemText').innerText = "Checklist Completata!";
-      document.getElementById('statusText').innerText = "OK";
-      document.getElementById('micStatus').innerText = "Microfono spento";
-      document.getElementById('micStatus').className = "mic-status";
-      document.getElementById('startBtn').style.display = 'none';
-      
-      document.getElementById('endControls').style.display = 'block';
-      if (currentChecklistIndex < checklistsData.length - 1) {
-        document.getElementById('nextChecklistBtn').innerText = `➡️ PASSA A: ${checklistsData[currentChecklistIndex + 1].title}`;
-        document.getElementById('nextChecklistBtn').style.display = 'inline-block';
-      } else {
-        document.getElementById('nextChecklistBtn').style.display = 'none';
-      }
-
-      updateUI();
-      speak("Checklist completata, tutte le voci verificate");
-    }
-
     function goToNextChecklist() {
-      if (currentChecklistIndex < checklistsData.length - 1) {
-        openChecklist(currentChecklistIndex + 1);
-      }
+      if (currentChecklistIndex < checklistsData.length - 1) openChecklist(currentChecklistIndex + 1);
     }
 
     function speakCurrent() {
-      if (currentIndex >= 0 && currentIndex < currentChecklist.length) {
-        speak(currentChecklist[currentIndex].speak);
-      }
+      if (currentIndex >= 0 && currentIndex < currentChecklist.length) speak(currentChecklist[currentIndex].speak);
     }
 
     function resetChecklist() {
       isListening = false;
       isSpeaking = false;
       isAskingReview = false;
+      isAskingNext = false;
       currentIndex = -1;
       reviewQueue = [];
       reviewIndex = -1;
       skippedItems.clear();
-
       releaseWakeLock();
       if (recognition) try { recognition.stop(); } catch(e) {}
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-
       document.getElementById('itemText').innerText = "Premi AVVIA per iniziare";
       document.getElementById('statusText').innerText = "---";
-      document.getElementById('micStatus').innerText = "Microfono spento";
-      document.getElementById('micStatus').className = "mic-status";
       document.getElementById('startBtn').style.display = 'inline-block';
       document.getElementById('endControls').style.display = 'none';
-
       updateUI();
     }
 
     function updateUI() {
-      if (currentIndex >= 0 && currentIndex < currentChecklist.length && !isAskingReview) {
+      if (currentIndex >= 0 && currentIndex < currentChecklist.length && !isAskingReview && !isAskingNext) {
         document.getElementById('itemText').innerText = currentChecklist[currentIndex].item;
         document.getElementById('statusText').innerText = currentChecklist[currentIndex].status;
       }
-
       currentChecklist.forEach((_, idx) => {
         const row = document.getElementById('row-' + idx);
         if (!row) return;
-        
-        if (idx === currentIndex && !isAskingReview) {
-          row.className = "active-row";
-        } else if (skippedItems.has(idx)) {
-          row.className = "skipped-row";
-        } else {
-          row.className = "";
-        }
+        if (idx === currentIndex && !isAskingReview && !isAskingNext) row.className = "active-row";
+        else if (skippedItems.has(idx)) row.className = "skipped-row";
+        else row.className = "";
       });
-
       const activeRow = document.getElementById('row-' + currentIndex);
-      if (activeRow) {
-        activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+      if (activeRow) activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     
     renderMenu();
