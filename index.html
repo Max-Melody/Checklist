@@ -340,34 +340,41 @@
             break;
           }
 
-          // Controllo dinamico basato sui tuoi stati e comandi vocali naturali
+          // Controllo rigoroso sullo stato della riga corrente o comando universale avanti
           let currentStatusMatch = "";
           if (currentIndex >= 0 && currentIndex < currentChecklist.length) {
             currentStatusMatch = currentChecklist[currentIndex].status.toLowerCase();
           }
 
-          const isCheck = 
-            // Voci del tuo elenco e comandi generali
-            spokenText.includes("on") || spokenText.includes("off") || 
-            spokenText.includes("inseriti") || spokenText.includes("inserito") ||
-            spokenText.includes("chiusa") || spokenText.includes("bloccata") || 
-            spokenText.includes("allacciate") || spokenText.includes("liberi") || 
-            spokenText.includes("corretti") || spokenText.includes("entrambi") || 
-            spokenText.includes("ricca") || spokenText.includes("fredda") || 
-            spokenText.includes("negli archi") || spokenText.includes("verificare") || 
-            spokenText.includes("set") || spokenText.includes("grin") || 
-            spokenText.includes("green") || spokenText.includes("clean") ||
-            // Se la parola detta include lo stato attuale visualizzato nella riga
-            (currentStatusMatch && spokenText.includes(currentStatusMatch)) ||
-            // Comandi standard di conferma universali
-            spokenText.includes("check") || spokenText.includes("ceck") || 
-            spokenText.includes("ok") || spokenText.includes("avanti") || 
-            spokenText.includes("passa") || spokenText.includes("fatto") || 
-            spokenText.includes("eseguito") || spokenText.includes("va bene") ||
-            spokenText.startsWith("ce") || spokenText.startsWith("ci") || 
-            spokenText === "c" || spokenText === "k";
+          // Comando universale sempre valido per andare avanti
+          const isUniversalForward = 
+            spokenText.includes("avanti") || spokenText.includes("check") || 
+            spokenText.includes("ceck") || spokenText.includes("fatto") || 
+            spokenText.includes("eseguito") || spokenText.includes("ok") || 
+            spokenText.includes("va bene") || spokenText === "c" || spokenText === "k";
 
-          if (isCheck) {
+          // Verifica se l'utente ha pronunciato lo stato specifico atteso in questa riga
+          let isSpecificStatusMatch = false;
+          if (currentStatusMatch && spokenText.includes(currentStatusMatch)) {
+            isSpecificStatusMatch = true;
+          } else {
+            // Controlli mirati sulle parole chiave del tuo elenco se presenti nello stato corrente
+            if (currentStatusMatch.includes("on") && (spokenText.includes("on") || spokenText === "on")) isSpecificStatusMatch = true;
+            else if (currentStatusMatch.includes("off") && (spokenText.includes("off") || spokenText === "off")) isSpecificStatusMatch = true;
+            else if (currentStatusMatch.includes("inserit") && (spokenText.includes("inseriti") || spokenText.includes("inserito"))) isSpecificStatusMatch = true;
+            else if (currentStatusMatch.includes("chiusa") && spokenText.includes("chiusa")) isSpecificStatusMatch = true;
+            else if (currentStatusMatch.includes("allacciat") && spokenText.includes("allacciate")) isSpecificStatusMatch = true;
+            else if (currentStatusMatch.includes("liberi") && spokenText.includes("liberi")) isSpecificStatusMatch = true;
+            else if (currentStatusMatch.includes("entrambi") && spokenText.includes("entrambi")) isSpecificStatusMatch = true;
+            else if (currentStatusMatch.includes("ricca") && spokenText.includes("ricca")) isSpecificStatusMatch = true;
+            else if (currentStatusMatch.includes("fredda") && spokenText.includes("fredda")) isSpecificStatusMatch = true;
+            else if (currentStatusMatch.includes("archi") && spokenText.includes("archi")) isSpecificStatusMatch = true;
+            else if (currentStatusMatch.includes("verificar") && spokenText.includes("verificare")) isSpecificStatusMatch = true;
+            else if (currentStatusMatch.includes("set") && spokenText.includes("set")) isSpecificStatusMatch = true;
+            else if (currentStatusMatch.includes("clean") && (spokenText.includes("clean") || spokenText.includes("grin"))) isSpecificStatusMatch = true;
+          }
+
+          if (isUniversalForward || isSpecificStatusMatch) {
             lastActionTime = Date.now();
             nextItem();
             break;
