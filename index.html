@@ -62,6 +62,44 @@
   </div>
 
   <script>
+    // Sintetizzatore audio nativo per i bip di errore (doppio tono)
+    let audioCtx = null;
+    function playErrorBeep() {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        let now = audioCtx.currentTime;
+        
+        // Primo tono
+        let osc1 = audioCtx.createOscillator();
+        let gain1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(440, now); // Nota La4
+        gain1.gain.setValueAtTime(0.15, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.12);
+
+        // Secondo tono (più acuto)
+        let osc2 = audioCtx.createOscillator();
+        let gain2 = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(659.25, now + 0.15); // Nota Mi5
+        gain2.gain.setValueAtTime(0.15, now + 0.15);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.27);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start(now + 0.15);
+        osc2.stop(now + 0.27);
+      } catch(e) {}
+    }
+
     const checklistsData = [
       { id: 0, title: "1. CONTROLLI CABINA", data: [
         { item: "Documenti pilota e aeromobile", status: "A BORDO", speak: "Documenti pilota e aeromobile: A bordo" },
@@ -157,8 +195,8 @@
         { item: "Quantità carburante", status: "VERIFICARE", speak: "Quantità carburante: Verificare" },
         { item: "Flaps", status: "SET", speak: "Flaps: Set" },
         { item: "Trim", status: "POSIZIONE DECOLLO", speak: "Trim: Posizione decollo" },
-        { item: "Memo Decollo", status: "VR 60 / VX 76 / VY 85 Mph", speak: "Memo decollo: VR sessanta emme pi acca, VX settantasei emme pi acca, VY ottantacinque emme pi acca", section: "PROMEMORIA VELOCITÀ" },
-        { item: "Max Efficienza", status: "80 Mph (SENZA FLAPS)", speak: "Massima efficienza: Ottanta emme pi acca senza flaps" }
+        { item: "Memo Decollo", status: "VR 60 Mph / VX 76 / VY 85", speak: "Memo decollo: V-R sessanta emme pi acca, V-X settantasei, V-Y ottantacinque", section: "PROMEMORIA VELOCITÀ" },
+        { item: "Max Efficienza", status: "80 (SENZA FLAPS)", speak: "Massima efficienza: Ottanta senza flaps" }
       ]},
       { id: 5, title: "6. ALLINEAMENTO, TAKE OFF E SALITA", data: [
         { item: "Manetta", status: "1.500 RPM", speak: "Manetta: 1500 erre-pi-em", section: "ALLINEAMENTO" },
@@ -219,7 +257,7 @@
     let recognition;
     let isListening = false;
     let isSpeaking = false;
-    let isStandby = false; // Flag per la modalità Standby
+    let isStandby = false;
     let lastActionTime = 0;
     let skippedItems = new Set();
     
@@ -319,7 +357,6 @@
             isStandby = false;
             lastActionTime = Date.now();
             updateUI();
-            // Riprende dall'ultima istruzione già confermata (cioè currentIndex - 1, se > 0)
             if (currentIndex > 0) {
               currentIndex--;
             }
@@ -327,10 +364,7 @@
             break;
           }
 
-          if (isStandby) {
-            // Se siamo in standby, ignoriamo tutti gli altri comandi vocali
-            break;
-          }
+          if (isStandby) break;
 
           if (isAskingNext) {
             if (spokenText.includes("avvia") || spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("ok")) {
@@ -401,13 +435,9 @@
             lastActionTime = Date.now();
             nextItem();
             break;
-          } else if (spokenText.includes("ripeti") || spokenText.includes("ancora")) {
-            lastActionTime = Date.now();
-            speakCurrent();
-            break;
-          } else if (spokenText.includes("ricomincia") || spokenText.includes("reset")) {
-            lastActionTime = Date.now();
-            resetChecklist();
+          } else {
+            // Risposta errata/non riconosciuta: emette il doppio bip e rimane in attesa
+            playErrorBeep();
             break;
           }
         }
@@ -463,7 +493,7 @@
             document.getElementById('micStatus').innerText = "⏸️ IN STANDBY (Pronuncia 'RIPRENDI')";
             document.getElementById('micStatus').className = "mic-status mic-standby";
           } else {
-            document.getElementById('micStatus').innerText = isAskingNext ? "🎙️ In ascolto ('SÌ', 'NO')" : (isAskingReview ? "🎙️ In ascolto ('SÌ', 'NO', 'VERIFICA')" : "🎙️ In ascolto (Pronuncia lo stato, 'AVANTI' o 'STANDBY')");
+            document.getElementById('micStatus').innerText = isAskingNext ? "🎙️ In ascolto ('SÌ', 'NO')" : (isAskingReview ? "🎙️ In ascolto ('SÌ', 'NO', 'VERIFICA')" : "🎙️ In ascolto (Silenzioso - Pronuncia lo stato)");
             document.getElementById('micStatus').className = "mic-status mic-active";
           }
         } catch(e) {}
