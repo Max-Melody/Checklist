@@ -555,7 +555,9 @@
       document.getElementById('startBtn').style.display = 'none';
       document.getElementById('endControls').style.display = 'none';
 
-      const headerText = `Avvio ${checklistsData[currentChecklistIndex].title}`;
+      // Modifica effettuata: aggiunto "checklist" nel saluto vocale
+      const title = checklistsData[currentChecklistIndex].title;
+      const headerText = `Avvio checklist ${title}`;
       const firstItemText = currentChecklist[0].speak;
       speak(`${headerText}. ${firstItemText}`);
     }
@@ -733,7 +735,6 @@
       }
     }
     
-    // Inizializza il menu all'avvio
     renderMenu();
   </script>
 </body>
