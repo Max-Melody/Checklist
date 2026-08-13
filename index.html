@@ -715,20 +715,25 @@
       }
 
       currentChecklist.forEach((_, idx) => {
-        const row = document.getElementById("row-" + idx);
-        if (row) {
-          row.classList.remove('active-row', 'skipped-row');
-
-          if (idx === currentIndex) {
-            row.classList.add('active-row');
-            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          } else if (skippedItems.has(idx)) {
-            row.classList.add('skipped-row');
-          }
+        const row = document.getElementById('row-' + idx);
+        if (!row) return;
+        
+        if (idx === currentIndex && !isAskingReview) {
+          row.className = "active-row";
+        } else if (skippedItems.has(idx)) {
+          row.className = "skipped-row";
+        } else {
+          row.className = "";
         }
       });
-    }
 
+      const activeRow = document.getElementById('row-' + currentIndex);
+      if (activeRow) {
+        activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+    
+    // Inizializza il menu all'avvio
     renderMenu();
   </script>
 </body>
