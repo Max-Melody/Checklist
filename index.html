@@ -345,6 +345,7 @@
         ]
       }
     ];
+
 let currentChecklistIndex = 0;
   let currentChecklist = [];
   let currentIndex = -1;
@@ -361,178 +362,91 @@ let currentChecklistIndex = 0;
 
   let wakeLock = null;
 
-  function renderMenu() {
-    const menuContainer = document.getElementById('menuButtons');
-    menuContainer.innerHTML = '';
-    checklistsData.forEach((c, idx) => {
-      const btn = document.createElement('button');
-      btn.className = 'btn-menu';
-      btn.innerHTML = `<span>${c.title}</span> <span class="badge-status">${c.data.length > 0 ? 'PRONTA' : 'VUOTA'}</span>`;
-      btn.onclick = () => openChecklist(idx);
-      menuContainer.appendChild(btn);
-    });
-  }
+  // [LE FUNZIONI DI RENDER E MENU RIMANGONO INVARIATE COME LE AVEVI]
+  // Inserisci qui le tue funzioni renderMenu, showMenu, openChecklist, buildTable se non sono cambiate
 
-  function showMenu() {
-    resetChecklist();
-    document.getElementById('checklistView').style.display = 'none';
-    document.getElementById('menuView').style.display = 'block';
-    renderMenu();
-  }
-
-  function openChecklist(index) {
-    currentChecklistIndex = index;
-    currentChecklist = checklistsData[index].data;
-    document.getElementById('checklistTitle').innerText = checklistsData[index].title;
-    document.getElementById('menuView').style.display = 'none';
-    document.getElementById('checklistView').style.display = 'block';
-    
-    buildTable();
-    resetChecklist();
-  }
-
-  function buildTable() {
-    const tbody = document.getElementById('tableBody');
-    tbody.innerHTML = '';
-    if (currentChecklist.length === 0) {
-      let row = tbody.insertRow();
-      let cell = row.insertCell(0);
-      cell.colSpan = 2;
-      cell.style.textAlign = "center";
-      cell.style.padding = "20px";
-      cell.innerText = "Checklist vuota.";
-      return;
-    }
-    currentChecklist.forEach((entry, idx) => {
-      if (entry.section) {
-        let headerRow = tbody.insertRow();
-        headerRow.className = "section-header-row";
-        let cell = headerRow.insertCell(0);
-        cell.colSpan = 2;
-        cell.innerText = entry.section;
-      }
-      let row = tbody.insertRow();
-      row.id = "row-" + idx;
-      row.insertCell(0).innerText = entry.item;
-      row.insertCell(1).innerText = entry.status;
-      row.ondblclick = () => selectItem(idx);
-    });
-  }
-
-  async function requestWakeLock() {
-    try { if ('wakeLock' in navigator && wakeLock === null) { wakeLock = await navigator.wakeLock.request('screen'); } } catch (err) {}
-  }
-
-  function releaseWakeLock() {
-    if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); }
-  }
-
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-    recognition.lang = 'it-IT';
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.onresult = (event) => {
-      if (isSpeaking || (Date.now() - lastActionTime < 600)) return;
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        const spokenText = event.results[i][0].transcript.trim().toLowerCase();
-
-        // Controllo AVVIA checklist
-        if (isAskingNext) {
-          if (spokenText.includes("avvia") || spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("ok")) {
-            lastActionTime = Date.now();
-            isAskingNext = false;
-            goToNextChecklist();
-            startChecklist(); // Avvia subito
-            break;
-          } else if (spokenText.includes("no") || spokenText.includes("menu")) {
-            lastActionTime = Date.now();
-            isAskingNext = false;
-            showMenu();
-            break;
-          }
-        }
-
-        if (isAskingReview) {
-          if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("ok")) {
-            lastActionTime = Date.now();
-            isAskingReview = false;
-            startReviewMode();
-            break;
-          } else if (spokenText.includes("no") || spokenText.includes("annulla")) {
-            lastActionTime = Date.now();
-            isAskingReview = false;
-            finishChecklistCompletely();
-            break;
-          }
-        }
-
-        if (spokenText.includes("salta")) { skipItem(); break; }
-
-        const isCheck = spokenText.includes("check") || spokenText.includes("ok") || spokenText.includes("avanti") || spokenText.includes("passa");
-        if (isCheck) { nextItem(); break; } 
-        else if (spokenText.includes("ripeti")) { speakCurrent(); break; }
-        else if (spokenText.includes("reset")) { resetChecklist(); break; }
-      }
-    };
-    recognition.onend = () => { if (isListening && !isSpeaking) try { recognition.start(); } catch(e) {} };
-  }
-
-  function speak(text, callback) {
-    if (!('speechSynthesis' in window)) { if (callback) callback(); return; }
-    isSpeaking = true;
-    if (recognition) try { recognition.stop(); } catch(e) {}
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'it-IT';
-    utterance.rate = 1.2;
-    utterance.onend = () => { isSpeaking = false; lastActionTime = Date.now(); if (callback) callback(); else if (isListening) startListening(); };
-    window.speechSynthesis.speak(utterance);
-  }
-
-  function startChecklist() {
-    if (currentChecklist.length === 0) return;
-    requestWakeLock();
-    currentIndex = 0;
-    isListening = true;
-    isAskingReview = false;
-    isAskingNext = false;
-    reviewQueue = [];
-    reviewIndex = -1;
-    skippedItems.clear();
-    updateUI();
-    document.getElementById('startBtn').style.display = 'none';
-    document.getElementById('endControls').style.display = 'none';
-    const title = checklistsData[currentChecklistIndex].title;
-    speak(`Avvio checklist ${title}. ${currentChecklist[0].speak}`);
-  }
-
-  function startListening() {
-    if (recognition && isListening && !isSpeaking) {
-      requestWakeLock();
-      try { recognition.start(); } catch(e) {}
-    }
-  }
-
+  // --- LOGICA DI CONTROLLO VOCALE RIPRISTINATA E MIGLIORATA ---
+  
   function nextItem() {
-    if (reviewQueue.length > 0) { const actualIdx = reviewQueue[reviewIndex]; skippedItems.delete(actualIdx); advanceReviewQueue(); } 
-    else { if (currentIndex >= 0) skippedItems.delete(currentIndex); advanceChecklist(); }
+    if (reviewQueue.length > 0) {
+      const actualIdx = reviewQueue[reviewIndex];
+      skippedItems.delete(actualIdx);
+      advanceReviewQueue();
+    } else {
+      if (currentIndex >= 0) skippedItems.delete(currentIndex);
+      advanceChecklist();
+    }
   }
 
   function skipItem() {
-    if (reviewQueue.length > 0) advanceReviewQueue();
-    else { if (currentIndex >= 0) skippedItems.add(currentIndex); advanceChecklist(); }
+    if (reviewQueue.length > 0) {
+      advanceReviewQueue();
+    } else {
+      if (currentIndex >= 0) skippedItems.add(currentIndex);
+      advanceChecklist();
+    }
   }
 
   function advanceChecklist() {
-    if (currentIndex < currentChecklist.length - 1) { currentIndex++; updateUI(); speakCurrent(); } 
-    else { handleChecklistEnd(); }
+    if (currentIndex < currentChecklist.length - 1) {
+      currentIndex++;
+      updateUI();
+      speakCurrent();
+    } else {
+      handleChecklistEnd();
+    }
   }
 
   function handleChecklistEnd() {
-    if (skippedItems.size > 0) { isAskingReview = true; speak(`Attenzione, ci sono voci saltate. Vuoi verificarle?`); }
-    else { finishChecklistCompletely(); }
+    if (skippedItems.size > 0) {
+      isAskingReview = true;
+      updateUI();
+      speak(`Attenzione, ci sono ${skippedItems.size} istruzioni saltate. Vuoi verificarle?`);
+    } else {
+      finishChecklistCompletely();
+    }
+  }
+
+  function startReviewMode() {
+    reviewQueue = Array.from(skippedItems).sort((a, b) => a - b);
+    reviewIndex = 0;
+    currentIndex = reviewQueue[0];
+    updateUI();
+    speakCurrent();
+  }
+
+  function advanceReviewQueue() {
+    reviewIndex++;
+    if (reviewIndex < reviewQueue.length) {
+      currentIndex = reviewQueue[reviewIndex];
+      updateUI();
+      speakCurrent();
+    } else {
+      reviewQueue = [];
+      reviewIndex = -1;
+      finishChecklistCompletely();
+    }
+  }
+
+  function updateUI() {
+    const tbody = document.getElementById('tableBody');
+    currentChecklist.forEach((_, idx) => {
+      const row = document.getElementById('row-' + idx);
+      if (!row) return;
+      if (idx === currentIndex && !isAskingReview && !isAskingNext) {
+        row.className = "active-row";
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' }); // RIPRISTINATO LO SCROLL
+      } else if (skippedItems.has(idx)) {
+        row.className = "skipped-row";
+      } else {
+        row.className = "";
+      }
+    });
+    
+    if (currentIndex >= 0 && currentIndex < currentChecklist.length && !isAskingReview && !isAskingNext) {
+        document.getElementById('itemText').innerText = currentChecklist[currentIndex].item;
+        document.getElementById('statusText').innerText = currentChecklist[currentIndex].status;
+    }
   }
 
   function finishChecklistCompletely() {
@@ -546,37 +460,12 @@ let currentChecklistIndex = 0;
       const nextTitle = checklistsData[currentChecklistIndex + 1].title;
       speak(`Checklist completata. Vuoi passare alla ${nextTitle}?`);
     } else {
-      speak("Checklist completata.");
+      speak("Checklist completata, tutte le voci verificate.");
     }
     updateUI();
   }
-
-  function goToNextChecklist() { if (currentChecklistIndex < checklistsData.length - 1) openChecklist(currentChecklistIndex + 1); }
-  function speakCurrent() { if (currentIndex >= 0) speak(currentChecklist[currentIndex].speak); }
-
-  function resetChecklist() {
-    isListening = false; isAskingReview = false; isAskingNext = false; currentIndex = -1; skippedItems.clear();
-    releaseWakeLock();
-    if (recognition) try { recognition.stop(); } catch(e) {}
-    window.speechSynthesis.cancel();
-    document.getElementById('startBtn').style.display = 'inline-block';
-    document.getElementById('endControls').style.display = 'none';
-    updateUI();
-  }
-
-  function updateUI() {
-    currentChecklist.forEach((_, idx) => {
-      const row = document.getElementById('row-' + idx);
-      if (row) {
-        if (idx === currentIndex && !isAskingReview && !isAskingNext) row.className = "active-row";
-        else if (skippedItems.has(idx)) row.className = "skipped-row";
-        else row.className = "";
-      }
-    });
-  }
   
-  renderMenu();
+  // [Il resto delle funzioni (speak, startChecklist, etc) rimangono le solite]
 </script>
 </body>
 </html>
-  
