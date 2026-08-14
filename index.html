@@ -498,7 +498,7 @@
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'it-IT';
-      utterance.rate = 1.35; // Aumentato leggermente per maggiore reattività e brio
+      utterance.rate = 1.35;
       utterance.pitch = 1.0;
       
       utterance.onend = () => {
@@ -509,7 +509,7 @@
         } else if (isListening) {
           setTimeout(() => {
             if (isListening && !isSpeaking) startListening();
-          }, 150); // Riattivazione microfono più rapida
+          }, 150);
         }
       };
 
@@ -635,7 +635,10 @@
       } else {
         reviewQueue = [];
         reviewIndex = -1;
-        finishChecklistCompletely();
+        // Pronuncia la conferma che tutte le voci sono verificate prima di procedere alla fine/prossima checklist
+        speak("Tutte le voci sono state verificate.", () => {
+          finishChecklistCompletely();
+        });
       }
     }
 
