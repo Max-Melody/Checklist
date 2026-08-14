@@ -176,7 +176,7 @@
         { item: "Pressione olio", status: "ARCO VERDE", speak: "Pressione olio: Arco verde" },
         { item: "Pressione carburante", status: "ARCO VERDE", speak: "Pressione carburante: Arco verde" },
         { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" },
-        { item: "Pannello annunciatore", status: "SPIE SPENTE", speak: "Pannello annunciatore:  Spie spente" },
+        { item: "Pannello annunciatore", status: "SPIE SPENTE", speak: "Pannello annunciatore: Spie spente" },
         { item: "Manetta", status: "CONTROLLO MINIMO poi 1200 rpm", speak: "Manetta: Controllo minimo, poi 1200 erre-pi-em" }
       ]},
       { id: 4, title: "5. PRE DECOLLO", data: [
@@ -216,12 +216,14 @@
       { id: 6, title: "7. CROCIERA", data: [
         { item: "Manetta", status: "COME RICHIESTO", speak: "Manetta: Come richiesto" },
         { item: "Miscela", status: "COME RICHIESTO", speak: "Miscela: Come richiesto" },
-        { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro e nove a cinque e uno" },
+        { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" },
         { item: "Girodirezionale e bussola", status: "ALLINEARE", speak: "Girodirezionale e bussola: Allineare" },
         { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
-        { item: "Quantità carburante", status: "Verificare", speak: "Quantità carburante: verificare" },
+        { item: "Pompa elettrica", status: "ON", speak: "Pompa elettrica: On", section: "CAMBIO SERBATOIO" },
         { item: "Cambiare", status: "SERBATOIO", speak: "Cambiare serbatoio" },
-        { item: "Verificare pressione carburante", status: "PRESSIONE", speak: "Verifica pressione carburante" }
+        { item: "Verificare pressione", status: "PRESSIONE", speak: "Verificare pressione" },
+        { item: "Pompa elettrica", status: "OFF", speak: "Pompa elettrica: Off" },
+        { item: "Verificare pressione", status: "PRESSIONE", speak: "Verificare pressione" }
       ]},
       { id: 7, title: "8. DISCESA E AVVICINAMENTO", data: [
         { item: "Cinture e spallacci", status: "ALLACCIATE", speak: "Cinture e spallacci: Allacciate" },
@@ -264,8 +266,10 @@
     let reviewIndex = -1;
     let wakeLock = null;
 
-    // Timer di Crociera impostato a 30 minuti (30 * 60 * 1000 ms)
+    // Timer di Crociera impostato a 30 minuti
     let cruiseTimer = null;
+    let cruiseIntervalTicker = null;
+    let cruiseTimeRemaining = 0;
     let isCruiseTimerActive = false;
     const CRUISE_INTERVAL_MS = 30 * 60 * 1000; 
 
@@ -281,9 +285,16 @@
       });
     }
 
-    function showMenu() {
+    function clearCruiseTimers() {
       if (cruiseTimer) clearTimeout(cruiseTimer);
+      if (cruiseIntervalTicker) clearInterval(cruiseIntervalTicker);
+      cruiseTimer = null;
+      cruiseIntervalTicker = null;
       isCruiseTimerActive = false;
+    }
+
+    function showMenu() {
+      clearCruiseTimers();
       resetChecklist();
       document.getElementById('checklistView').style.display = 'none';
       document.getElementById('menuView').style.display = 'block';
@@ -291,8 +302,7 @@
     }
 
     function openChecklist(index) {
-      if (cruiseTimer) clearTimeout(cruiseTimer);
-      isCruiseTimerActive = false;
+      clearCruiseTimers();
       currentChecklistIndex = index;
       currentChecklist = checklistsData[index].data;
       document.getElementById('checklistTitle').innerText = checklistsData[index].title;
@@ -354,14 +364,14 @@
           if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("ok") || spokenText.includes("avvia") || spokenText.includes("procediamo")) {
             lastActionTime = Date.now();
             isAskingNext = false;
-            isCruiseTimerActive = false;
+            clearCruiseTimers();
             openChecklist(6); // Riavvia la checklist 7. CROCIERA (indice 6)
             startChecklist();
             return;
           } else if (spokenText.includes("no") || spokenText.includes("menu")) {
             lastActionTime = Date.now();
             isAskingNext = false;
-            isCruiseTimerActive = false;
+            clearCruiseTimers();
             speak("Monitoraggio crociera terminato.");
             showMenu();
             return;
@@ -527,7 +537,7 @@
       isStandby = false;
       isAskingReview = false;
       isAskingNext = false;
-      isCruiseTimerActive = false;
+      clearCruiseTimers();
       reviewQueue = [];
       reviewIndex = -1;
       skippedItems.clear();
@@ -567,7 +577,7 @@
       isStandby = false;
       isAskingReview = false;
       isAskingNext = false;
-      isCruiseTimerActive = false;
+      clearCruiseTimers();
       updateUI();
       speakCurrent();
     }
@@ -638,18 +648,33 @@
       currentIndex = -1;
       updateUI();
 
-      // Logica Timer per la Checklist Crociere (30 minuti) con frase aggiornata
+      // Logica Timer per la Checklist Crociere con conto alla rovescia visibile
       if (checklistsData[currentChecklistIndex].title.includes("CROCIERA")) {
         isCruiseTimerActive = true;
-        document.getElementById('itemText').innerText = "Crociera in corso";
-        document.getElementById('statusText').innerText = "Timer attivo (30 min)";
+        cruiseTimeRemaining = CRUISE_INTERVAL_MS;
+
         speak("Checklist crociera completata. Timer programmato per la ripetizione della checklist crociera tra 30 minuti.", () => {
+          
+          // Avvia l'intervallo visivo ogni secondo per aggiornare lo schermo
+          cruiseIntervalTicker = setInterval(() => {
+            cruiseTimeRemaining -= 1000;
+            if (cruiseTimeRemaining <= 0) {
+              cruiseTimeRemaining = 0;
+              clearInterval(cruiseIntervalTicker);
+            }
+            updateUI();
+          }, 1000);
+
+          // Avvia il timer principale di 30 minuti
           cruiseTimer = setTimeout(() => {
+            clearInterval(cruiseIntervalTicker);
             isAskingNext = true;
+            updateUI();
             speak("Tempo programmato per la ripetizione della checklist crociera. Procediamo?", () => {
               if (isListening && !isSpeaking) startListening();
             });
           }, CRUISE_INTERVAL_MS);
+
         });
         return;
       }
@@ -680,8 +705,7 @@
     }
 
     function resetChecklist() {
-      if (cruiseTimer) clearTimeout(cruiseTimer);
-      isCruiseTimerActive = false;
+      clearCruiseTimers();
       currentIndex = -1;
       isListening = false;
       isStandby = false;
@@ -710,6 +734,14 @@
       } else if (isAskingNext && isCruiseTimerActive) {
         document.getElementById('itemText').innerText = "Ripetizione suggerita";
         document.getElementById('statusText').innerText = "Procediamo?";
+      } else if (isCruiseTimerActive) {
+        document.getElementById('itemText').innerText = "Crociera in corso";
+        // Converte i millisecondi rimanenti in minuti e secondi formattati (es. 29:45)
+        let totalSecs = Math.max(0, Math.floor(cruiseTimeRemaining / 1000));
+        let mins = Math.floor(totalSecs / 60);
+        let secs = totalSecs % 60;
+        let timeFormatted = mins + ":" + (secs < 10 ? "0" : "") + secs;
+        document.getElementById('statusText').innerText = "Tra " + timeFormatted;
       } else if (isAskingNext) {
         document.getElementById('itemText').innerText = "Checklist Completata";
         document.getElementById('statusText').innerText = "Passare alla successiva?";
