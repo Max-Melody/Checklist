@@ -266,10 +266,10 @@
     let reviewIndex = -1;
     let wakeLock = null;
 
-    // Variabili per il Timer di Crociera
+    // Timer di Crociera impostato a 30 minuti (30 * 60 * 1000 ms)
     let cruiseTimer = null;
     let isCruiseTimerActive = false;
-    const TEST_INTERVAL_MS = 30000; // 30 secondi per il test
+    const CRUISE_INTERVAL_MS = 30 * 60 * 1000; 
 
     function renderMenu() {
       const menuContainer = document.getElementById('menuButtons');
@@ -353,7 +353,7 @@
 
         // GESTIONE TIMER CROCIERA (RISPOSTA SI/NO)
         if (isAskingNext && isCruiseTimerActive) {
-          if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("ok") || spokenText.includes("avvia")) {
+          if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("ok") || spokenText.includes("avvia") || spokenText.includes("procediamo")) {
             lastActionTime = Date.now();
             isAskingNext = false;
             isCruiseTimerActive = false;
@@ -550,7 +550,7 @@
             document.getElementById('micStatus').className = "mic-status mic-standby";
           } else {
             let statusMsg = "🎙️ In ascolto (Pronuncia lo stato)";
-            if (isAskingNext && isCruiseTimerActive) statusMsg = "🎙️ In ascolto ('SÌ', 'NO' per timer crociera)";
+            if (isAskingNext && isCruiseTimerActive) statusMsg = "🎙️ In ascolto (Ripetizione crociera?)";
             else if (isAskingNext) statusMsg = "🎙️ In ascolto ('SÌ', 'NO')";
             else if (isAskingReview) statusMsg = "🎙️ In ascolto ('SÌ', 'NO', 'VERIFICA')";
             
@@ -640,18 +640,18 @@
       currentIndex = -1;
       updateUI();
 
-      // NUOVA LOGICA TIMER PER LA CHECKLIST CROCIERA
+      // Logica Timer per la Checklist Crociere (30 minuti)
       if (checklistsData[currentChecklistIndex].title.includes("CROCIERA")) {
         isCruiseTimerActive = true;
-        document.getElementById('itemText').innerText = "In attesa: Prossima verifica tra 30 secondi";
-        document.getElementById('statusText').innerText = "TIMER ATTIVO";
-        speak("Checklist crociera completata. Avvio timer per prossima verifica tra 30 secondi.", () => {
+        document.getElementById('itemText').innerText = "Crociera in corso";
+        document.getElementById('statusText').innerText = "Timer attivo (30 min)";
+        speak("Checklist crociera completata. Timer programmato per la ripetizione della checklist crociera.", () => {
           cruiseTimer = setTimeout(() => {
             isAskingNext = true;
-            speak("Attenzione, tempo scaduto. Avviamo la checklist crociera?", () => {
+            speak("Tempo programmato per la ripetizione della checklist crociera. Procediamo?", () => {
               if (isListening && !isSpeaking) startListening();
             });
-          }, TEST_INTERVAL_MS);
+          }, CRUISE_INTERVAL_MS);
         });
         return;
       }
@@ -710,8 +710,8 @@
         document.getElementById('itemText').innerText = currentChecklist[currentIndex].item;
         document.getElementById('statusText').innerText = currentChecklist[currentIndex].status;
       } else if (isAskingNext && isCruiseTimerActive) {
-        document.getElementById('itemText').innerText = "Tempo scaduto!";
-        document.getElementById('statusText').innerText = "Avviare Crociera?";
+        document.getElementById('itemText').innerText = "Ripetizione suggerita";
+        document.getElementById('statusText').innerText = "Procediamo?";
       } else if (isAskingNext) {
         document.getElementById('itemText').innerText = "Checklist Completata";
         document.getElementById('statusText').innerText = "Passare alla successiva?";
