@@ -11,7 +11,7 @@
     .btn-menu { padding: 16px; font-size: 18px; font-weight: bold; color: white; background-color: #007bff; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
     .btn-menu:active { background-color: #0056b3; }
     .badge-status { font-size: 14px; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 5px; }
-    .card { position: sticky; top: 10px; z-index: 100; background: white; border: 2px solid #007bff; border-radius: 10px; padding: 15px; margin: 10px auto; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+    .card { background: white; border: 2px solid #007bff; border-radius: 10px; padding: 15px; margin: 10px auto; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
     .item-title { font-size: 20px; font-weight: bold; color: #333; }
     .item-status { font-size: 24px; font-weight: bold; color: #d9534f; margin-top: 8px; }
     .mic-status { font-size: 14px; font-weight: bold; margin-top: 8px; color: #666; }
@@ -150,7 +150,7 @@
         { item: "Intercom", status: "VOLUME/SQUELCH", speak: "Intercom: Volume e squelch" },
         { item: "Transponder", status: "CODICE E STAND BY", speak: "Transponder: Codice e stand by" },
         { item: "VOR / GPS", status: "IMPOSTATI", speak: "VOR e GPS: Impostati" },
-        { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" },
+        { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro e nove a cinque e uno" },
         { item: "Anemometro", status: "0", speak: "Anemometro: Zero" },
         { item: "Orizzonte artificiale", status: "ALLINEARE", speak: "Orizzonte artificiale: Allineare" },
         { item: "Altimetro", status: "QNH +/- 75 piedi", speak: "Altimetro: Q-N-H più o meno settantacinque piedi" },
@@ -175,7 +175,7 @@
         { item: "Magneti: Magnete 2 test", status: "max drop 175 rpm / diff. 50 rpm", speak: "Magneti, test magnete due: calo massimo centosettantacinque erre-pi-em, differenza massima cinquanta erre-pi-em" },
         { item: "Pressione olio", status: "ARCO VERDE", speak: "Pressione olio: Arco verde" },
         { item: "Pressione carburante", status: "ARCO VERDE", speak: "Pressione carburante: Arco verde" },
-        { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" },
+        { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro e nove a cinque e uno" },
         { item: "Pannello annunciatore", status: "SPIE SPENTE", speak: "Pannello annunciatore: Spie spente" },
         { item: "Manetta", status: "CONTROLLO MINIMO poi 1200 rpm", speak: "Manetta: Controllo minimo, poi 1200 erre-pi-em" }
       ]},
@@ -263,7 +263,6 @@
     let reviewIndex = -1;
     let wakeLock = null;
 
-    // Timer di Crociera impostato a 30 minuti
     let cruiseTimer = null;
     let cruiseIntervalTicker = null;
     let cruiseTimeRemaining = 0;
@@ -356,13 +355,12 @@
         if (isSpeaking) return;
         const spokenText = event.results[0][0].transcript.trim().toLowerCase();
 
-        // GESTIONE TIMER CROCIERA (RISPOSTA SI/NO)
         if (isAskingNext && isCruiseTimerActive) {
           if (spokenText.includes("si") || spokenText.includes("sì") || spokenText.includes("ok") || spokenText.includes("avvia") || spokenText.includes("procediamo")) {
             lastActionTime = Date.now();
             isAskingNext = false;
             clearCruiseTimers();
-            openChecklist(6); // Riavvia la checklist 7. CROCIERA (indice 6)
+            openChecklist(6); 
             startChecklist();
             return;
           } else if (spokenText.includes("no") || spokenText.includes("menu")) {
@@ -646,14 +644,12 @@
       currentIndex = -1;
       updateUI();
 
-      // Logica Timer per la Checklist Crociere con conto alla rovescia visibile (gestito in modo sicuro)
       if (checklistsData[currentChecklistIndex].title.includes("CROCIERA")) {
         isCruiseTimerActive = true;
         cruiseTimeRemaining = CRUISE_INTERVAL_MS;
 
         speak("Checklist crociera completata. Timer programmato per la ripetizione della checklist crociera tra 30 minuti.", () => {
           
-          // Avvia l'intervallo visivo ogni secondo per aggiornare lo schermo in modo stabile
           if (cruiseIntervalTicker) clearInterval(cruiseIntervalTicker);
           cruiseIntervalTicker = setInterval(() => {
             cruiseTimeRemaining -= 1000;
@@ -664,7 +660,6 @@
             updateUI();
           }, 1000);
 
-          // Avvia il timer principale di 30 minuti
           if (cruiseTimer) clearTimeout(cruiseTimer);
           cruiseTimer = setTimeout(() => {
             if (cruiseIntervalTicker) clearInterval(cruiseIntervalTicker);
@@ -730,6 +725,7 @@
     function updateUI() {
       if (currentIndex >= 0 && currentIndex < currentChecklist.length) {
         document.getElementById('itemText').innerText = currentChecklist[currentIndex].item;
+        document.getElementById('statusText').innerText = currentChecklist['statusText'] ? '' : currentChecklist[currentIndex].status;
         document.getElementById('statusText').innerText = currentChecklist[currentIndex].status;
       } else if (isAskingNext && isCruiseTimerActive) {
         document.getElementById('itemText').innerText = "Ripetizione suggerita";
@@ -759,6 +755,8 @@
         if (!isNaN(dataRowIdx)) {
           if (dataRowIdx === currentIndex) {
             row.className = "active-row";
+            // Centra automaticamente la riga attiva nel display
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
           } else if (skippedItems.has(dataRowIdx)) {
             row.className = "skipped-row";
           }
