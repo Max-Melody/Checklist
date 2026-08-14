@@ -473,13 +473,13 @@
 
       recognition.onerror = () => {
         if (isListening && !isSpeaking) {
-          setTimeout(startListening, 400);
+          setTimeout(startListening, 150);
         }
       };
 
       recognition.onend = () => {
         if (isListening && !isSpeaking) {
-          setTimeout(startListening, 400);
+          setTimeout(startListening, 150);
         }
       };
     }
@@ -498,7 +498,7 @@
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'it-IT';
-      utterance.rate = 1.2;
+      utterance.rate = 1.35; // Aumentato leggermente per maggiore reattività e brio
       utterance.pitch = 1.0;
       
       utterance.onend = () => {
@@ -509,7 +509,7 @@
         } else if (isListening) {
           setTimeout(() => {
             if (isListening && !isSpeaking) startListening();
-          }, 350);
+          }, 150); // Riattivazione microfono più rapida
         }
       };
 
@@ -518,7 +518,7 @@
         if (isListening) {
           setTimeout(() => {
             if (isListening && !isSpeaking) startListening();
-          }, 350);
+          }, 150);
         }
       };
 
@@ -725,7 +725,6 @@
     function updateUI() {
       if (currentIndex >= 0 && currentIndex < currentChecklist.length) {
         document.getElementById('itemText').innerText = currentChecklist[currentIndex].item;
-        document.getElementById('statusText').innerText = currentChecklist['statusText'] ? '' : currentChecklist[currentIndex].status;
         document.getElementById('statusText').innerText = currentChecklist[currentIndex].status;
       } else if (isAskingNext && isCruiseTimerActive) {
         document.getElementById('itemText').innerText = "Ripetizione suggerita";
@@ -755,7 +754,6 @@
         if (!isNaN(dataRowIdx)) {
           if (dataRowIdx === currentIndex) {
             row.className = "active-row";
-            // Centra automaticamente la riga attiva nel display
             row.scrollIntoView({ behavior: 'smooth', block: 'center' });
           } else if (skippedItems.has(dataRowIdx)) {
             row.className = "skipped-row";
