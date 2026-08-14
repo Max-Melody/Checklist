@@ -216,14 +216,11 @@
       { id: 6, title: "7. CROCIERA", data: [
         { item: "Manetta", status: "COME RICHIESTO", speak: "Manetta: Come richiesto" },
         { item: "Miscela", status: "COME RICHIESTO", speak: "Miscela: Come richiesto" },
-        { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" },
+        { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro e nove a cinque e uno" },
         { item: "Girodirezionale e bussola", status: "ALLINEARE", speak: "Girodirezionale e bussola: Allineare" },
         { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
-        { item: "Pompa elettrica", status: "ON", speak: "Pompa elettrica: On", section: "CAMBIO SERBATOIO" },
-        { item: "Cambiare", status: "SERBATOIO", speak: "Cambiare serbatoio" },
-        { item: "Verificare pressione", status: "PRESSIONE", speak: "Verificare pressione" },
-        { item: "Pompa elettrica", status: "OFF", speak: "Pompa elettrica: Off" },
-        { item: "Verificare pressione", status: "PRESSIONE", speak: "Verificare pressione" }
+        { item: "Cambio serbatoio", status: "CAMBIATO", speak: "Cambio serbatoio: Cambiato" },
+        { item: "Pressione alimentazione", status: "VERIFICARE", speak: "Pressione alimentazione: Verificare" }
       ]},
       { id: 7, title: "8. DISCESA E AVVICINAMENTO", data: [
         { item: "Cinture e spallacci", status: "ALLACCIATE", speak: "Cinture e spallacci: Allacciate" },
@@ -464,6 +461,7 @@
           else if (currentStatusMatch.includes("archi") && spokenText.includes("archi")) isSpecificStatusMatch = true;
           else if (currentStatusMatch.includes("verificar") && spokenText.includes("verificare")) isSpecificStatusMatch = true;
           else if (currentStatusMatch.includes("set") && spokenText.includes("set")) isSpecificStatusMatch = true;
+          else if (currentStatusMatch.includes("cambiat") && spokenText.includes("cambiato")) isSpecificStatusMatch = true;
         }
 
         if (isUniversalForward || isSpecificStatusMatch) {
@@ -648,14 +646,15 @@
       currentIndex = -1;
       updateUI();
 
-      // Logica Timer per la Checklist Crociere con conto alla rovescia visibile
+      // Logica Timer per la Checklist Crociere con conto alla rovescia visibile (gestito in modo sicuro)
       if (checklistsData[currentChecklistIndex].title.includes("CROCIERA")) {
         isCruiseTimerActive = true;
         cruiseTimeRemaining = CRUISE_INTERVAL_MS;
 
         speak("Checklist crociera completata. Timer programmato per la ripetizione della checklist crociera tra 30 minuti.", () => {
           
-          // Avvia l'intervallo visivo ogni secondo per aggiornare lo schermo
+          // Avvia l'intervallo visivo ogni secondo per aggiornare lo schermo in modo stabile
+          if (cruiseIntervalTicker) clearInterval(cruiseIntervalTicker);
           cruiseIntervalTicker = setInterval(() => {
             cruiseTimeRemaining -= 1000;
             if (cruiseTimeRemaining <= 0) {
@@ -666,8 +665,9 @@
           }, 1000);
 
           // Avvia il timer principale di 30 minuti
+          if (cruiseTimer) clearTimeout(cruiseTimer);
           cruiseTimer = setTimeout(() => {
-            clearInterval(cruiseIntervalTicker);
+            if (cruiseIntervalTicker) clearInterval(cruiseIntervalTicker);
             isAskingNext = true;
             updateUI();
             speak("Tempo programmato per la ripetizione della checklist crociera. Procediamo?", () => {
@@ -736,7 +736,6 @@
         document.getElementById('statusText').innerText = "Procediamo?";
       } else if (isCruiseTimerActive) {
         document.getElementById('itemText').innerText = "Crociera in corso";
-        // Converte i millisecondi rimanenti in minuti e secondi formattati (es. 29:45)
         let totalSecs = Math.max(0, Math.floor(cruiseTimeRemaining / 1000));
         let mins = Math.floor(totalSecs / 60);
         let secs = totalSecs % 60;
@@ -748,6 +747,9 @@
       } else if (isAskingReview) {
         document.getElementById('itemText').innerText = "Elementi saltati presenti";
         document.getElementById('statusText').innerText = "Vuoi verificarli?";
+      } else {
+        document.getElementById('itemText').innerText = checklistsData[currentChecklistIndex].title;
+        document.getElementById('statusText').innerText = "Pronta";
       }
 
       const rows = document.querySelectorAll('#tableBody tr');
