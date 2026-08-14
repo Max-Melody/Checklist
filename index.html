@@ -219,10 +219,7 @@
         { item: "Vacuum", status: "4,9 – 5,1", speak: "Vacuum: Da quattro virgola nove a cinque virgola uno" },
         { item: "Girodirezionale e bussola", status: "ALLINEARE", speak: "Girodirezionale e bussola: Allineare" },
         { item: "Strumenti motore", status: "NEGLI ARCHI", speak: "Strumenti motore: Negli archi" },
-        { item: "Pompa elettrica", status: "ON", speak: "Pompa elettrica: On", section: "CAMBIO SERBATOIO" },
         { item: "Cambiare", status: "SERBATOIO", speak: "Cambiare serbatoio" },
-        { item: "Verificare pressione", status: "PRESSIONE", speak: "Verificare pressione" },
-        { item: "Pompa elettrica", status: "OFF", speak: "Pompa elettrica: Off" },
         { item: "Verificare pressione", status: "PRESSIONE", speak: "Verificare pressione" }
       ]},
       { id: 7, title: "8. DISCESA E AVVICINAMENTO", data: [
@@ -640,12 +637,12 @@
       currentIndex = -1;
       updateUI();
 
-      // Logica Timer per la Checklist Crociere (30 minuti)
+      // Logica Timer per la Checklist Crociere (30 minuti) con frase aggiornata
       if (checklistsData[currentChecklistIndex].title.includes("CROCIERA")) {
         isCruiseTimerActive = true;
         document.getElementById('itemText').innerText = "Crociera in corso";
         document.getElementById('statusText').innerText = "Timer attivo (30 min)";
-        speak("Checklist crociera completata. Timer programmato per la ripetizione della checklist crociera.", () => {
+        speak("Checklist crociera completata. Timer programmato per la ripetizione della checklist crociera tra 30 minuti.", () => {
           cruiseTimer = setTimeout(() => {
             isAskingNext = true;
             speak("Tempo programmato per la ripetizione della checklist crociera. Procediamo?", () => {
