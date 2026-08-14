@@ -8,9 +8,10 @@
     body { font-family: Arial, sans-serif; margin: 15px; padding: 0; background-color: #f4f4f9; text-align: center; }
     h1 { color: #333; margin-bottom: 10px; font-size: 22px; }
     .menu-grid { display: grid; grid-template-columns: 1fr; gap: 12px; max-width: 450px; margin: 15px auto; }
-    .btn-menu { padding: 16px; font-size: 18px; font-weight: bold; color: white; background-color: #007bff; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+    .btn-menu { padding: 14px 18px; font-size: 16px; color: white; background-color: #007bff; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; text-align: left; }
     .btn-menu:active { background-color: #0056b3; }
-    .badge-status { font-size: 14px; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 5px; }
+    .menu-number { font-size: 22px; font-weight: bold; margin-right: 15px; min-width: 30px; }
+    .menu-title { font-weight: bold; text-transform: uppercase; line-height: 1.2; }
     .card { background: white; border: 2px solid #007bff; border-radius: 10px; padding: 15px; margin: 10px auto; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
     .item-title { font-size: 20px; font-weight: bold; color: #333; }
     .item-status { font-size: 24px; font-weight: bold; color: #d9534f; margin-top: 8px; }
@@ -276,7 +277,16 @@
       checklistsData.forEach((c, idx) => {
         const btn = document.createElement('button');
         btn.className = 'btn-menu';
-        btn.innerHTML = `<span>${c.title}</span> <span class="badge-status">${c.data.length > 0 ? 'PRONTA' : 'VUOTA'}</span>`;
+        
+        // Estraiamo il numero e il titolo pulito (es. "1." e "CONTROLLI CABINA")
+        const parts = c.title.split('. ');
+        const numStr = parts[0] + ".";
+        const titleStr = parts.slice(1).join('. ');
+
+        btn.innerHTML = `
+          <span class="menu-number">${numStr}</span>
+          <span class="menu-title">${titleStr}</span>
+        `;
         btn.onclick = () => openChecklist(idx);
         menuContainer.appendChild(btn);
       });
@@ -574,126 +584,41 @@
       isStandby = false;
       isAskingReview = false;
       isAskingNext = false;
-      clearCruiseTimers();
       updateUI();
-      speakCurrent();
+    }
+
+    function updateUI() {
+      if (currentIndex >= 0 && currentIndex < currentChecklist.length) {
+        document.getElementById('itemText').innerText = currentChecklist[currentIndex].item;
+        document.getElementById('statusText').innerText = currentChecklist[currentIndex].status;
+      }
+      currentChecklist.forEach((_, idx) => {
+        let row = document.getElementById("row-" + idx);
+        if (row) {
+          row.classList.remove('active-row', 'skipped-row');
+          if (idx === currentIndex) {
+            row.classList.add('active-row');
+          } else if (skippedItems.has(idx)) {
+            row.classList.add('skipped-row');
+          }
+        }
+      });
     }
 
     function nextItem() {
-      if (reviewQueue.length > 0) {
-        const actualIdx = reviewQueue[reviewIndex];
-        skippedItems.delete(actualIdx);
-        advanceReviewQueue();
+      if (currentIndex < currentChecklist.length - 1) {
+        currentIndex++;
+        updateUI();
+        speak(currentChecklist[currentIndex].speak);
       } else {
-        if (currentIndex >= 0) skippedItems.delete(currentIndex);
-        advanceChecklist();
+        finishChecklist();
       }
     }
 
     function skipItem() {
-      if (reviewQueue.length > 0) {
-        advanceReviewQueue();
-      } else {
-        if (currentIndex >= 0) skippedItems.add(currentIndex);
-        advanceChecklist();
-      }
-    }
-
-    function advanceChecklist() {
-      if (currentIndex < currentChecklist.length - 1) {
-        currentIndex++;
-        updateUI();
-        speakCurrent();
-      } else {
-        handleChecklistEnd();
-      }
-    }
-
-    function handleChecklistEnd() {
-      if (skippedItems.size > 0) {
-        isAskingReview = true;
-        updateUI();
-        speak(`Attenzione, ci sono ${skippedItems.size} istruzioni saltate. Vuoi verificarle?`);
-      } else {
-        finishChecklistCompletely();
-      }
-    }
-
-    function startReviewMode() {
-      reviewQueue = Array.from(skippedItems).sort((a, b) => a - b);
-      reviewIndex = 0;
-      currentIndex = reviewQueue[0];
-      updateUI();
-      speak("Inizio revisione elementi saltati. " + currentChecklist[currentIndex].speak);
-    }
-
-    function advanceReviewQueue() {
-      reviewIndex++;
-      if (reviewIndex < reviewQueue.length) {
-        currentIndex = reviewQueue[reviewIndex];
-        updateUI();
-        speak(currentChecklist[currentIndex].speak);
-      } else {
-        reviewQueue = [];
-        reviewIndex = -1;
-        // Pronuncia la conferma che tutte le voci sono verificate prima di procedere alla fine/prossima checklist
-        speak("Tutte le voci sono state verificate.", () => {
-          finishChecklistCompletely();
-        });
-      }
-    }
-
-    function finishChecklistCompletely() {
-      isAskingReview = false;
-      currentIndex = -1;
-      updateUI();
-
-      if (checklistsData[currentChecklistIndex].title.includes("CROCIERA")) {
-        isCruiseTimerActive = true;
-        cruiseTimeRemaining = CRUISE_INTERVAL_MS;
-
-        speak("Checklist crociera completata. Timer programmato per la ripetizione della checklist crociera tra 30 minuti.", () => {
-          
-          if (cruiseIntervalTicker) clearInterval(cruiseIntervalTicker);
-          cruiseIntervalTicker = setInterval(() => {
-            cruiseTimeRemaining -= 1000;
-            if (cruiseTimeRemaining <= 0) {
-              cruiseTimeRemaining = 0;
-              clearInterval(cruiseIntervalTicker);
-            }
-            updateUI();
-          }, 1000);
-
-          if (cruiseTimer) clearTimeout(cruiseTimer);
-          cruiseTimer = setTimeout(() => {
-            if (cruiseIntervalTicker) clearInterval(cruiseIntervalTicker);
-            isAskingNext = true;
-            updateUI();
-            speak("Tempo programmato per la ripetizione della checklist crociera. Procediamo?", () => {
-              if (isListening && !isSpeaking) startListening();
-            });
-          }, CRUISE_INTERVAL_MS);
-
-        });
-        return;
-      }
-
-      document.getElementById('startBtn').style.display = 'none';
-      document.getElementById('endControls').style.display = 'block';
-      if (currentChecklistIndex < checklistsData.length - 1) {
-        isAskingNext = true;
-        const nextTitle = checklistsData[currentChecklistIndex + 1].title;
-        speak(`Checklist completata. Vuoi passare alla ${nextTitle}?`);
-      } else {
-        speak("Checklist completata.");
-      }
-    }
-
-    function goToNextChecklist() {
-      if (currentChecklistIndex < checklistsData.length - 1) {
-        openChecklist(currentChecklistIndex + 1);
-      } else {
-        showMenu();
+      if (currentIndex >= 0 && currentIndex < currentChecklist.length) {
+        skippedItems.add(currentIndex);
+        nextItem();
       }
     }
 
@@ -713,57 +638,73 @@
       reviewQueue = [];
       reviewIndex = -1;
       skippedItems.clear();
+      if (recognition) { try { recognition.stop(); } catch(e) {} }
       releaseWakeLock();
-      if (recognition) {
-        try { recognition.stop(); } catch(e) {}
-      }
       document.getElementById('startBtn').style.display = 'block';
       document.getElementById('endControls').style.display = 'none';
       document.getElementById('itemText').innerText = "Premi AVVIA per iniziare";
       document.getElementById('statusText').innerText = "---";
       document.getElementById('micStatus').innerText = "Microfono spento";
       document.getElementById('micStatus').className = "mic-status";
-      updateUI();
+      buildTable();
     }
 
-    function updateUI() {
-      if (currentIndex >= 0 && currentIndex < currentChecklist.length) {
-        document.getElementById('itemText').innerText = currentChecklist[currentIndex].item;
-        document.getElementById('statusText').innerText = currentChecklist[currentIndex].status;
-      } else if (isAskingNext && isCruiseTimerActive) {
-        document.getElementById('itemText').innerText = "Ripetizione suggerita";
-        document.getElementById('statusText').innerText = "Procediamo?";
-      } else if (isCruiseTimerActive) {
-        document.getElementById('itemText').innerText = "Crociera in corso";
-        let totalSecs = Math.max(0, Math.floor(cruiseTimeRemaining / 1000));
-        let mins = Math.floor(totalSecs / 60);
-        let secs = totalSecs % 60;
-        let timeFormatted = mins + ":" + (secs < 10 ? "0" : "") + secs;
-        document.getElementById('statusText').innerText = "Tra " + timeFormatted;
-      } else if (isAskingNext) {
-        document.getElementById('itemText').innerText = "Checklist Completata";
-        document.getElementById('statusText').innerText = "Passare alla successiva?";
-      } else if (isAskingReview) {
-        document.getElementById('itemText').innerText = "Elementi saltati presenti";
-        document.getElementById('statusText').innerText = "Vuoi verificarli?";
+    function finishChecklist() {
+      if (skippedItems.size > 0) {
+        reviewQueue = Array.from(skippedItems);
+        reviewIndex = 0;
+        isAskingReview = true;
+        currentIndex = -1;
+        updateUI();
+        speak("Checklist terminata, ma ci sono elementi saltati. Vuoi verificali adesso? Pronuncia Sì o No.");
       } else {
-        document.getElementById('itemText').innerText = checklistsData[currentChecklistIndex].title;
-        document.getElementById('statusText').innerText = "Pronta";
+        finishChecklistCompletely();
       }
+    }
 
-      const rows = document.querySelectorAll('#tableBody tr');
-      rows.forEach((row, idx) => {
-        row.className = "";
-        let dataRowIdx = parseInt(row.id.replace("row-", ""));
-        if (!isNaN(dataRowIdx)) {
-          if (dataRowIdx === currentIndex) {
-            row.className = "active-row";
-            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          } else if (skippedItems.has(dataRowIdx)) {
-            row.className = "skipped-row";
+    function startReviewMode() {
+      if (reviewQueue.length > 0) {
+        currentIndex = reviewQueue[reviewIndex];
+        updateUI();
+        speak(`Verifica elemento saltato. ${currentChecklist[currentIndex].speak}`);
+      }
+    }
+
+    function finishChecklistCompletely() {
+      isListening = false;
+      currentIndex = -1;
+      updateUI();
+      if (recognition) { try { recognition.stop(); } catch(e) {} }
+      releaseWakeLock();
+      document.getElementById('startBtn').style.display = 'none';
+      document.getElementById('endControls').style.display = 'block';
+
+      const title = checklistsData[currentChecklistIndex].title;
+      
+      if (currentChecklistIndex === 6) {
+        isCruiseTimerActive = true;
+        isAskingNext = true;
+        speak(`Checklist ${title} completata. Avvio timer crociera di trenta minuti.`);
+        
+        cruiseTimer = setTimeout(() => {
+          if (isCruiseTimerActive) {
+            speak("Trenta minuti trascorsi. Cambio serbatoio e controllo parametri motore. Vuoi ripetere la checklist di crociera? Pronuncia Sì o No.");
           }
-        }
-      });
+        }, CRUISE_INTERVAL_MS);
+      } else {
+        isAskingNext = true;
+        speak(`Checklist ${title} completata. Vuoi passare alla prossima checklist? Pronuncia Sì o No.`);
+      }
+    }
+
+    function goToNextChecklist() {
+      clearCruiseTimers();
+      if (currentChecklistIndex < checklistsData.length - 1) {
+        openChecklist(currentChecklistIndex + 1);
+        startChecklist();
+      } else {
+        showMenu();
+      }
     }
 
     renderMenu();
