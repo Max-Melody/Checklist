@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Piper PA-28 EC-IML Checklist</title>
+  <link rel="manifest" href="manifest.json">
+  <title>Piper PA-28 E-C-I-M-L Checklist</title>
   <style>
     body { 
       font-family: Arial, sans-serif; 
@@ -93,10 +94,10 @@
 <body>
 
   <div id="menuView" style="display: flex; flex-direction: column; height: 100%;">
-    <h1>Piper PA-28 EC-IML Checklist</h1>
+    <h1>Piper PA-28 E-C-I-M-L Checklist</h1>
     <div class="menu-grid" id="menuButtons"></div>
     <div class="disclaimer">
-        <strong>SAFETY NOTICE:</strong> Configured exclusively for Piper PA-28 <strong>EC-IML</strong>. Always verify against the POH.
+        <strong>SAFETY NOTICE:</strong> Configured exclusively for Piper PA-28 <strong>E-C-I-M-L</strong>. Always verify against the POH.
     </div>
   </div>
 
@@ -768,6 +769,11 @@
     }
 
     renderMenu();
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
   </script>
 </body>
 </html>
