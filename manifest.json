@@ -1,13 +1,13 @@
-{
-  "name": "Checklist PA-28 E-C-I-M-L",
-  "short_name": "PA28 Checklist",
-  "start_url": "/",
+ {
+  "name": "Checklist E-C-I-M-L",
+  "short_name": "Checklist",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "theme_color": "#2196F3",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2767/2767146.png",
+      "src": "icon.png",
       "sizes": "192x192",
       "type": "image/png"
     }
